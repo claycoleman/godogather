@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+
+{% block title %}{{ event }} Details{% endblock title %}
+
+
+{% block body %}
+
+<div class="main">
+    <div class="container">
+        <div class="row">
+            <h1 class="text-center"><b>{{ event.name }}</b></h1>
+            <div class="col-sm-6">
+                    <h4>{{ event.description }}</h4>
+                    <h2>Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong class='black'>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h2>
+                    <h4>Posted at {{ event.date_posted }}</h4>
+                    {% if event.people_coming.all|length == 0 %}
+                    <h3>{{ event.people_coming.all|length }}  showing up: </h3>
+                    {% elif event.people_coming.all|length == 1 %}
+                    <h3>1 person showing up: </h3>
+                    {% else %}
+                    <h3>{{ event.people_coming.all|length }} people showing up: </h3>
+                    {% endif %}
+                    {% if event.people_coming.all|length > 0 %}
+                        {% for person in event.people_coming.all %}
+                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}"><img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}"></a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <h5>No one has confirmed yet!</h5>
+                    {% endif %}
+                    <h3>People who for sure can't make it: </h3>
+                    {% if event.people_not_coming.all|length > 0 %}
+                        {% for person in event.people_not_coming.all %}
+                            <a href="{% url 'profile_detail_view' person.pk %}">{{ person }}</a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <h5>No one has turned us down yet!</h5>
+                    {% endif %}
+
+                    <br>
+                    <br>
+                    <a href="{% url 'event_list_view' %}">Back to event list</a>
+            </div>
+            <div class="col-sm-6">
+                    <h2>{{ event.location }}</h2>
+                    <iframe width="100%" height="200" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;q={{event.location}}&amp;spn=56.506174,79.013672&amp;t=m&amp;z=5&amp;output=embed"></iframe>
+
+                        {{ event.date_happening }}<br>
+                    From {{ event.time_starting }} to
+                    {{ event.time_ending }}
+                    <br>
+                    {% if event.groups.all %}
+                        <h4>Groups:</h4>
+                        {% for group in event.groups.all %}
+                            <a href="{% url 'group_detail_view' group.name|slugify %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    <br>
+                    <br>
+                    {% if request.user.profile in event.host.all %}
+                    <div style="float:left;">                    
+                        <a class="btn btn-primary" href="{% url 'event_update_view' event.pk %}">Edit your event</a>&nbsp;&nbsp;<a class="btn btn-danger" href="{% url 'event_delete_view' event.pk %}">Delete this event</a>
+                    </div>
+
+                    {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}  

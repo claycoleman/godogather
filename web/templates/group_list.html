@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Groups{% endblock title %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <h1 class="bold">Your groups</h1>
+            {% if groups %}
+                {% for group in groups %}
+                    <a href="{% url 'group_detail_view' group.name|slugify %}">{{ group }}</a></br>
+                {% endfor %}
+                <br><br>
+            {% else %}   
+                <h3>You're not in any groups! Create a new one?</h3>
+            {% endif %}
+            {% if group_requests %}
+                <strong><h4>Groups you've requested to join:</h4></strong>
+                {% for group in group_requests %}
+                    {{ group }}<br>
+                {% endfor %}
+                <br>
+                <br>
+            {% endif %}
+            
+            {% if requested_groups %}
+                <strong><h4>Groups that've added you to join:</h4></strong>
+                {% for group in requested_groups %}
+                    {{ group }}<br>
+                {% endfor %}
+                <br><br>
+            {% endif %}
+                <a class="green" href = "{% url 'group_create_view' %}" %}><i class='fa fa-plus-circle'></i> Create a new group</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

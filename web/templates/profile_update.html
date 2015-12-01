@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load addcss %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <h2>Update your profile...</h2>
+            <p class="green">{{ saved }}</p>
+            <form action="{% url 'profile_update_view' profile.pk %}" enctype="multipart/form-data" method='POST'>
+                {% csrf_token %}
+                First name:
+                {{ form.first_name|addcss:"form-control" }}
+                Last name:
+                {{ form.last_name|addcss:"form-control" }}
+                Username:
+                {{ form.username|addcss:"form-control" }}
+                <br>
+                Bio:
+                {{ form.bio|addcss:"form-control" }}
+                <br><br>
+                {{ form.picture }}
+                <br>
+
+
+                <p>
+                    <input class="form-control" type='submit' value='Update profile' />
+                </p>
+
+            </form>
+
+             {% if profile.picture %}
+                <p>
+                    <img src="{{ profile.picture.url }}">
+                </p>
+                {% endif %}
+
+            <a href="{% url 'profile_detail_view' profile.pk %}">Back to {{profile}}</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

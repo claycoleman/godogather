@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load addcss %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Create a new group</h2>
+            <form action="{% url 'group_create_view' %}" enctype="multipart/form-data" method="POST" >
+                {% csrf_token %}    
+                Name:
+                {{ form.name|addcss:"form-control" }}
+                People to invite to this group:
+                <div class="overflow form-control">{{ form.member_requests }}</div>
+                Admins <small>(besides yourself, of course)</small>:
+                <div class="overflow form-control">{{ form.admin }}</div>
+                <br>
+                <input class="form-control" type="submit" value="Create group" />
+
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load addcss %}
+
+{% block title %}Create an event{% endblock title %}
+
+{% block body %}
+<div class="container">
+        <form action="{% url 'event_create_view' %}" enctype="multipart/form-data" method="POST" >
+    <div class="row">
+            {% csrf_token %}    
+            <div class="col-sm-7">
+                <h2>Create an event</h2>
+                    Name: {{ form.name|addcss:"form-control" }}
+                    Description: {{ form.description|addcss:"form-control" }}
+                    Location: <small>(please include street address, city and zip)</small> {{ form.location|addcss:"form-control" }}
+            </div>
+            <div class="col-sm-5">
+                <h2>&nbsp;</h2>
+                Host: <small>(besides yourself, of course)</small><div class="overflow form-control">{{form.host}}
+                </div>
+                Date: {{form.date_happening|addcss:"form-control"}}
+                Time Starting: {{form.time_starting|addcss:"form-control"}}
+                Time Ending: {{form.time_ending|addcss:"form-control"}}
+                Groups: <div class="overflow form-control">{{form.groups}}
+                </div>
+                <br>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-8 col-sm-offset-2">
+<input class="form-control btn-default" type="submit" value="Create event" />
+                    
+            </div>
+        </div>
+        </form>
+        <div class="red">{{ errors }}</div>    
+    </div>
+</div>
+    
+
+{% endblock %}
+

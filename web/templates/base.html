@@ -1,0 +1,142 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>  
+<html>  
+<head>  
+    <title>{% block title %}{% endblock %}</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-datetimepicker.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}">
+    <script type="text/javascript" src="{% static 'js/jquery-1.11.2.min.js' %}"></script>
+
+      <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+
+    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>  
+</head>  
+
+<body>
+
+    <nav class="navbar navbar-default navbar-fixed-top" id="main-nav">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="{% url 'event_list_view' %}"><strong>GoDogether</strong></a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown {% block home-active %}{% endblock %}"><a href="{% url 'event_list_view' %}">Home</a></li>
+            {% if request.user.is_authenticated %}
+            <li id="noti_Container" class="dropdown request_list">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user-plus fa-lg"></i><div id="friend_request_bubble">{% if request.user.profile.friend_requests.all %} <div id='friend_request_noti' class="noti_bubble">{{ request.user.profile.friend_requests.all | length}}</div>{% endif %}</div></a>
+                <ul id="add-menu" class="dropdown-menu add-menu">
+                    {% if request.user.profile.friend_requests.all or request.user.profile.group_list.all %} 
+                            <li><a href="{% url 'full_notifications' %}"><b>Friend Requests</b></a></li>
+                            <li role="separator" class="divider"></li>
+                        {% for friend_request in request.user.profile.friend_requests.all %}
+                            <li class="hz" id='li-{{ friend_request.pk }}'>
+                              <a href='#' id="rejection-{{ friend_request.pk }}" class="reject-button" alt="{{ friend_request.pk }}"><i class="fa fa-times red" id="times-{{friend_request.pk}}" alt="{{ friend_request.pk }}"></i></a>
+                              <a href="{% url 'profile_detail_view' friend_request.pk %}">{{ friend_request }}</a>
+                              <a href='#' id="addition-{{ friend_request.pk }}" class="add-button" alt="{{ friend_request.pk }}"><i class="fa fa-check green" id="check-{{friend_request.pk}}" alt="{{ friend_request.pk }}"></i></a>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                      <li><a>No notifications!</a></li>
+                    {% endif %}
+              </ul>
+            </li>
+            <li class="dropdown icon_list {% block groups-active %}{% endblock %}">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-users fa-lg"></i><span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a><b>Groups</b></a></li>
+                <li role="separator" class="divider"></li>
+                {% for group in request.user.profile.groups_in.all|slice:"0:5" %}
+                <li><a href="{% url 'group_event_list' group.name|slugify %}">{{ group }}</a></li>
+                {% endfor %}
+                <li role="separator" class="divider"></li>
+                <li><a href="{% url 'group_list_view' %}">Group List</a></li>
+                <li><a href="{% url 'search_profiles' %}">Profile List</a></li>
+                <li><a href="{% url 'group_detail_view' 2 %}">Mission Buds</a></li>
+                <!--<li role="separator" class="divider"></li>
+                <li><a href="#">Separated link</a></li>-->
+              </ul>
+            </li>
+            <li class="dropdown {% block user_active %}{% endblock %}">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{request.user.first_name}}<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                        <li><a href="{% url 'profile_detail_view' request.user.profile.pk %}">Your profile</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="{% url 'logout_view' %}"><b>Log out</b> {{request.user.profile}}</a></li>
+                    
+              </ul>
+            </li>
+            {% endif %}
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+    <br>
+    <br>
+    <br>
+    <br>
+    {% if not no_footer %}
+    <div class="wrapper">
+    {% endif %}
+      {% block body %}
+      {% endblock %}
+      {% if not no_footer %}
+      <div class="push"></div>
+    </div>
+     {% endif %}
+
+
+<!-- +++++ Footer Section +++++ -->
+  {% if not no_footer %}
+    <footer>
+      <div id="footer">
+          <div class="container">
+              <div class="row">
+                  <div class="col-sm-4">
+                      <h4>Got Feedback? Get in touch here</h4>
+                      <a href="{% url 'contact_view' %}">Contact us</a>
+                  </div><!-- /col-sm-4 -->
+                  <div class="col-sm-4">
+                      <h4>Download the App!</h4>
+                      <p>
+                          <a href="#">App Store</a><br/>
+                      </p>
+                  </div><!-- /col-sm-4 -->
+                  <div class="col-sm-4">
+                      <h4>About <strong>GoDogether</strong></h4>
+                      <a href="{% url 'about_view' %}">Read on here</a>
+                  </div><!-- /col-sm-4 -->
+              </div>
+          </div>
+      </div>
+    </footer>
+  {% endif %}
+
+    <script type="text/javascript" src="{% static 'js/custom.js' %}"></script>
+
+    <script>
+    $(function() {
+        $(".dropdown").hover(
+            function(){ $(this).addClass('open') },
+            function(){ $(this).removeClass('open') }
+        );
+    });
+</script>
+</body>
+
+</html>  

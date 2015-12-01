@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load addcss %}
+
+{% block title %}GoDogether – Events Made Easy{% endblock title %}
+
+
+
+{% block body %}
+
+<div class="container main">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-6 col-sm-8">
+                    <h1 class="text-center"><strong>GoDogether</strong></h1>
+                    <h5 class="text-center">(terrible name, we know, we're working on it)</h5>
+                    <br>
+                    <h3>Make events happen, all without the pain of making events happen.</h3>
+                    <br>
+                    <h4><i class='fa fa-comments fa-2x'></i>&nbsp;&nbsp;<strong>Get people together</strong> by just a single post.</h4>
+                    <h4>&nbsp;&nbsp;<i class='fa fa-bolt fa-2x'></i>&nbsp;&nbsp;&nbsp;&nbsp;<strong>Find out</strong> what's happening in an instant.</h4>
+                    <h4><i class='fa fa-calendar-check-o fa-2x'></i>&nbsp;&nbsp;<strong>Scheduling</strong> is as easy as checking a feed.</h4>
+                </div>
+                <div class="col-md-5 col-sm-4 col-md-offset-1">
+                    <br>
+                    <h2 class="text-center">Sign In</h2>
+                    <br>
+                    <h5>Don't have an account? That's okay - just use your Facebook profile to create one now!</h5><br>
+                    <h4><a class="btn btn-primary btn-lg" href="{% url 'social:begin' 'facebook' %}?next={% if next %}{{next}}{% else %}{% url 'event_list_view' %}{% endif %}">
+                        <i class="fa fa-facebook fa-lg"></i>&nbsp;&nbsp;|&nbsp;&nbsp;Log In with Facebook
+                    </a></h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+    

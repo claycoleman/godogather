@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Users on GoDogether{% endblock title %}
+
+
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            {% for profile in profiles %}
+                <a href="{% url 'profile_detail_view' profile.pk %}">{{ profile }}</a></br>
+            {% endfor %}
+
+            {% if request.user.is_staff %}
+            <a href = "#implement-later" alt = "profile_create_view" %}>Create a new profile</a>
+            {% endif %}</div>
+    </div>
+</div>
+
+{% endblock %}

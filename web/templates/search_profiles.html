@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Search for Friends{% endblock title %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Friend Search</h2>
+            <h4>Your username (for friends to find you more easily): {{ request.user.username }}</h4>
+            <form action="{% url 'search_profiles' %}" enctype="form-data" method="POST" >
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input class="form-control btn-default" type="submit" value="Search" />
+            </form>
+        </div>
+    </div>
+    <hr>
+    <div class="search-results">
+    {% if profiles %}
+        <div class="row">
+         {% for profile in profiles %}
+            <div class="col-md-4 text-right">
+                <div class="row">
+                    <div class="col-md-4">
+                        {% if profile.picture %}
+                        <img src="{{ profile.picture.url }}" class="thumb">
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <h3><a href="{% url 'profile_detail_view' profile.pk %}">{{ profile }}</a></h3>
+                        <h4>{{ profile.username }}</h4>
+                        <div class="friend_request_section" id="friend_request_section-{{ profile.pk }}">
+                        {% if request.user.profile in profile.friend_requests.all  %}
+                            <a class="btn btn-default" alt='{{ profile.pk }}'>{{ profile.user.first_name }} requested</a>
+                            <a id="cancel-request-{{ profile.pk }}" class="btn btn-warning cancel-request" href = "#" alt='{{ profile.pk }}'>Cancel request</a>
+                        {% elif profile in request.user.profile.friend_requests.all %}
+                            <a id="addition-{{ profile.pk }}" class="btn btn-success detail-add-button" href = "#" alt='{{ profile.pk }}'>Accept {{ profile.user.first_name }} as a friend</a>
+                            <a id="rejection-{{ profile.pk }}" class="btn btn-danger detail-reject-button" href = "#" alt='{{ profile.pk }}'>Reject {{ profile.user.first_name }} as a friend</a>
+                        {% elif request.user.profile not in profile.friends.all %}
+                            <a id="request-add-button-{{ profile.pk }}" class="btn btn-primary request-add-button" href = "#" alt='{{ profile.pk }}'>Add {{ profile.user.first_name }} as a friend</a>
+                        {% else %}
+                            <h4>You are friends with {{ profile.user.first_name }}</h4>
+                            <a id="delete-friend-button-{{ profile.pk }}" class="btn btn-danger delete-friend-button" href = "#" alt='{{ profile.pk }}'>Delete {{ profile.user.first_name }} as a friend</a>
+                        {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            {% if forloop.counter|divisibleby:3 %}
+                </div><div class="row">
+            {% endif %}
+        {% endfor %}
+        </div>
+    {% elif not get %}
+        <div class="col-md-8">
+            <h3>&nbsp;&nbsp;&nbsp;No search results!</h3>
+        </div>
+    {% endif %}
+        
+    </div>
+</div>
+
+{% endblock %}

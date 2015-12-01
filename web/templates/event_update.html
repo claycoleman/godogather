@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load addcss %}
+
+{% block title %}Edit "{{ event.name }}"{% endblock title %}
+
+
+{% block body %}
+<div class="container">
+    <form action="{% url 'event_update_view' event.pk %}" enctype="multipart/form-data" method='POST'>
+    <div class="row">
+        <h2>Edit <i>"{{ event.name }}"</i></h2>    
+        <p class="green">{{ saved }}</p>
+        {% csrf_token %}    
+        <div class="col-sm-7">
+                Name: {{ form.name|addcss:"form-control" }}
+                Description: {{ form.description|addcss:"form-control" }}
+                Location: <small>(please include street address, city and zip)</small>{{ form.location|addcss:"form-control" }}
+        </div>
+        <div class="col-sm-5">
+            Host: <small>(besides yourself, of course)</small><div class="overflow form-control">{{form.host}}
+            </div>
+            Date: {{form.date_happening|addcss:"form-control"}}
+            Time Starting: {{form.time_starting|addcss:"form-control"}}
+            Time Ending: {{form.time_ending|addcss:"form-control"}}
+            Groups: <div class="overflow form-control">{{form.groups}}
+                </div>
+            <br>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-8 col-sm-offset-2">
+    <input class="form-control btn-success" type="submit" value="Save {{ event }} and continue editing" />
+                
+        </div>
+    </div>
+        </form>
+        <div class="red">{{ errors }}</div>   
+
+    <br><br>
+    <a href="{% url 'event_detail_view' event.pk %}">Finish editing to {{ event }}</a> 
+</div>
+{% endblock %}

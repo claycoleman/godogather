@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Notifications{% endblock title %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+    <h1 class="text-center">Notifications</h1>
+        <div class="col-sm-6">
+            <h2 class="text-center">Friend Requests</h2>
+            <ul class="add-menu">
+            {% if friend_requests %}
+            {% for new_request in friend_requests %}
+                <li class="hz no_bullet" id='li-{{ new_request.pk }}'>
+                  <a href='#' id="rejection-{{ new_request.pk }}" class="reject-button" alt="{{ new_request.pk }}"><i class="fa fa-times red" id="times-{{new_request.pk}}" alt="{{ new_request.pk }}"></i></a>
+                  <a href="{% url 'profile_detail_view' new_request.pk %}">{{ new_request }}</a>
+                  <a href='#' id="addition-{{ new_request.pk }}" class="add-button" alt="{{ new_request.pk }}"><i class="fa fa-check green" id="check-{{new_request.pk}}" alt="{{ new_request.pk }}"></i></a>
+                </li>
+            {% endfor %}
+            {% else %}
+                <li class="no_bullet"><a>No friend requests!</a></li>
+            {% endif %}
+            </ul>
+        </div>
+        <div class="col-sm-6">
+            <h2 class="text-center">Group Requests</h2>
+            <ul class="add-menu">
+            {% if group_requests %}
+                {% for new_request in friend_requests %}
+                <li class="hz no_bullet" id='li-{{ new_request.pk }}'>
+                  <a href='#' id="rejection-{{ new_request.pk }}" class="reject-button" alt="{{ new_request.pk }}"><i class="fa fa-times red" id="times-{{new_request.pk}}" alt="{{ new_request.pk }}"></i></a>
+                  <a href="{% url 'profile_detail_view' new_request.pk %}">{{ new_request }}</a>
+                  <a href='#' id="addition-{{ new_request.pk }}" class="add-button" alt="{{ new_request.pk }}"><i class="fa fa-check green" id="check-{{new_request.pk}}" alt="{{ new_request.pk }}"></i></a>
+                </li>
+                {% endfor %}
+            {% else %}
+                <li class="no_bullet"><a>No group requests!</a></li>
+            {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

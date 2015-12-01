@@ -1,0 +1,180 @@
+*, #footer, body, h1, h2, h3, h4, h5, h6 {
+    font-family: 'Open Sans', sans-serif;
+}
+
+h1, h2 {
+    font-weight: bolder;
+}
+
+.bio {
+    padding: 5px;
+    background-color: #DDD;
+}
+
+#bs-example-navbar-collapse-1 {
+    min-height: 70px;
+}
+
+.navbar-nav, .navbar-header {
+    padding-top: 10px;
+}
+
+ul.nav {
+    padding-right: 100px;
+}
+@media (min-width: 768px) {
+    .navbar-brand {
+        padding-left: 100px;
+
+    }
+}
+
+
+#noti_Container {
+    position:relative;     /* This is crucial for the absolutely positioned element */
+}
+
+.noti_bubble {
+    position:absolute;    /* This breaks the div from the normal HTML document. */
+    top: 3px;
+    right:8px;
+    padd
+    padding:1px 3px 1px 3px;
+    background-color:red; /* you could use a background image if you'd like as well */
+    color:white;
+    font-weight:bold;
+    font-size:0.80em;
+    /* The following is CSS3, but isn't crucial for this technique to work. */
+    /* Keep in mind that if a browser doesn't support CSS3, it's fine! They just won't have rounded borders and won't have a box shadow effect. */
+    /* You can always use a background image to produce the same effect if you want to, and you can use both together so browsers without CSS3 still have the rounded/shadow look. */
+    border-radius:20px;
+    box-shadow:1px 1px 1px gray;
+}
+
+.green {
+    color: rgb(39, 163, 156);
+}
+
+.black {
+    color: #000;
+}
+
+.darkgrey {
+    color: darkgrey;
+}
+
+.red {
+    color: rgb(170, 0, 8);
+}
+
+.open> ul>li.hz{
+    display: inline-flex !important;
+}
+
+.request_list {
+    padding-right: 10px;
+    padding-left: 20px;
+}
+
+.icon_list {
+    padding-right: 20px;
+    padding-left: 10px;
+}
+
+li.hz > a {
+    padding: 3px 10px;
+}
+
+#footer {
+  background-color: rgb(39, 163, 156);
+    position: absolute;
+  bottom: 0;
+  width: 100%;
+
+  margin-top: 0; 
+  height: 85px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+#footer > div > div > div > p > a,
+#footer > div > div > div  > a
+{
+    color: #424242;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  /* Margin bottom by footer height */
+  /*margin-bottom: 150px;*/
+}
+
+#footer> * {
+    color: rgb(240,240,240)
+}
+
+.overflow {
+    border: 1px solid lightgray;
+    width: 100%;
+    height: 106px;
+    overflow: scroll;
+}
+
+.main-feed, .main-event-feed {
+    max-height: 300px;
+    overflow: scroll;
+}
+
+.search-results {
+    max-height: 500px;
+    max-width: 100%;
+    overflow: scroll;
+    margin-bottom: 85px;
+}
+
+.overflow li, .no_bullet {
+    list-style-type: none;
+}
+
+
+div.event-detail:nth-child(even) {
+    background: #EEE;
+    border-left: solid 10px #EEE;
+    border-right: solid 10px #EEE;
+}
+
+
+div.event-detail:nth-child(odd), a.btn-default.stan {
+    background: #FFF;
+    background-color: #FFF;
+    border-left: solid 10px #FFF;
+    border-right: solid 10px #FFF;
+}
+
+.thumb {
+    max-width: 150px;
+    max-height: 150px;
+}
+
+.tiny-thumb {
+    max-width: 40px;
+    max-height: 40px;
+}
+
+.bold {
+    font-weight: bolder;
+}
+
+.about-col {
+    background-color: #27A39C;
+    border: 2px solid #424242;
+    margin: 2px;
+}
+
+span.glyphicon-fullscreen {
+    font-size: 3em;
+}
