@@ -1,4 +1,4 @@
-import pytz 
+import pytz
 from itertools import chain
 from operator import attrgetter
 from datetime import datetime
@@ -49,7 +49,11 @@ def event_list_view(request):
 
     for event in events:
         event_date = datetime.combine(date=event.date_happening, time=event.time_starting)
-        event_date = event_date.replace(tzinfo=pytz.timezone(request.session.get('django_timezone') ))
+        timezone_inst = request.session.get('django_timezone')
+        if not timezone_inst:
+            timezone_inst = 'UTC'
+
+        event_date = event_date.replace(tzinfo=pytz.timezone(timezone_inst))
         if event_date < timezone.now():
             for host in event.host.all():
                 host.events_hosted.remove(event)
@@ -80,7 +84,10 @@ def event_create_view(request):
             should_save = True
             new_event = form.save(commit=False)
             event = datetime.combine(new_event.date_happening, new_event.time_starting)
-            event = event.replace(tzinfo=pytz.timezone(request.session.get('django_timezone') ))
+            timezone_inst = request.session.get('django_timezone')
+            if not timezone_inst:
+                timezone_inst = 'UTC'
+            event = event.replace(tzinfo=pytz.timezone(timezone_inst))
             if event < timezone.now():
 
                 should_save = False
@@ -128,7 +135,10 @@ def event_update_view(request, pk):
             should_save = True
             new_event = form.save(commit=False)
             event = datetime.combine(new_event.date_happening, new_event.time_starting)
-            event = event.replace(tzinfo=pytz.timezone(request.session.get('django_timezone') ))
+            timezone_inst = request.session.get('django_timezone')
+            if not timezone_inst:
+                timezone_inst = 'UTC'
+            event = event.replace(tzinfo=pytz.timezone(timezone_inst))
             if event < timezone.now():
                 should_save = False
                 context['errors'] = "The event date was already in the past! Try again."
@@ -215,7 +225,11 @@ def group_event_list(request, slug):
 
     for event in events:
         event_date = datetime.combine(date=event.date_happening, time=event.time_starting)
-        event_date = event_date.replace(tzinfo=pytz.timezone(request.session.get('django_timezone') ))
+        timezone_inst = request.session.get('django_timezone')
+        if not timezone_inst:
+            timezone_inst = 'UTC'
+
+        event_date = event_date.replace(tzinfo=pytz.timezone(timezone_inst))
         if event_date < timezone.now():
             for host in event.host.all():
                 host.events_hosted.remove(event)
