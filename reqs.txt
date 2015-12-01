@@ -3,10 +3,8 @@ coverage==4.0.2
 decorator==4.0.4
 Django==1.8.6
 django-easy-timezones==0.6.2
-gnureadline==6.3.3
 ipaddress==1.0.14
 ipython==4.0.0
-ipython-genutils==0.1.0
 MySQL-python==1.2.5
 oauthlib==1.0.3
 path.py==8.1.2
