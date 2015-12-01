@@ -36,6 +36,7 @@ INSTALLED_APPS = (
     'main',
     'web',
     'social.apps.django_app.default',
+)
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
