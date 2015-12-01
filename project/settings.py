@@ -24,10 +24,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOGIN_URL = '/home/'
 
 
-GEOIP_DATABASE = 'project/GeoLiteCity.dat'
-GEOIPV6_DATABASE = 'project/GeoLiteCityv6.dat'
-
-
 # Application definition
 
 INSTALLED_APPS = (
@@ -40,8 +36,6 @@ INSTALLED_APPS = (
     'main',
     'web',
     'social.apps.django_app.default',
-    'easy_timezones',
-)
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -52,7 +46,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'easy_timezones.middleware.EasyTimezoneMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (  

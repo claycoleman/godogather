@@ -667,7 +667,7 @@ def can_come(request):
     event = Event.objects.get(pk=pk)
     event.people_not_coming.remove(request.user.profile)
     event.people_coming.add(request.user.profile)
-
+ 
     hosts = ""
     host_list = [e for e in event.host.all()]
     for count, e in enumerate(host_list):
@@ -676,7 +676,7 @@ def can_come(request):
         else:
             hosts += "%s, " % e
     date = "%s at %s" % (event.date_happening.strftime('%A, %b %-d'), event.time_starting.strftime('%-I:%M %p'))
-    posted = "%s" % event.date_posted.strftime('at %-I:%M %p on %a, %b %-d  ')
+    posted = "%s" % event.date_posted.isoformat(' ')
     return JsonResponse([event.name, hosts, date, "People coming: %d" % len(event.people_coming.all()), host_list[0].picture.url, posted, event.description, "People not coming: %d" % len(event.people_not_coming.all())], safe=False)
 
 
@@ -709,7 +709,7 @@ def cancel_decision(request):
         else:
             hosts += "%s, " % e
     date = "%s at %s" % (event.date_happening.strftime('%A, %b %-d'), event.time_starting.strftime('%-I:%M %p'))
-    posted = "%s" % event.date_posted.strftime('at %-I:%M %p on %a, %b %-d  ')
+    posted = "%s" % event.date_posted.isoformat(' ')
     return JsonResponse([event.name, hosts, date, len(event.people_coming.all()), host_list[0].picture.url, posted, event.description], safe=False)
 
 
