@@ -30,6 +30,7 @@ class EventModelCreateForm(forms.ModelForm):
         self.fields["host"].widget = forms.CheckboxSelectMultiple()
         self.fields["groups"].widget = forms.CheckboxSelectMultiple()
         self.fields["test_location"].widget = LocationPickerWidget()
+        self.fields["location"].required = True
 
 
 class EventModelUpdateForm(forms.ModelForm):  

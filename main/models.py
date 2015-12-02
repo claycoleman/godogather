@@ -43,13 +43,14 @@ class Profile(models.Model):
         return "%s %s" % (self.first_name, self.last_name)
 
     def save(self, *args, **kwargs):
-        self.first_name = self.first_name.strip(" ")
-        self.last_name = self.last_name.strip(" ")
-        self.username = self.username.strip(" ")
-        if " " in self.first_name:
-            self.first_name, space, temp = self.first_name.partition(" ")
-            self.last_name = temp + " " + self.last_name
-        super(Profile, self).save(*args, **kwargs) # Call the "real" save() method.
+        if self.first_name:
+            self.first_name = self.first_name.strip(" ")
+            self.last_name = self.last_name.strip(" ")
+            self.username = self.username.strip(" ")
+            if " " in self.first_name:
+                self.first_name, space, temp = self.first_name.partition(" ")
+                self.last_name = temp + " " + self.last_name
+            super(Profile, self).save(*args, **kwargs) # Call the "real" save() method.
 
 
 class Group(models.Model):
