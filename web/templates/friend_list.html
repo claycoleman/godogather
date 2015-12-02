@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block refresh %}<meta http-equiv="refresh" content="120">{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <h2>Your Friends</h2>
+        <div class="col-sm-12">
+            <div class="friend-list">
+            {% for profile in friends %}
+                 <div class="event-detail">
+                    <img class="thumb" src="{{profile.picture.url}}">
+                    <a href="{% url 'profile_detail_view' profile.pk %}">{{ profile }}</a></br>
+                    <hr>
+                </div>
+
+            {% endfor %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

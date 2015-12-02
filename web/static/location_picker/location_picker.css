@@ -1,0 +1,14 @@
+.location-picker-wrap {
+    display: inline-block;
+}
+.location-picker-map {
+    width: 300px;
+    height: 200px;
+    border: 1px solid grey;
+    padding: 2px;
+}
+.location-picker-wrap input {
+    width: 298px;
+    visibility: hidden;
+    margin: 0 0 10px;
+}

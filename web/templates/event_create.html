@@ -12,20 +12,24 @@
                 <h2>Create an event</h2>
                     Name: {{ form.name|addcss:"form-control" }}
                     Description: {{ form.description|addcss:"form-control" }}
-                    Location: <small>(please include street address, city and zip)</small> {{ form.location|addcss:"form-control" }}
+                    Location: <small>(please include street address, city and zip)</small> {{ form.location|addcss:"form-control" }}<br>
+                    Test Loc:{{ form.test_location}}<br>
+                    {{ form.public }}&nbsp;&nbsp;Public event (all your friends can view this)&nbsp;
+                    {{ form.shareable }}&nbsp;&nbsp;Allow sharing (your friends can repost this event)
             </div>
             <div class="col-sm-5">
                 <h2>&nbsp;</h2>
                 Host: <small>(besides yourself, of course)</small><div class="overflow form-control">{{form.host}}
                 </div>
-                Date: {{form.date_happening|addcss:"form-control"}}
-                Time Starting: {{form.time_starting|addcss:"form-control"}}
-                Time Ending: {{form.time_ending|addcss:"form-control"}}
-                Groups: <div class="overflow form-control">{{form.groups}}
+                Date: {{form.date_happening|addcss:"form-control datepicker"}}
+                Time Starting: {{form.time_starting|addcss:"form-control timepicker"}}
+                Time Ending: {{form.time_ending|addcss:"form-control timepicker"}}
+                Groups:<br><small>(if you don’t select a group, your event will be public by default)</small> <div class="overflow form-control">{{form.groups}}
                 </div>
                 <br>
             </div>
         </div>
+        <div class="red text-center"><p>{{ errors }}</p></div>    
         <div class="row">
             <div class="col-sm-8 col-sm-offset-2">
 <input class="form-control btn-default" type="submit" value="Create event" />
@@ -33,10 +37,7 @@
             </div>
         </div>
         </form>
-        <div class="red">{{ errors }}</div>    
     </div>
 </div>
-    
-
 {% endblock %}
 

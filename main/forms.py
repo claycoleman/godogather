@@ -1,17 +1,25 @@
 import datetime
+from location_picker import LocationPickerWidget
 
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserCreationForm, UserChangeForm
 
 from .models import Event, Group, Profile
+from .widget import SelectTimeWidget
 
 #Event forms
 
+valid_time_formats = ['%I:%M %p', '%P', '%H:%M%A', '%H:%M %A', '%H:%M%a', '%H:%M %a']
+
+
 class EventModelCreateForm(forms.ModelForm):
     date_happening = forms.DateField(widget=forms.DateInput(attrs={'type':'date'}), initial=datetime.datetime.now())
-    time_starting = forms.TimeField(widget=forms.TimeInput(attrs={'type':'time'}), initial=datetime.datetime.now())
-    time_ending = forms.TimeField(widget=forms.TimeInput(attrs={'type':'time'}), initial=datetime.datetime.now())
+    time_starting = forms.TimeField(input_formats=valid_time_formats, widget=forms.TimeInput( attrs={'class':'time'}), initial=datetime.datetime.now())
+    time_ending = forms.TimeField(input_formats=valid_time_formats, widget=forms.TimeInput( attrs={'class':'time'}), initial=datetime.datetime.now())
+
+
+
 
     class Meta:
         model = Event
@@ -21,6 +29,7 @@ class EventModelCreateForm(forms.ModelForm):
         super(EventModelCreateForm, self).__init__(*args, **kwargs)
         self.fields["host"].widget = forms.CheckboxSelectMultiple()
         self.fields["groups"].widget = forms.CheckboxSelectMultiple()
+        self.fields["test_location"].widget = LocationPickerWidget()
 
 
 class EventModelUpdateForm(forms.ModelForm):  

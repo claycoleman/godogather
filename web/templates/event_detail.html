@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% block refresh %}<meta http-equiv="refresh" content="120">{% endblock %}
+
 
 {% block title %}{{ event }} Details{% endblock title %}
 
@@ -11,9 +13,12 @@
         <div class="row">
             <h1 class="text-center"><b>{{ event.name }}</b></h1>
             <div class="col-sm-6">
-                    <h4>{{ event.description }}</h4>
+                    <h4><strong>Description:</strong> {{ event.description }}</h4>
                     <h2>Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong class='black'>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h2>
-                    <h4>Posted at {{ event.date_posted }}</h4>
+                    <h3>{{ event.date_happening }}</h3>
+                    <h4>From {{ event.time_starting }} to
+                    {{ event.time_ending }}</h4>
+                    <h6>Posted at {{ event.date_posted }}</h6>
                     {% if event.people_coming.all|length == 0 %}
                     <h3>{{ event.people_coming.all|length }}  showing up: </h3>
                     {% elif event.people_coming.all|length == 1 %}
@@ -43,12 +48,12 @@
             </div>
             <div class="col-sm-6">
                     <h2>{{ event.location }}</h2>
-                    <iframe width="100%" height="200" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;q={{event.location}}&amp;spn=56.506174,79.013672&amp;t=m&amp;z=5&amp;output=embed"></iframe>
+                    <iframe width="100%" height="300" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;q={{event.test_location}}&amp;spn=56.506174,79.013672&amp;t=m&amp;z=16&amp;output=embed"></iframe>
+                    <!--<div style="width: 100%; overflow: hidden; height: 300px;">
+                        <iframe width="100%" height="600" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" style="border:0; margin-top: -150px;" src="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;q={{event.test_location}}&amp;spn=56.506174,79.013672&amp;t=m&amp;z=16&amp;output=embed"></iframe>
+                    </div>-->
 
-                        {{ event.date_happening }}<br>
-                    From {{ event.time_starting }} to
-                    {{ event.time_ending }}
-                    <br>
+                        
                     {% if event.groups.all %}
                         <h4>Groups:</h4>
                         {% for group in event.groups.all %}

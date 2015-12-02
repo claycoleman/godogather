@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
-{% load tz %}
     
-
+{% block refresh %}<meta http-equiv="refresh" content="120">{% endblock %}
 
 {% block title %}Home – GoDogether{% endblock title %}
 
@@ -28,6 +27,7 @@
                             <h4 style="float: left;"><strong class='black'>&nbsp;{% for host in event.host.all %}{% if host == request.user.profile %}You{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>{% if event.groups.all %} in {% for group in event.groups.all %}<a href="{% url 'group_detail_view' group.name|slugify %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</h4>
                             <h5 class="darkgrey" style="float: right;">Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</span></h5> 
                             <div class="row" style="clear:both;">
+                            
                                 <h2 class="text-center"><a href="{% url 'event_detail_view' event.pk %}">{{ event.name }}</a></h2>
                                 <div class="col-sm-7">
                                     <h4>{{ event.date_happening|date:"l, M d" }} at {{ event.time_starting|time:"g:i A" }}</h4>
@@ -49,6 +49,10 @@
                             <h4 style="float: left;"><strong class='black'>&nbsp;{% for host in event.host.all %}{% if host == request.user.profile %}You{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>{% if event.groups.all %} in {% for group in event.groups.all %}<a href="{% url 'group_detail_view' group.name|slugify %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</h4>
                             <h5 class="darkgrey" style="float: right;">Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</h5> 
                             <br style="clear:both;">
+                            {% if event.people_who_shared.all.exists %}
+                                        <p>shared by {% for sharer in event.people_who_shared.all %}<a href="{% url 'profile_detail_view' sharer.pk %}">{{sharer.first_name}}</a>{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}</p>
+                                    {% endif %}
                             <h2 class="text-center"><a href="{% url 'event_detail_view' event.pk %}">{{ event.name }}</a></h2>
                             <div class="row">
                                 <div class="col-sm-4">
@@ -82,6 +86,10 @@
                                 <h4 style="float: left;"><strong class='black'>&nbsp;{% for host in event.host.all %}{% if host == request.user.profile %}You{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>{% if event.groups.all %} in {% for group in event.groups.all %}<a href="{% url 'group_detail_view' group.name|slugify %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</h4>
                                 <h5 class="darkgrey" style="float: right;">Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</h5> 
                                 <div class="row" style="clear:both;">
+                                    {% if event.people_who_shared.all.exists %}
+                                        <p>&nbsp;&nbsp;&nbsp;shared by {% for sharer in event.people_who_shared.all %}<a href="{% url 'profile_detail_view' sharer.pk %}">{{sharer.first_name}}</a>{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}</p>
+                                    {% endif %}
                                     <h2 class="text-center"><a href="{% url 'event_detail_view' event.pk %}">{{ event.name }}</a></h2>
                                     <div class="col-sm-7">
                                         <h4>{{ event.date_happening|date:"l, M d" }} at {{ event.time_starting|time:"g:i A" }}</h4>

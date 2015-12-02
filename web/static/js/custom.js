@@ -10,6 +10,8 @@ $(function() {
         var date = new Date(date_array[i].innerHTML);
         date_array[i].innerHTML = moment(date).fromNow();
     }
+    $('.datepicker').datepicker({ dateFormat: 'yy-mm-dd', changeMonth: true, changeYear: true, selectOtherMonths: true, showOtherMonths: true});
+    $('.timepicker').timepicker({ 'timeFormat': 'h:i a', 'scrollDefault': 'now', 'step': 5  });
     // if (('localStorage' in window) && window['localStorage'] !== null) {
     //     if ('main-event-feed' in localStorage) {
     //         $(".main-event-feed").html(localStorage.getItem('main-event-feed'));

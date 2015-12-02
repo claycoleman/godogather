@@ -13,6 +13,7 @@ from django.contrib.auth.forms import PasswordChangeForm, UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db.models import Q
 
 
 from main.models import Event, Group, Profile
@@ -27,6 +28,7 @@ def event_detail_view(request, pk):
 
     context = {}
     context['event'] = event
+    context['friends'] = list(request.user.profile.friends.all())
 
     return render_to_response('event_detail.html', context, context_instance=RequestContext(request))
 
@@ -38,7 +40,8 @@ def event_list_view(request):
     context = {}
     context['no_footer'] = True
     order = request.GET.get('order', '')
-    friend_events = Event.objects.filter(host=request.user.profile.friends.all()) #, groups=request.user.profile.groups_in.all())
+
+    friend_events = Event.objects.filter(Q(host=request.user.profile.friends.all(), public=True) | Q(groups=request.user.profile.groups_in.all()) | Q(people_who_shared=request.user.profile.friends.all()))
     my_events = request.user.profile.events_hosted.all()
 
     if order:
@@ -74,6 +77,7 @@ def event_create_view(request):
     form = EventModelCreateForm()
     friends = request.user.profile.friends.all()
     groups = request.user.profile.groups_in.all()
+
     form.fields['host'].queryset = friends
     form.fields['groups'].queryset = groups
 
@@ -88,24 +92,40 @@ def event_create_view(request):
             if not timezone_inst:
                 timezone_inst = 'UTC'
             event = event.replace(tzinfo=pytz.timezone(timezone_inst))
+            print form.cleaned_data
             if event < timezone.now():
-
                 should_save = False
                 context['errors'] = "The event date was already in the past! Try again."
                 form = EventModelCreateForm(initial=new_event.__dict__)
                 form.fields['groups'].queryset = groups
                 form.fields['host'].queryset = friends
                 context['form'] = form
+
+            elif not new_event.public and len(form.cleaned_data['groups']) is 0:
+                should_save = False
+                context['errors'] = "An event must either be public, or have at least one group to be displayed in."
+                form = EventModelUpdateForm(initial=new_event.__dict__)
+                form.fields['host'].queryset = friends
+                form.fields['groups'].queryset = groups
+                context['form'] = form
+
             if should_save:
                 new_event.save()
                 form.save_m2m()
                 new_event.host.add(request.user.profile)
                 for host in new_event.host.all():
                     new_event.people_coming.add(host)
-                return redirect('event_list_view')
+                return redirect('event_detail_view', new_event.pk)
         else:
             print form.errors
             context['errors'] = form.errors
+            form_dict = {}
+            for key in form.data:
+                form_dict[key] = form.data[key]
+            form = EventModelCreateForm(initial=form_dict)
+            form.fields['groups'].queryset = groups
+            form.fields['host'].queryset = friends
+            context['form'] = form
     return render_to_response('event_create.html', context, context_instance=RequestContext(request))
 
 
@@ -121,6 +141,7 @@ def event_update_view(request, pk):
     form = EventModelUpdateForm(request.POST or None, instance=event)
     friends = request.user.profile.friends.all()
     groups = request.user.profile.groups_in.all()
+
     form.fields['host'].queryset = friends
     form.fields['groups'].queryset = groups
     context['form'] = form
@@ -146,6 +167,14 @@ def event_update_view(request, pk):
                 form.fields['host'].queryset = friends
                 form.fields['groups'].queryset = groups
                 context['form'] = form
+            if not new_event.public and len(form.cleaned_data['groups']) is 0:
+                should_save = False
+                context['errors'] = "A private event must have at least one group to be displayed in."
+                form = EventModelUpdateForm(initial=new_event.__dict__)
+                form.fields['host'].queryset = friends
+                form.fields['groups'].queryset = groups
+                context['form'] = form
+                
             if should_save:
                 new_event.save()
                 form.save_m2m()
@@ -153,9 +182,17 @@ def event_update_view(request, pk):
                 for host in new_event.host.all():
                     new_event.people_coming.add(host)
                 context['saved'] = '%s saved!' % new_event.name
+                return redirect('event_detail_view', new_event.pk)
         else:
             print form.errors
             context['errors'] = form.errors
+            form_dict = {}
+            for key in form.data:
+                form_dict[key] = form.data[key]
+            form = EventModelCreateForm(initial=form_dict)
+            form.fields['groups'].queryset = groups
+            form.fields['host'].queryset = friends
+            context['form'] = form
 
     return render_to_response('event_update.html', context, context_instance=RequestContext(request))
 
@@ -234,6 +271,7 @@ def group_event_list(request, slug):
             for host in event.host.all():
                 host.events_hosted.remove(event)
                 host.past_events.add(event)
+            event.people_who_shared.clear()
             events.remove(event)
 
     context['today'] = timezone.now()
@@ -337,6 +375,13 @@ def profile_detail_view(request, pk):
     return render_to_response('profile_detail.html', context, context_instance=RequestContext(request))
 
 
+def friend_list(request):
+    context = {}
+    context['friends'] = request.user.profile.friends.all()
+
+    return render_to_response('friend_list.html', context, context_instance=RequestContext(request))
+
+
 @login_required
 def search_profiles(request):
     profiles = []
@@ -346,12 +391,14 @@ def search_profiles(request):
     context['get'] = request.method == 'GET'
     if request.method == 'POST':
         if form.is_valid():
-            search = form.cleaned_data.get('search', '')
+            search = form.cleaned_data.get('search', '').strip(' ')
+            if " " in search:
+                first, space, last = search.partition(' ')
+                names = Profile.objects.filter(first_name__istartswith=first, last_name__istartswith=last)
+            else:
+                names = Profile.objects.filter(Q(first_name__istartswith=search) | Q(last_name__istartswith=search) )
 
-            first_name = Profile.objects.filter(first_name__istartswith=search)
-            last_name = Profile.objects.filter(last_name__istartswith=search)
             username = Profile.objects.filter(username__istartswith=search)
-            names = list(set(first_name) | set(last_name))
             result_list = list(set(names) | set(username))
             if request.user.profile in result_list:
                 result_list.remove(request.user.profile)

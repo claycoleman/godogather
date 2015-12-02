@@ -17,6 +17,12 @@ from .local import *
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+TIME_INPUT_FORMATS = (
+    '%H:%M:%S',     # '14:30:59'
+    '%H:%M',        # '14:30'
+    '%-I:%M:%S %p', 
+    '%-I:%M %p', 
+)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -36,6 +42,7 @@ INSTALLED_APPS = (
     'main',
     'web',
     'social.apps.django_app.default',
+    'location_picker',
 )
 
 MIDDLEWARE_CLASSES = (

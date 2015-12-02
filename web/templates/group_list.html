@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
 
+{% block refresh %}<meta http-equiv="refresh" content="120">{% endblock %}
+
 {% block title %}Your Groups{% endblock title %}
 
 {% block body %}
 <div class="container">
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
-            <h1 class="bold">Your groups</h1>
+            <h1 class="bold">Your Groups</h1>
             {% if groups %}
                 {% for group in groups %}
                     <a href="{% url 'group_detail_view' group.name|slugify %}">{{ group }}</a></br>

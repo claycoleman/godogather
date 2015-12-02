@@ -2,21 +2,18 @@
 
 <!DOCTYPE html>  
 <html>  
-<head>  
-    <meta http-equiv="refresh" content="120">
+<head>    
+    {% block refresh %}{% endblock %}
+      <script src="{% static 'js/jquery-1.11.3.min.js' %}"></script>
     <title>{% block title %}{% endblock %}</title>
     <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-datetimepicker.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}">
-    <script type="text/javascript" src="{% static 'js/jquery-1.11.2.min.js' %}"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="{% static 'css/jquery.timepicker.css' %}">
+    <link rel="stylesheet" href="{% static 'location_picker/location_picker.css' %}">
 
-      <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-
-    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>  
 </head>  
 
 <body>
@@ -55,6 +52,10 @@
                     {% else %}
                       <li><a>No notifications!</a></li>
                     {% endif %}
+                    <li role="separator" class="divider"></li>
+                    <li><a href="{% url 'search_profiles' %}">Search for people</a></li>
+                    <li><a href="{% url 'friend_list' %}">See all of your friends</a></li>
+                     
               </ul>
             </li>
             <li class="dropdown icon_list {% block groups-active %}{% endblock %}">
@@ -64,19 +65,21 @@
                 <li role="separator" class="divider"></li>
                 {% for group in request.user.profile.groups_in.all|slice:"0:5" %}
                 <li><a href="{% url 'group_event_list' group.name|slugify %}">{{ group }}</a></li>
-                {% endfor %}
+                {% if forloop.last %}
                 <li role="separator" class="divider"></li>
-                <li><a href="{% url 'group_list_view' %}">Group List</a></li>
-                <li><a href="{% url 'search_profiles' %}">Profile List</a></li>
-                <li><a href="{% url 'group_detail_view' 2 %}">Mission Buds</a></li>
+                {% endif %}
+                {% endfor %}
+                <li><a href="{% url 'group_list_view' %}">See all of your groups</a></li>
                 <!--<li role="separator" class="divider"></li>
                 <li><a href="#">Separated link</a></li>-->
               </ul>
             </li>
             <li class="dropdown {% block user_active %}{% endblock %}">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{request.user.first_name}}<span class="caret"></span></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{request.user.profile.first_name}}<span class="caret"></span></a>
               <ul class="dropdown-menu">
                         <li><a href="{% url 'profile_detail_view' request.user.profile.pk %}">Your profile</a></li>
+                        <li><a href="{% url 'friend_list' %}">Your friends</a></li>
+                        <li><a href="{% url 'group_list_view' %}">Your groups</a></li>
                         <li role="separator" class="divider"></li>
                         <li><a href="{% url 'logout_view' %}"><b>Log out</b> {{request.user.profile}}</a></li>
                     
@@ -127,9 +130,16 @@
       </div>
     </footer>
   {% endif %}
+  
+    <script src="{% static 'js/jquery-ui.js' %}"></script>
+    <script src="{% static 'js/jquery.timepicker.min.js' %}"></script>
+    <script src="{% static 'location_picker/location_picker.js' %}"></script>
 
+    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>  
     <script type="text/javascript" src="{% static 'js/moment.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/custom.js' %}"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
+
 
     <script>
     $(function() {

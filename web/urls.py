@@ -39,6 +39,7 @@ urlpatterns = [
     # userprofile urls
     url(r'^profile_detail/(?P<pk>\d+)/$', 'web.views.profile_detail_view', name='profile_detail_view'),
     url(r'^profile_list/$', 'web.views.profile_list_view', name='profile_list_view'),
+    url(r'^friends/$', 'web.views.friend_list', name='friend_list'),
     url(r'^search/profiles/$', 'web.views.search_profiles', name='search_profiles'),
     url(r'^profile_delete/(?P<pk>\d+)/$', 'web.views.profile_delete_view', name='profile_delete_view'),
     url(r'^profile_update/(?P<pk>\d+)/$', 'web.views.profile_update_view', name='profile_update_view'),
