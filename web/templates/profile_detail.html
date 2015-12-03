@@ -10,7 +10,7 @@
 <div class="container">
     <div class="row">
             <h1 class="text-center bold">{{ profile }}</h1>
-        <div class="col-md-8">
+        <div class="col-sm-8">
             <br> 
             {% if profile.picture %}
                 <img src="{{ profile.picture.url }}">
@@ -19,13 +19,13 @@
                 <h3>No prof pic</h3>
             {% endif %}
 
-            <h3>{{ profile.user.first_name }}'s friends</h3>
+            <h3>{{ profile.first_name }}'s friends</h3>
 
             {% for friend in profile.friends.all %}
                 <a href="{% url 'profile_detail_view' friend.pk %}">{{ friend }}</a>{% if not forloop.last %},{% endif %}
             {% endfor %}
 
-            <h3>{{ profile.user.first_name }}'s groups</h3>
+            <h3>{{ profile.first_name }}'s groups</h3>
 
             {% for group in profile.groups_in.all %}
                 <a href="{% url 'group_detail_view' group.name|slugify %}">{{ group }}</a>{% if not forloop.last %},{% endif %}
@@ -40,28 +40,28 @@
                 {% else %}
                     <div class="friend_request_section" id="friend_request_section-{{ profile.pk }}">
                         {% if friend_requested_by_you %}
-                            <a class="btn btn-default" alt='{{ profile.pk }}'>{{ profile.user.first_name }} requested</a>
+                            <a class="btn btn-default" alt='{{ profile.pk }}'>{{ profile.first_name }} requested</a>
                             <a id="cancel-request-{{ profile.pk }}" class="btn btn-warning cancel-request" href = "#" alt='{{ profile.pk }}'>Cancel request</a>
                         {% elif friend_requested_by_them %}
-                            <a id="addition-{{ profile.pk }}" class="btn btn-success detail-add-button" href = "#" alt='{{ profile.pk }}'>Accept {{ profile.user.first_name }} as a friend</a>
-                            <a id="rejection-{{ profile.pk }}" class="btn btn-danger detail-reject-button" href = "#" alt='{{ profile.pk }}'>Reject {{ profile.user.first_name }} as a friend</a>
+                            <a id="addition-{{ profile.pk }}" class="btn btn-success detail-add-button" href = "#" alt='{{ profile.pk }}'>Accept {{ profile.first_name }} as a friend</a>
+                            <a id="rejection-{{ profile.pk }}" class="btn btn-danger detail-reject-button" href = "#" alt='{{ profile.pk }}'>Reject {{ profile.first_name }} as a friend</a>
                         {% elif not_friends %}
-                            <a id="request-add-button-{{ profile.pk }}" class="btn btn-primary request-add-button" href = "#" alt='{{ profile.pk }}'>Add {{ profile.user.first_name }} as a friend</a>
+                            <a id="request-add-button-{{ profile.pk }}" class="btn btn-primary request-add-button" href = "#" alt='{{ profile.pk }}'>Add {{ profile.first_name }} as a friend</a>
                         {% else %}
-                            <h4>You are friends with {{ profile.user.first_name }}!</h4>
-                            <a id="delete-friend-button-{{ profile.pk }}" class="btn btn-danger delete-friend-button" href = "#" alt='{{ profile.pk }}'>Delete {{ profile.user.first_name }} as a friend</a>
+                            <h4>You are friends with {{ profile.first_name }}!</h4>
+                            <a id="delete-friend-button-{{ profile.pk }}" class="btn btn-danger delete-friend-button" href = "#" alt='{{ profile.pk }}' placeholder="{{ profile.first_name }}">Delete {{ profile.first_name }} as a friend</a>
 
                         {% endif %}
                     </div>
                 {% endifequal %}
             {% else %}
-                <h4 class="btn btn-danger">Log in to add {{ profile.user.first_name }}!</h4>
+                <h4 class="btn btn-danger">Log in to add {{ profile.first_name }}!</h4>
             {% endif %}
             <br>
             <br>
             <a href="{% url 'profile_list_view' %}">Back to profile list</a>
         </div>
-        <div class="col-md-4">
+        <div class="col-sm-4">
         <br>
             <h5 class="bio">{{profile.bio}}</h5><br>
             <h4><strong>Your Search Username</strong>:</h4><h4>{{ profile.username }}</h4>

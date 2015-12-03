@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load addcss %}
+{% load staticfiles %}
 
 {% block title %}Edit "{{ event.name }}"{% endblock title %}
 
@@ -9,31 +10,46 @@
     <form action="{% url 'event_update_view' event.pk %}" enctype="multipart/form-data" method='POST'>
     <div class="row">
         <h2>Edit <i>"{{ event.name }}"</i></h2>    
-        <p class="green">{{ saved }}</p>
-        {% csrf_token %}    
-        <div class="col-sm-7">
-                Name: {{ form.name|addcss:"form-control" }}
-                Description: {{ form.description|addcss:"form-control" }}
-                Location: <small>(please include street address, city and zip)</small>{{ form.location|addcss:"form-control" }}
-                {{ form.public }}&nbsp;&nbsp;Public event (all your friends can view this)
-                {{ form.shareable }}&nbsp;&nbsp;Allow sharing (your friends can repost this event)
-        </div>
-        <div class="col-sm-5">
-            Host: <small>(besides yourself, of course)</small><div class="overflow form-control">{{form.host}}
-            </div>
-            Date: {{form.date_happening|addcss:"form-control"}}
-            Time Starting: {{form.time_starting|addcss:"form-control"}}
-            Time Ending: {{form.time_ending|addcss:"form-control"}}
-            Groups:<br><small>(if you don’t select a group, your event will be public by default)</small> <div class="overflow form-control">{{form.groups}}
-                </div>
-            <br>
-        </div>
-    </div>
-    <div class="red text-center"><p>{{ errors }}</p></div>    
-        <div class="row">
-            <div class="col-sm-8 col-sm-offset-2">
-<input class="form-control btn-default" type="submit" value="Save and finish" />
+        {% if saved %}<p class="green">{{ saved }}</p>{% endif %} 
+        {% csrf_token %}      
+            <div class="col-sm-7">
+                    Name: {{ form.name|addcss:"form-control" }}
+                    Description: {{ form.description|addcss:"form-control" }}
+                    Location: <small>(please include street address, city and zip)</small> {{ form.location|addcss:"form-control" }}
+                    {{ form.test_location|addcss:"form-control"}}
                     
+            </div>
+            <div class="col-sm-5">
+                Host: <small>(besides yourself, of course)</small><div class="overflow form-control">{{form.host}}
+                </div>
+                <hr>
+                Date: {{form.date_happening|addcss:"form-control datepicker"}}
+                Time Starting: {{form.time_starting|addcss:"form-control timepicker"}}
+                Time Ending: {{form.time_ending|addcss:"form-control timepicker"}}
+                <hr>
+                <p class="red">Choose a group, or check public below!</p>
+                Groups:<br>
+                <div class="overflow form-control">{{form.groups}}
+                </div>
+                {{ form.public }}&nbsp;&nbsp;Public event (all your friends can view this)<br>
+                    {{ form.shareable }}&nbsp;&nbsp;Allow sharing (your friends can repost this event)
+                <br>
+            </div>
+        </div>
+        {% if errors %}
+            <div class="red text-center errors">Uh oh! {{ errors|safe }}</div>   
+        {% else %}
+            <br>
+        {% endif %}
+
+
+
+        <div class="row">
+            <div class="col-sm-4 col-sm-offset-2">
+                <input class="form-control btn-default submit" type="submit" value="Save and finish" name="_finish" />
+            </div>
+            <div class="col-sm-4 ">
+                <input class="form-control btn-default submit" type="submit" value="Save and continue editing" name="_continue"/>            
             </div>
         </div>
         </form>
@@ -42,3 +58,15 @@
     <a href="{% url 'event_detail_view' event.pk %}">Cancel changes to {{ event }}</a> 
 </div>
 {% endblock %}
+
+
+{% block links %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="{% static 'css/jquery.timepicker.css' %}">
+    <link rel="stylesheet" href="{% static 'location_picker/location_picker.css' %}">
+    
+{% endblock links %}
+
+{% block scripts %}
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
+{% endblock scripts %}

@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserCreationForm, UserChangeForm
 
 from .models import Event, Group, Profile
-from .widget import SelectTimeWidget
 
 #Event forms
 
@@ -14,9 +13,9 @@ valid_time_formats = ['%I:%M %p', '%P', '%H:%M%A', '%H:%M %A', '%H:%M%a', '%H:%M
 
 
 class EventModelCreateForm(forms.ModelForm):
-    date_happening = forms.DateField(widget=forms.DateInput(attrs={'type':'date'}), initial=datetime.datetime.now())
-    time_starting = forms.TimeField(input_formats=valid_time_formats, widget=forms.TimeInput( attrs={'class':'time'}), initial=datetime.datetime.now())
-    time_ending = forms.TimeField(input_formats=valid_time_formats, widget=forms.TimeInput( attrs={'class':'time'}), initial=datetime.datetime.now())
+    date_happening = forms.DateField(initial=datetime.datetime.now())
+    time_starting = forms.TimeField(input_formats=valid_time_formats, initial=datetime.datetime.now())
+    time_ending = forms.TimeField(input_formats=valid_time_formats, initial=datetime.datetime.now())
 
 
 
@@ -35,9 +34,9 @@ class EventModelCreateForm(forms.ModelForm):
 
 class EventModelUpdateForm(forms.ModelForm):  
 
-    date_happening = forms.DateField(widget=forms.DateInput(attrs={'type':'date'}), initial=datetime.datetime.now())
-    time_starting = forms.TimeField(widget=forms.TimeInput(attrs={'type':'time'}), initial=datetime.datetime.now())
-    time_ending = forms.TimeField(widget=forms.TimeInput(attrs={'type':'time'}), initial=datetime.datetime.now())
+    date_happening = forms.DateField()
+    time_starting = forms.TimeField(input_formats=valid_time_formats)
+    time_ending = forms.TimeField(input_formats=valid_time_formats)
 
     class Meta:
         model = Event
@@ -47,6 +46,8 @@ class EventModelUpdateForm(forms.ModelForm):
         super(EventModelUpdateForm, self).__init__(*args, **kwargs)
         self.fields["host"].widget = forms.CheckboxSelectMultiple()
         self.fields["groups"].widget = forms.CheckboxSelectMultiple()
+        self.fields["test_location"].widget = LocationPickerWidget()
+        self.fields["location"].required = True
 
 
 
@@ -65,11 +66,10 @@ class GroupModelCreateForm(forms.ModelForm):
 class GroupModelUpdateForm(forms.ModelForm):  
     class Meta:
         model = Group
-        fields = "__all__"
+        exclude = ['member_requests']
 
     def __init__(self, *args, **kwargs):
         super(GroupModelUpdateForm, self).__init__(*args, **kwargs)
-        self.fields["member_requests"].widget = forms.CheckboxSelectMultiple()
         self.fields["members"].widget = forms.CheckboxSelectMultiple()
 
         self.fields["admin"].widget = forms.CheckboxSelectMultiple()
@@ -127,12 +127,6 @@ class ContactForm(forms.Form):
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'id': 'email', 'placeholder': 'Your email *', 'class': 'form-control'}))
 
 
+class CommentForm(forms.Form):
+    message = forms.CharField(required=False, label="Enter your comment here!", widget=forms.Textarea(attrs={'id': 'comment_body', 'class': "form-control", 'placeholder':"Type your comment here"}))
 
-class JQueryUIDatepickerWidget(forms.DateInput):
-    def __init__(self, **kwargs):
-        super(forms.DateInput, self).__init__(attrs={"size":10, "class": "dateinput"}, **kwargs)
-
-    class Media:
-        css = {"all":("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.6/themes/redmond/jquery-ui.css",)}
-        js = ("http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js",
-              "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.6/jquery-ui.min.js",)

@@ -4,7 +4,7 @@
 {% block body %}
 <div class="container">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-sm-8 col-sm-offset-2">
             <h2>Edit {{ group }}</h2>
             <p class="green">{{ saved }}</p>
             <h4>{{ saved }}</h4>
@@ -14,15 +14,21 @@
                 {{ form.name|addcss:"form-control" }}
                 Members of {{ group }}:
                 <div class="overflow form-control">{{ form.members }}</div>
-                People invited to {{ group.name }}:
-                <div class="overflow form-control">{{ form.member_requests }}</div>
                 Admins <small>(besides yourself, of course)</small>:
                 <div class="overflow form-control">{{ form.admin }}</div>
                 <br>
                 <div class="red text-center"><p>{{ errors }}</p></div>    
 
-                <input class="form-control" type="submit" value="Save {{ group }}" />
-
+                
+                <div class="row">
+                    <div class="col-sm-4 col-sm-offset-2">
+                        <input class="form-control btn-default" type="submit" value="Save and finish" name="_finish" />
+                    </div>
+                    <div class="col-sm-4 ">
+                        <input class="form-control btn-default" type="submit" value="Save and continue editing" name="_continue"/>            
+                    </div>
+                </div>
+                <br>
             </form>
         </div>
     </div>

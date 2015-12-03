@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 
+{% block refresh %}<meta http-equiv="refresh" content="120">{% endblock %}
+
+
 {% block title %}Search for Friends{% endblock title %}
 
 {% block body %}
 <div class="container">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-sm-8">
             <h2>Friend Search</h2>
             <h4>Your username (for friends to find you more easily): {{ request.user.username }}</h4>
             <form action="{% url 'search_profiles' %}" enctype="form-data" method="POST" >
@@ -20,14 +23,14 @@
     {% if profiles %}
         <div class="row">
          {% for profile in profiles %}
-            <div class="col-md-4 text-right">
+            <div class="col-sm-4 text-right">
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-sm-4">
                         {% if profile.picture %}
                         <img src="{{ profile.picture.url }}" class="thumb">
                         {% endif %}
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-sm-8">
                         <h3><a href="{% url 'profile_detail_view' profile.pk %}">{{ profile }}</a></h3>
                         <h4>{{ profile.username }}</h4>
                         <div class="friend_request_section" id="friend_request_section-{{ profile.pk }}">
@@ -41,7 +44,7 @@
                             <a id="request-add-button-{{ profile.pk }}" class="btn btn-primary request-add-button" href = "#" alt='{{ profile.pk }}'>Add {{ profile.user.first_name }} as a friend</a>
                         {% else %}
                             <h4>You are friends with {{ profile.user.first_name }}</h4>
-                            <a id="delete-friend-button-{{ profile.pk }}" class="btn btn-danger delete-friend-button" href = "#" alt='{{ profile.pk }}'>Delete {{ profile.user.first_name }} as a friend</a>
+                            <a id="delete-friend-button-{{ profile.pk }}" class="btn btn-danger delete-friend-button" href = "#" alt='{{ profile.pk }}' placeholder="{{ profile.first_name }}">Delete {{ profile.user.first_name }} as a friend</a>
                         {% endif %}
                         </div>
                     </div>
@@ -54,7 +57,7 @@
         {% endfor %}
         </div>
     {% elif not get %}
-        <div class="col-md-8">
+        <div class="col-sm-8">
             <h3>&nbsp;&nbsp;&nbsp;No search results!</h3>
         </div>
     {% endif %}

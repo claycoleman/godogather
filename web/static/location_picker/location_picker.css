@@ -1,14 +1,15 @@
 .location-picker-wrap {
+    width: 100%;
     display: inline-block;
 }
 .location-picker-map {
-    width: 300px;
+    width: 100%;
     height: 200px;
     border: 1px solid grey;
     padding: 2px;
 }
 .location-picker-wrap input {
-    width: 298px;
+    width: 400px;
     visibility: hidden;
     margin: 0 0 10px;
 }

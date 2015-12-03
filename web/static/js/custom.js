@@ -1,5 +1,7 @@
 $(function() {
-    $(".main-event-feed").css({'max-height': (window.innerHeight-280)+'px', 'overflow': 'scroll'});
+    $(".main-event-feed").css({'max-height': (window.innerHeight-370)+'px', 'overflow': 'scroll'});
+    $("div.main").css({'min-height': (window.innerHeight-155)+'px', 'overflow': 'scroll'});
+    $("div.wrapper").css({'min-height': (window.innerHeight-155)+'px', 'overflow': 'scroll'});
     $(".main-feed").css({'max-height': (window.innerHeight/2)+'px', 'overflow': 'scroll'});
     $('a.tooltipped').tooltip();
     var date_str = $('#current-date').text();
@@ -12,6 +14,12 @@ $(function() {
     }
     $('.datepicker').datepicker({ dateFormat: 'yy-mm-dd', changeMonth: true, changeYear: true, selectOtherMonths: true, showOtherMonths: true});
     $('.timepicker').timepicker({ 'timeFormat': 'h:i a', 'scrollDefault': 'now', 'step': 5  });
+    var options = {'width': '600px', 'height': '300px'};
+    try {
+        $('a.popup').popup(options);
+    }
+    catch(err) {
+    }
     // if (('localStorage' in window) && window['localStorage'] !== null) {
     //     if ('main-event-feed' in localStorage) {
     //         $(".main-event-feed").html(localStorage.getItem('main-event-feed'));
@@ -156,18 +164,21 @@ $('.friend_request_section').on('click', '.delete-friend-button', function(e) {
     e.preventDefault();
     console.log('delete friendship');
     var prk = $("#"+e.target.id).attr('alt')
-    $.ajax({
-        type: 'GET',
-        url: '/delete_friendship/',
-        data: {
-            pk: prk,
-        },
-        success: function(data) {
-            $("#friend_request_section-"+prk).html('');
-            $("#friend_request_section-"+prk).html('<h3 class="btn btn-default"> Your friendship with ' + data[0] + ' has been deleted.</h3>');
-        }
+    var confirm = window.confirm("You're about to delete " + $("#"+e.target.id).attr('placeholder') + " as a friend. Are you sure you want to do that?")
+    if (confirm) {
+        $.ajax({
+            type: 'GET',
+            url: '/delete_friendship/',
+            data: {
+                pk: prk,
+            },
+            success: function(data) {
+                $("#friend_request_section-"+prk).html('');
+                $("#friend_request_section-"+prk).html('<h3 class="btn btn-default"> Your friendship with ' + data[0] + ' has been deleted.</h3>');
+            }
 
-    });
+        });
+    }
 });
 
 
@@ -264,11 +275,38 @@ $('.add-menu').on('click', '.reject-button', function(e) {
     });
 });
 
+$('#notification-menu').on('click', '.clear-button', function(e) {
+    e.preventDefault();
+    var prk = $("#"+e.target.id).attr('alt')
+    $.ajax({
+        type: 'GET',
+        url: '/clear_notification/',
+        data: {
+            pk: prk,
+        },
+        success: function(data) {
+            $("#notif-"+prk).remove('');
+            if (data[0] == 0) {
+                $("#notification_request_bubble").html('');
+                $("#notifs").html('<li><a class="navbar-li">No notifications!</a></li>');
+            } else {
+                $("#notification_request_count").text(data[0]);
+            }
+        }
+
+    });
+});
+
+
+
+
+
+
 
 $('#group-detail').on('click', '.request_membership_in_group', function(e) {
     e.preventDefault();
     console.log('user requesting group');
-    var prk = $("#"+e.target.id).attr('alt')
+    var prk = $('#group_pk').attr('alt')
     $.ajax({
         type: 'GET',
         url: '/request_membership_in_group/',
@@ -286,7 +324,7 @@ $('#group-detail').on('click', '.request_membership_in_group', function(e) {
 $('#group-detail').on('click', '.cancel_request_membership_in_group', function(e) {
     e.preventDefault();
     console.log('user cancelling request to group');
-    var prk = $("#"+e.target.id).attr('alt')
+    var prk = $('#group_pk').attr('alt')
     $.ajax({
         type: 'GET',
         url: '/cancel_request_membership_in_group/',
@@ -305,7 +343,7 @@ $('#group-detail').on('click', '.cancel_request_membership_in_group', function(e
 $('#group-detail').on('click', '.accept_invitation_from_group', function(e) {
     e.preventDefault();
     console.log('accept to join group');
-    var prk = $("#"+e.target.id).attr('alt')
+    var prk = $('#group_pk').attr('alt')
     $.ajax({
         type: 'GET',
         url: '/group_invitation_accepted/',
@@ -324,17 +362,18 @@ $('#group-detail').on('click', '.accept_invitation_from_group', function(e) {
 $('#group-detail').on('click', '.reject_invitation_from_group', function(e) {
     e.preventDefault();
     console.log('reject group invitation');
-
-    var prk = $("#"+e.target.id).attr('alt')
+    var person_pk = $('#'+e.target.id).attr('alt');
+    var group_pk = $('#group_pk').attr('alt');
     $.ajax({
         type: 'GET',
         url: '/reject_invitation_from_group/',
         data: {
-            pk: prk,
+            group_pk: group_pk,
+            person_pk: person_pk,
         },
         success: function(data) {
-            $("#group_request_section-"+prk).html('');
-            $("#group_request_section-"+prk).html('<a id="request-add-button-' + prk + '" class="btn btn-primary request_membership_in_group" href = "#" alt="' + prk + '">Request to join ' + data[0] + '</a>');
+            $("#group_request_section-"+group_pk).html('');
+            $("#group_request_section-"+group_pk).html('<h4 class="red"> You declined joining '+ data[0]+'...</h4>');
         }
     });
 });
@@ -342,37 +381,82 @@ $('#group-detail').on('click', '.reject_invitation_from_group', function(e) {
 
 $('#group-detail').on('click', '.accept_request_from_user', function(e) {
     e.preventDefault();
-    console.log('accept user into group');
+    console.log('accept user into this group');
+    var prk = $('#'+e.target.id).attr('alt');
+    $.ajax({
+        type: 'GET',
+        url: '/group_invitation_accepted/',
+        data: {
+            group_pk: $('#group_pk').attr('alt'),
+            person_pk: prk,
+        },
+        success: function(data) {
+            $("#accept-request-"+prk).html('');
+            $("#accept-request-"+prk).html('<h5 class="green">' + data[1] + ' is now a member of ' + data[0] + '!</h5>');
+        }
+    });
 });
 
 
 $('#group-detail').on('click', '.reject_request_from_user', function(e) {
     e.preventDefault();
     console.log('reject user from joining group');
+    var prk = $('#'+e.target.id).attr('alt');
+    $.ajax({
+        type: 'GET',
+        url: '/reject_invitation_from_group/',
+        data: {
+            group_pk: $('#group_pk').attr('alt'),
+            person_pk: prk,
+        },
+        success: function(data) {
+            $("#accept_request-"+prk).html('');
+            $("#accept-request-"+prk).html('<h5 class="red">You rejected ' + data[1] + ' from ' + data[0] + '...</h5>');
+        }
+    });
+
 });
 
 
 $('#group-detail').on('click', '.leave_group', function(e) {
     e.preventDefault();
     console.log('leave a group');
-    var prk = $("#"+e.target.id).attr('alt')
-    $.ajax({
-        type: 'GET',
-        url: '/leave_group/',
-        data: {
-            pk: prk,
-        },
-        success: function(data) {
-            $("#membership").html('');
-            $("#adminship").html('');
-            $("#membership").html('<h3 class="red">You left ' + data[0] + '...</h3>');
-        }
-    });
+    var confirm = window.confirm("You're about to leave " + e.target.id + ". Are you okay with that?")
+    if(confirm) {
+        var prk = $('#group_pk').attr('alt')
+        $.ajax({
+            type: 'GET',
+            url: '/leave_group/',
+            data: {
+                pk: prk,
+            },
+            success: function(data) {
+                $("#membership").html('');
+                $("#adminship").html('');
+                $("#membership").html('<h3 class="red">You left ' + data[0] + '...</h3>');
+            }
+        });
+    }
 });
 
 
+$('.delete-button').on("click", function(e) {
+    e.preventDefault();
+    var confirm = window.confirm("You're about to delete " + e.target.id + ". Are you okay with that?")
+    if(confirm) {
+        window.location = e.target.href
+    }
+});
 
-
+$('.reply-link').on('click', function(event) {
+    event.preventDefault();
+    $('#reply-pk').val($(this).attr('alt'));
+    $("#comments").children().removeClass('reply-target');
+    $('#'+$(this).attr('alt')).addClass('reply-target');
+    console.log($('#reply-pk').val());
+    console.log('#'+$(this).attr('alt')+"author");
+    $('#replying-to').text(" -- Replying to "+$('#'+$(this).attr('alt')+"author").text());
+});
 
 $('.dropdown').on('hide.bs.dropdown', function(e) {
     return false;

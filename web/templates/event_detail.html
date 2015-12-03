@@ -19,14 +19,14 @@
                     <h4>From {{ event.time_starting }} to
                     {{ event.time_ending }}</h4>
                     <h6>Posted at {{ event.date_posted }}</h6>
-                    {% if event.people_coming.all|length == 0 %}
-                    <h3>{{ event.people_coming.all|length }}  showing up: </h3>
-                    {% elif event.people_coming.all|length == 1 %}
-                    <h3>1 person showing up: </h3>
+                    {% if event.people_coming.count == 0 %}
+                        <h3>{{ event.people_coming.count }}  showing up: </h3>
+                    {% elif event.people_coming.count == 1 %}
+                        <h3>1 person showing up: </h3>
                     {% else %}
-                    <h3>{{ event.people_coming.all|length }} people showing up: </h3>
+                        <h3>{{ event.people_coming.count }} people showing up: </h3>
                     {% endif %}
-                    {% if event.people_coming.all|length > 0 %}
+                    {% if event.people_coming.count > 0 %}
                         {% for person in event.people_coming.all %}
                             <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}"><img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}"></a>{% if not forloop.last %}, {% endif %}
                         {% endfor %}
@@ -34,9 +34,9 @@
                         <h5>No one has confirmed yet!</h5>
                     {% endif %}
                     <h3>People who for sure can't make it: </h3>
-                    {% if event.people_not_coming.all|length > 0 %}
+                    {% if event.people_not_coming.count > 0 %}
                         {% for person in event.people_not_coming.all %}
-                            <a href="{% url 'profile_detail_view' person.pk %}">{{ person }}</a>{% if not forloop.last %}, {% endif %}
+                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}"><img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}"></a>{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     {% else %}
                         <h5>No one has turned us down yet!</h5>
@@ -64,10 +64,62 @@
                     <br>
                     {% if request.user.profile in event.host.all %}
                     <div style="float:left;">                    
-                        <a class="btn btn-primary" href="{% url 'event_update_view' event.pk %}">Edit your event</a>&nbsp;&nbsp;<a class="btn btn-danger" href="{% url 'event_delete_view' event.pk %}">Delete this event</a>
+                        <a class="btn btn-primary" href="{% url 'event_update_view' event.pk %}">Edit your event</a>&nbsp;&nbsp;<a class="btn btn-danger delete-button" href="{% url 'event_delete_view' event.pk %}" id="{{ event }}">Delete this event</a>
                     </div>
 
                     {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-10 col-sm-offset-1">
+                <h3>Comments</h3>
+                <div id="comments">
+                    {% for comment in event.comment_set.all %}
+                        {% if not comment.comment_in_response_to %}
+                        <div class="comment event-comment" id="{{comment.id}}">
+                        <strong id="{{comment.id}}author">{{comment.author}}</strong>
+
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+                        <small>{{ comment.date_posted }}
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+                        <a href="#comment-form" alt="{{ comment.pk }}" class="reply-link">Reply</a>
+                        {% if request.user.profile == comment.author %}
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="delete-button" id="your comment" href="{% url 'comment_delete_view' comment.pk %}"><i class='fa fa-times'></i>&nbsp;&nbsp;&nbsp;Delete your comment</a>
+                        {% endif %}
+                        </small>
+                        <p>
+                            {{ comment.message }}
+                        </p>
+
+                        </div>
+                        {% if comment.replies %}
+                            {% for child in comment.replies.all %}
+                                <div class="comment event-comment-reply">
+                                    <strong>{{child.author}}</strong>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <small>{{ child.date_posted }}
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    {% if request.user.profile == child.author %}
+                                    <a class="delete-button" id="your comment" href="{% url 'comment_delete_view' child.pk %}"><i class='fa fa-times'></i>&nbsp;&nbsp;&nbsp;Delete your comment</a>{% endif %}</small><br>
+                                    <p>{{ child.message }}</p>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    <br>
+                    <form action="{% url 'event_detail_view' event.pk %}" method="POST" id='comment-form'>
+                        {% csrf_token %}
+                        {{form.message.label}}<strong id="replying-to"></strong><br>
+                        {{form.message}}
+                        <input type="text" class="hidden" value='' name="reply-pk" id='reply-pk'>
+                        <br>
+                        <input class="form-control" type="submit" value="Comment">
+                    </form>
+                    <br>
+                </div>
             </div>
         </div>
     </div>

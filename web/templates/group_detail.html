@@ -1,15 +1,18 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 
-{% block refresh %}<meta http-equiv="refresh" content="120">{% endblock %}
+{% block refresh %}<meta http-equiv="refresh" content="120">
+<link rel="stylesheet" type="text/css" href="{% static 'css/popup.css' %}">{% endblock %}
 
 {% block title %}{{ group }}{% endblock title %}
 
 {% block body %}
+
 <div class="container">
     <div class="row">
         <h1 class="text-center">{{ group.name }}</h1>
         <div id="group-detail">
-            <div class="col-md-6">
+            <div class="col-sm-6">
                 <br>    
                 <br>    
                 <h3>Members:</h3>
@@ -28,14 +31,14 @@
                         {% endif %}
                         <br>
                         <br>
-                        <a class="btn btn-default" href="#">Add friends to {{ group }}</a>
-                        {% if not is_admin or group.admin.all|length != 1 %}
-                        <a id="delete-friend-button-{{ group.pk }}" class="btn btn-danger leave_group" href = "#" alt='{{ group.pk }}'>Leave {{ group }}</a></div>
+                        <a class="btn btn-default popup" href="/ajax/friends/?group_pk={{ group.pk }}">Add friends to {{ group }}</a>
+                        {% if not is_admin or group.admin.count != 1 %}
+                        <a id="{{ group.name }}" class="btn btn-danger leave_group" href = "#">Leave {{ group }}</a></div>
                         {% endif %}
                         <br><br>
-                        {% if group.member_requests.all %}
+                        {% if group.invited_people.exists %}
                             <h4>People invited to join {{ group }}:</h4>
-                            {% for potential in group.member_requests.all %}
+                            {% for potential in group.invited_people.all %}
                                 <a href="{% url 'profile_detail_view' potential.pk %}">{{ potential }}</a>{% if not forloop.last %}, {% endif %}
                             {% endfor %}
                         {% endif %}
@@ -43,13 +46,13 @@
                     {% else %}
                         <div class="group_request_section" id="group_request_section-{{ group.pk }}">
                             {% if group_requested_by_member %}
-                                <span class="btn btn-default" alt='{{ group.pk }}'>{{ group }} requested</span>
-                                <a id="cancel-request-{{ group.pk }}" class="btn btn-warning cancel_request_membership_in_group" href = "#" alt='{{ group.pk }}'>Cancel request</a>
+                                <span class="btn btn-default">{{ group }} requested</span>
+                                <a id="cancel-request-{{ group.pk }}" class="btn btn-warning cancel_request_membership_in_group" href = "#">Cancel request</a>
                             {% elif member_requested_by_group %}
-                                <a id="addition-{{ group.pk }}" class="btn btn-success accept_invitation_from_group" href = "#" alt='{{ group.pk }}'>Join {{ group }}</a>
-                                <a id="rejection-{{ group.pk }}" class="btn btn-danger reject_invitation_from_group" href = "#" alt='{{ group.pk }}'>Decline joining {{ group }}</a>
+                                <a id="addition-{{ group.pk }}" class="btn btn-success accept_invitation_from_group" href = "#">Join {{ group }}</a>
+                                <a id="rejection-{{ group.pk }}" class="btn btn-danger reject_invitation_from_group" href = "#" alt='{{ request.user.profile.pk }}'>Decline joining {{ group }}</a>
                             {% else %}
-                                <a id="request-add-button-{{ group.pk }}" class="btn btn-primary request_membership_in_group" href = "#" alt='{{ group.pk }}'>Request to join {{ group }}</a>
+                                <a id="request-add-button-{{ group.pk }}" class="btn btn-primary request_membership_in_group" href = "#">Request to join {{ group }}</a>
                             {% endif %}
                         </div>
                     {% endif %}
@@ -63,21 +66,23 @@
                 
             </div>
             </div>
-            <div class="col-md-5 col-md-offset-1" id="group-detail">
+            <div class="col-sm-5 col-sm-offset-1">
                 {% if is_admin %}
                 <div id="adminship">
                 <br>
                 <h3>You're an admin of {{ group }}!</h3>
                 <a class="btn btn-success" href="{% url 'group_update_view' group.pk %}">Edit {{ group }}</a>&nbsp;
-                <a class="btn btn-danger" href="{% url 'group_delete_view' group.pk %}">Delete {{ group }}...</a>
+                <a class="btn btn-danger delete-button" id="{{ group }}" href="{% url 'group_delete_view' group.pk %}">Delete {{ group }}...</a>
                 <br>
                 <br>
-                {% if group.requested_members.all %}
+                {% if group.member_requests.exists %}
                     <h4>People requesting to join {{ group }}</h4>
-                    {% for potential in group.requested_members.all %}
+                    {% for potential in group.member_requests.all %}
                         <h5>{{ potential }}</h5>
-                        <a id="addition-{{ group.pk }}" class="btn btn-success btn-sm accept_request_from_user" href = "#" alt='{{ group.pk }}'>Accept {{ potential.first_name }}</a>&nbsp;
-                        <a id="rejection-{{ group.pk }}" class="btn btn-danger btn-sm reject_request_from_user" href = "#" alt='{{ group.pk }}'>Reject {{ potential.first_name }}</a>
+                        <div id="accept-request-{{potential.pk}}">
+                            <a id="addition-{{ potential.pk }}" class="btn btn-success btn-sm accept_request_from_user" href = "#" alt='{{ potential.pk }}'>Accept {{ potential.first_name }}</a>&nbsp;
+                            <a id="rejection-{{ potential.pk }}" class="btn btn-danger btn-sm reject_request_from_user" href = "#" alt='{{ potential.pk }}'>Reject {{ potential.first_name }}</a>
+                        </div>
                         <br>
                     {% endfor %}
                 {% else %}
@@ -93,5 +98,6 @@
     <a href="{% url 'group_list_view' %}">Back to group list</a>
 </div>
 <input class="hidden" id="user_pk" alt="{{ request.user.profile.pk }}">
-
+<input class="hidden" id="group_pk" alt="{{ group.pk }}">
+<script src="{% static 'js/jquery.popup.min.js' %}"></script>
 {% endblock %}  

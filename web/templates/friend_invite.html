@@ -1,0 +1,45 @@
+<h3>Your Friends</h3>
+<div id="friends">
+{% if friends.exists %}
+    {% for friend in friends %}
+        <div class="event-detail" style="border-bottom: 1px solid #EEE; min-height: 40px;">
+            <img class="tiny-thumb" src="{{friend.picture.url}}">
+            <a href="{% url 'profile_detail_view' friend.pk %}" >{{ friend }}</a>
+            <strong id='div-invite-friend-{{friend.pk}}'>
+            {% if group not in friend.group_requests.all %}                
+                <a id='invite-friend-{{friend.pk}}' class="btn btn-sm btn-success invite-friend" style="float: right; margin-top: 5px;" href="#invite-to-group" alt='{{friend.pk}}'>Invite</a>
+            {% else %}
+                <h5 style="float: right;" class="green">Invited!</h5>
+            {% endif %}
+            </strong>
+        </div>
+    {% endfor %}
+{% else %}
+    <h5>You have no friends to invite!</h5>
+{% endif %}
+</div>
+<span id='group-pk' class='hidden'>{{group.pk}}</span>
+
+<script type="text/javascript">
+$('#friends').on('click', '.invite-friend', function(e) {
+    e.preventDefault();
+    console.log('group inviting friend');
+    console.log('#'+e.target.id)
+    var group_pk = $('#group-pk').text();
+    var person_pk = $('#'+e.target.id).attr('alt');
+    console.log(group_pk);
+    console.log(person_pk);
+    $.ajax({
+        type: 'GET',
+        url: '/invite_friend_to_group/',
+        data: {
+            group_pk: group_pk,
+            person_pk: person_pk,
+        },
+        success: function(data) {
+            $("#div-invite-friend-"+person_pk).html('');
+            $("#div-invite-friend-"+person_pk).html('<h5 style="float: right;" class="green">Invited!</h5>');
+        }
+    });
+});
+</script>

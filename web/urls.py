@@ -16,6 +16,9 @@ urlpatterns = [
     url(r'^group_invitation_accepted/$', 'web.views.group_invitation_accepted'),
     url(r'^reject_invitation_from_group/$', 'web.views.reject_invitation_from_group'),
     url(r'^leave_group/$', 'web.views.leave_group'),
+    url(r'^clear_notification/$', 'web.views.clear_notification'),
+    url(r'^ajax/friends/$', 'web.views.ajax_friends'),
+    url(r'^invite_friend_to_group/$', 'web.views.invite_friend_to_group'),
 
     # event urls
     url(r'^event_detail/(?P<pk>\d+)/$', 'web.views.event_detail_view', name='event_detail_view'),
@@ -52,5 +55,8 @@ urlpatterns = [
     url(r'^about/$', 'web.views.about_view', name='about_view'),
     url(r'^contact/$', 'web.views.contact_view', name='contact_view'),
     url(r'^thank-you/$', 'web.views.thank_you', name='thank_you'),
+
+    # comment urls
+    url(r'^delete/comment/(?P<pk>\d+)/$', 'web.views.comment_delete_view', name='comment_delete_view')
 
 ]

@@ -1,5 +1,4 @@
 import pytz
-from itertools import chain
 from operator import attrgetter
 from datetime import datetime
 
@@ -16,8 +15,9 @@ from django.core.mail import send_mail
 from django.db.models import Q
 
 
-from main.models import Event, Group, Profile
-from main.forms import SearchProfile, EventModelCreateForm, EventModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, UserLogin, ProfileModelCreateForm, ProfileModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, ContactForm
+from main.models import Event, Group, Profile, Comment, Notification
+from main.forms import SearchProfile, EventModelCreateForm, EventModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, UserLogin, ProfileModelCreateForm, ProfileModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, ContactForm, CommentForm
+
 
 
 #  Event Views!
@@ -29,6 +29,25 @@ def event_detail_view(request, pk):
     context = {}
     context['event'] = event
     context['friends'] = list(request.user.profile.friends.all())
+    form = CommentForm()
+    context['form'] = form
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            message = form.cleaned_data['message']
+            if message != "":
+                new_comment = Comment.objects.create(message=message)
+                new_comment.author = request.user.profile
+                new_comment.event = event
+
+                reply_pk = request.POST.get('reply-pk')
+                if reply_pk != '':
+                    parent = Comment.objects.get(pk=reply_pk)
+                    new_comment.comment_in_response_to = parent
+                    parent.save()
+
+                new_comment.save()
+                return redirect('event_detail_view', pk)
 
     return render_to_response('event_detail.html', context, context_instance=RequestContext(request))
 
@@ -38,7 +57,6 @@ def event_list_view(request):
         return redirect('new_user')
 
     context = {}
-    context['no_footer'] = True
     order = request.GET.get('order', '')
 
     friend_events = Event.objects.filter(Q(host=request.user.profile.friends.all(), public=True) | Q(groups=request.user.profile.groups_in.all()) | Q(people_who_shared=request.user.profile.friends.all()))
@@ -63,7 +81,7 @@ def event_list_view(request):
                 host.past_events.add(event)
             events.remove(event)
 
-    context['today'] = timezone.now()
+    context['today'] = datetime.now()
     context['events'] = events
     context['my_events'] = my_events
 
@@ -91,12 +109,14 @@ def event_create_view(request):
             timezone_inst = request.session.get('django_timezone')
             if not timezone_inst:
                 timezone_inst = 'UTC'
+                print "UTC'd"
             event = event.replace(tzinfo=pytz.timezone(timezone_inst))
-            print form.cleaned_data
+
+            print timezone.localtime(event)
             if event < timezone.now():
                 should_save = False
                 context['errors'] = "The event date was already in the past! Try again."
-                form = EventModelCreateForm(initial=new_event.__dict__)
+                form = EventModelCreateForm(initial=return_dict(form.data))
                 form.fields['groups'].queryset = groups
                 form.fields['host'].queryset = friends
                 context['form'] = form
@@ -104,7 +124,7 @@ def event_create_view(request):
             elif not new_event.public and len(form.cleaned_data['groups']) is 0:
                 should_save = False
                 context['errors'] = "An event must either be public, or have at least one group to be displayed in."
-                form = EventModelUpdateForm(initial=new_event.__dict__)
+                form = EventModelCreateForm(initial=return_dict(form.data))
                 form.fields['host'].queryset = friends
                 form.fields['groups'].queryset = groups
                 context['form'] = form
@@ -119,15 +139,17 @@ def event_create_view(request):
         else:
             print form.errors
             context['errors'] = form.errors
-            form_dict = {}
-            for key in form.data:
-                form_dict[key] = form.data[key]
-            form = EventModelCreateForm(initial=form_dict)
+            form = EventModelCreateForm(initial=return_dict(form.data))
             form.fields['groups'].queryset = groups
             form.fields['host'].queryset = friends
             context['form'] = form
     return render_to_response('event_create.html', context, context_instance=RequestContext(request))
 
+def return_dict(dictionary):
+    form_dict = {}
+    for key in dictionary:
+        form_dict[key] = dictionary[key]
+    return form_dict
 
 @login_required
 def event_update_view(request, pk):
@@ -139,6 +161,13 @@ def event_update_view(request, pk):
     context['event'] = event
 
     form = EventModelUpdateForm(request.POST or None, instance=event)
+    print form.fields['time_starting'].initial
+    form.fields['time_starting'].initial = event.time_starting
+    form.fields['time_ending'].initial = event.time_ending
+    print form.fields['time_starting'].initial
+    print form.fields['time_ending'].initial
+
+
     friends = request.user.profile.friends.all()
     groups = request.user.profile.groups_in.all()
 
@@ -147,49 +176,46 @@ def event_update_view(request, pk):
     context['form'] = form
 
     if request.method == 'POST':
-        form = EventModelUpdateForm(request.POST, request.FILES, instance=event)
         if form.is_valid():
-            form.save()
-
-        if form.is_valid():
-            print form.cleaned_data['host']
             should_save = True
             new_event = form.save(commit=False)
             event = datetime.combine(new_event.date_happening, new_event.time_starting)
             timezone_inst = request.session.get('django_timezone')
             if not timezone_inst:
                 timezone_inst = 'UTC'
+                print "UTC'd"
             event = event.replace(tzinfo=pytz.timezone(timezone_inst))
+            print event
+            print timezone.now()
             if event < timezone.now():
                 should_save = False
                 context['errors'] = "The event date was already in the past! Try again."
-                form = EventModelUpdateForm(initial=new_event.__dict__)
-                form.fields['host'].queryset = friends
+                form = EventModelCreateForm(initial=return_dict(form.data))
                 form.fields['groups'].queryset = groups
+                form.fields['host'].queryset = friends
                 context['form'] = form
-            if not new_event.public and len(form.cleaned_data['groups']) is 0:
+
+            elif not new_event.public and len(form.cleaned_data['groups']) is 0:
                 should_save = False
-                context['errors'] = "A private event must have at least one group to be displayed in."
-                form = EventModelUpdateForm(initial=new_event.__dict__)
+                context['errors'] = "An event must either be public, or have at least one group to be displayed in."
+                form = EventModelCreateForm(initial=return_dict(form.data))
                 form.fields['host'].queryset = friends
                 form.fields['groups'].queryset = groups
                 context['form'] = form
-                
+
             if should_save:
                 new_event.save()
                 form.save_m2m()
                 new_event.host.add(request.user.profile)
                 for host in new_event.host.all():
                     new_event.people_coming.add(host)
-                context['saved'] = '%s saved!' % new_event.name
-                return redirect('event_detail_view', new_event.pk)
+                if request.POST.get('_finish'):
+                    return redirect('event_detail_view', pk)
+
         else:
             print form.errors
             context['errors'] = form.errors
-            form_dict = {}
-            for key in form.data:
-                form_dict[key] = form.data[key]
-            form = EventModelCreateForm(initial=form_dict)
+            form = EventModelCreateForm(initial=return_dict(form.data))
             form.fields['groups'].queryset = groups
             form.fields['host'].queryset = friends
             context['form'] = form
@@ -204,6 +230,16 @@ def event_delete_view(request, pk):
     Event.objects.get(pk=pk).delete()
 
     return redirect('event_list_view')
+
+
+# Comment Views!
+
+def comment_delete_view(request, pk):
+    comment = Comment.objects.get(pk=pk)
+    event_pk = comment.event.pk
+    comment.delete()
+
+    return redirect('event_detail_view', event_pk)
 
 
 # Group Views!
@@ -251,7 +287,7 @@ def group_event_list(request, slug):
     my_events = request.user.profile.events_hosted.filter(groups=group)
 
 
-    context['no_footer'] = True
+
     order = request.GET.get('order', '')
 
     if order:
@@ -287,8 +323,7 @@ def group_create_view(request):
 
     context = {} 
     form = GroupModelCreateForm()
-    friends = request.user.profile.friends.all()
-    form.fields['member_requests'].queryset = friends    
+    friends = request.user.profile.friends.all()    
     form.fields['admin'].queryset = friends    
     context['form'] = form
 
@@ -299,7 +334,7 @@ def group_create_view(request):
             new_group.save()
             form.save_m2m()
             for admin in new_group.admin.all():
-                new_group.member_requests.add(admin)
+                new_group.invited_people.add(admin)
             new_group.admin.add(request.user.profile)
             new_group.members.add(request.user.profile)
                 
@@ -320,12 +355,9 @@ def group_update_view(request, pk):
     context['group'] = group
 
     form = GroupModelUpdateForm(request.POST or None, instance=group)
-    group_members = group.members.all()
-
-    friends = request.user.profile.friends.all()
+    group_members = group.members.exclude(pk=request.user.profile.pk)
 
     form.fields['members'].queryset = group_members
-    form.fields['member_requests'].queryset = friends
     form.fields['admin'].queryset = group_members
     context['form'] = form
 
@@ -334,14 +366,16 @@ def group_update_view(request, pk):
         if form.is_valid():
             new_group = form.save(commit=False)
             new_group.save()
-            form.save_m2m()
             for admin in new_group.admin.all():
-                new_group.member_requests.add(admin)
+                new_group.invited_people.add(admin)
+            form.save_m2m()
             new_group.admin.add(request.user.profile)
             new_group.members.add(request.user.profile)
 
             context['saved'] = '%s saved!' % new_group.name
 
+            if request.POST.get('_finish'):
+                return redirect('group_detail_view', slugify(new_group.name))
         else:
             context['errors'] = form.errors
 
@@ -455,6 +489,8 @@ def profile_update_view(request, pk):
 
             context['saved'] = 'Your profile has been saved!'
 
+            if request.POST.get('_finish'):
+                return redirect('profile_detail_view', pk)
         else:
             context['errors'] = form.errors
 
@@ -556,7 +592,14 @@ def contact_view(request):
 def accept_request(request):
     pk = request.GET.get('pk')
     prof = Profile.objects.get(pk=pk)
-    print prof
+
+    new_notif = Notification.objects.create()
+    new_notif.user = prof
+    new_notif.notification_type = "Friend Request"
+    new_notif.message = "<strong>%s</strong> accepted your friend request!" % request.user.profile.first_name
+    new_notif.sender_pk = request.user.profile.pk
+    new_notif.save()
+
     prof.friends.add(request.user.profile)
     request.user.profile.friends.add(prof)
 
@@ -565,7 +608,7 @@ def accept_request(request):
     prof_list = []
 
     prof_list.append(prof.user.first_name)
-    prof_list.append(len(request.user.profile.friend_requests.all()))
+    prof_list.append(request.user.profile.friend_requests.count())
 
     return JsonResponse(prof_list, safe=False)
 
@@ -580,7 +623,7 @@ def reject_request(request):
     prof_list = []
 
     prof_list.append(prof.user.first_name)
-    prof_list.append(len(request.user.profile.friend_requests.all()))
+    prof_list.append(request.user.profile.friend_requests.count())
 
     return JsonResponse(prof_list, safe=False)
 
@@ -707,6 +750,7 @@ def group_invitation_accepted(request):
 
     group_list = []
     group_list.append(group.name)
+    group_list.append(friend.first_name)
 
     return JsonResponse(group_list, safe=False)
 
@@ -738,7 +782,7 @@ def can_come(request):
             hosts += "%s, " % e
     date = "%s at %s" % (event.date_happening.strftime('%A, %b %-d'), event.time_starting.strftime('%-I:%M %p'))
     posted = "%s" % event.date_posted.isoformat(' ')
-    return JsonResponse([event.name, hosts, date, "People coming: %d" % len(event.people_coming.all()), host_list[0].picture.url, posted, event.description, "People not coming: %d" % len(event.people_not_coming.all())], safe=False)
+    return JsonResponse([event.name, hosts, date, "People coming: %d" % event.people_coming.count(), host_list[0].picture.url, posted, event.description, "People not coming: %d" % event.people_not_coming.count()], safe=False)
 
 
 def cannot_come(request):
@@ -754,7 +798,7 @@ def cannot_come(request):
         else:
             hosts += "%s, " % e.first_name
     date = "%s at %s" % (event.date_happening.strftime('%a, %b %-d'), event.time_starting.strftime('%-I:%M %p'))
-    return JsonResponse([event.name, hosts, date, len(event.people_coming.all()), host_list[0].picture.url], safe=False)
+    return JsonResponse([event.name, hosts, date, event.people_coming.count(), host_list[0].picture.url], safe=False)
 
 
 def cancel_decision(request):
@@ -771,7 +815,27 @@ def cancel_decision(request):
             hosts += "%s, " % e
     date = "%s at %s" % (event.date_happening.strftime('%A, %b %-d'), event.time_starting.strftime('%-I:%M %p'))
     posted = "%s" % event.date_posted.isoformat(' ')
-    return JsonResponse([event.name, hosts, date, len(event.people_coming.all()), host_list[0].picture.url, posted, event.description], safe=False)
+    return JsonResponse([event.name, hosts, date, event.people_coming.count(), host_list[0].picture.url, posted, event.description], safe=False)
+
+
+def clear_notification(request):
+    pk = request.GET.get('pk', '')
+    notif = Notification.objects.get(pk=pk)
+    notif.read = True
+    notif.save()
+    return JsonResponse([request.user.profile.unread_notifications().count(),], safe=False)
+
+
+def ajax_friends(request):
+    context = {}
+    pk = request.GET.get('group_pk')
+    group = Group.objects.get(pk=pk)
+    context['group'] = group
+    member_ids = group.members.all().values_list('pk', flat=True)
+    friends = request.user.profile.friends.exclude(pk__in=member_ids)
+    context['friends'] = friends
+
+    return render_to_response('friend_invite.html', context, context_instance=RequestContext(request))
 
 
 def slugify(string):

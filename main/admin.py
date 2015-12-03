@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Event, Profile, Group
+from .models import Event, Profile, Group, Comment
 
 
 class EventAdmin(admin.ModelAdmin):
@@ -28,6 +28,16 @@ class ProfileAdmin(admin.ModelAdmin):
     list_filter = ('user',)
     search_fields = ['user']
 
+
+class CommentAdmin(admin.ModelAdmin):
+    '''
+        Admin View for Comment
+    '''
+    list_display = ('author',)
+    list_filter = ('author',)
+    search_fields = ['author']
+
+admin.site.register(Comment, CommentAdmin)
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Event, EventAdmin)

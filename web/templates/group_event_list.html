@@ -49,8 +49,8 @@
                             <div class="row">
                                 <div class="col-sm-4">
                                     <h4>{{ event.date_happening|date:"l, M d" }} at {{ event.time_starting|time:"g:i A" }}</h4>
-                                    <h5>People coming: {{ event.people_coming.all|length}}</h5>
-                                    <h5>People coming: {{ event.people_not_coming.all|length}}</h5>
+                                    <h5>People coming: {{ event.people_coming.count}}</h5>
+                                    <h5>People coming: {{ event.people_not_coming.count}}</h5>
                                 </div>
                                 <div class="col-sm-8 text-right">
                                     <h3>{{ event.description }}</h3>
