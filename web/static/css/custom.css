@@ -135,7 +135,7 @@ body {
     height: 75%;
 }
 
-.main-feed, .main-event-feed {
+.main-feed, .main-events-going-to, .main-group-list {
     max-height: 300px;
     overflow: scroll;
 }

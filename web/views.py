@@ -972,7 +972,7 @@ def can_come(request):
         else:
             new_notif = Notification.objects.create(user=e)
             new_notif.notification_type = "Confirm can come to event"
-            new_notif.message = "%s is coming to %s, the event you're hosting." % (request.user.profile.first_name, event.name)
+            new_notif.message = '%s is coming to "%s", the event you\'re hosting.' % (request.user.profile.first_name, event.name)
             new_notif.sender_pk = event.pk
             new_notif.save()
         if count >= len(host_list)-1:

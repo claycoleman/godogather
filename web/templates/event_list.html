@@ -134,39 +134,36 @@
                 {% endif %}
             <div class="col-sm-3">
                 <br>
-                <a class="btn btn-primary popup" href="/ajax/facebook_friends/">Find your Facebook friends on Horizon</a>
+                <a class="btn btn-lg" href = "{% url 'event_create_view' %}" %}><i class='fa fa-plus-circle'></i> Create a new event</a>
+                <br>
+                <a class="btn btn-primary btn-sm popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;Find your Facebook friends on Horizon</a>
                 <br>
                 <h3>Events you're going to!</h3>
-                <a href = "{% url 'event_create_view' %}" %}><i class='fa fa-plus-circle'></i> Create a new event</a>
-                <div class="main-feed">
-                {% for event in request.user.profile.events_going_to.all|slice:"0:10" %}
+                <div class="main-events-going-to">
+                {% for event in request.user.profile.events_going_to.allg %}
                     <hr>
                     <h5>{{ event }}</h5>
                     <h6 style="color: darkgrey">Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h6>
                     <a class="btn btn-default" href="{% url 'event_detail_view' event.pk %}">More details...</a></br>
                 {% endfor %}
                 </div>
-                {% if my_events|length > 3 %}
+                <p class="text-center"><i class='fa fa-arrow-down'></i></p>
 
-                <h2 class="text-center" style="color: lightgray;"><i class='fa fa-arrow-down'></i></h2>
-                    
-                {% endif %}
                 <br>
                 <h3>Your groups!</h3>
-                <a href = "{% url 'event_create_view' %}" %}><i class='fa fa-plus-circle'></i> Create a new event</a>
-                <div class="main-feed">
-                {% for event in request.user.profile.events_going_to.all|slice:"0:10" %}
+                <div class="main-group-list">
+                {% for event in request.user.profile.groups_in.all|slice:"0:5" %}
                     <hr>
                     <h5>{{ event }}</h5>
                     <h6 style="color: darkgrey">Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h6>
                     <a class="btn btn-default" href="{% url 'event_detail_view' event.pk %}">More details...</a></br>
                 {% endfor %}
-                </div>
-                {% if my_events|length > 3 %}
+                </div>                
+                <p class="text-center"><i class='fa fa-arrow-down'></i></p>
+
 
                 <h5 class="text-center" style="color: lightgray;"><a href="{% url 'group_list_view' %}">See all your groups</a></h5>
                     
-                {% endif %}
             </div>
         </div>
     </div>

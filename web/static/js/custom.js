@@ -1,5 +1,7 @@
 $(function() {
     $(".main-event-feed").css({'max-height': (window.innerHeight-370)+'px', 'overflow': 'scroll'});
+    $(".main-events-going-to").css({'max-height': (window.innerHeight-430)*2/3+'px', 'overflow': 'scroll'});
+    $(".main-group-list").css({'max-height': (window.innerHeight-430)/4+'px', 'overflow': 'scroll'});
     $("div.main").css({'min-height': (window.innerHeight-155)+'px', 'overflow': 'scroll'});
     $("div.wrapper").css({'min-height': (window.innerHeight-155)+'px', 'overflow': 'scroll'});
     $(".main-feed").css({'max-height': (window.innerHeight/2)+'px', 'overflow': 'scroll'});
