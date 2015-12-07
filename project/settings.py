@@ -87,6 +87,8 @@ SOCIAL_AUTH_PIPELINE += (
 'web.pipelines.save_profile_picture',
 )
 
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['user_friends']
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 

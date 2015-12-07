@@ -1,6 +1,14 @@
+import os
+from location_picker import LocationField
+from datetime import datetime
+from icalendar import Calendar
+from icalendar import Event as CalEvent
+
 from django.db import models
 from django.contrib.auth.models import User
-from location_picker import LocationField
+from django.core.files.base import ContentFile
+
+
 
 
 class Event(models.Model):
@@ -18,9 +26,32 @@ class Event(models.Model):
     groups = models.ManyToManyField('Group', blank=True)
     public = models.BooleanField(default=False)
     shareable = models.BooleanField(default=True)
+    ics = models.FileField(upload_to="event_ics", null=True, blank=True)
 
     def __unicode__(self):
         return self.name
+
+    def create_apple_ics(self):
+        url_date_starting = datetime.combine(date=self.date_happening, time=self.time_starting).isoformat().replace('-', '').replace(':', '')
+        url_date_ending = datetime.combine(date=self.date_happening, time=self.time_ending).isoformat().replace('-', '').replace(':', '')
+
+        try:
+            os.remove(self.ics.file.name)
+        except:
+            pass
+
+        cal = Calendar()
+
+        app_event = CalEvent()
+        app_event['summary'] = self.name
+        app_event['location'] = self.location
+        app_event['uid'] = self.pk
+        app_event['dtstart'] = url_date_starting
+        app_event['dtend'] = url_date_ending
+        print app_event
+        cal.add_component(app_event)
+
+        self.ics.save('{0}.ics'.format(self.pk), ContentFile(cal.to_ical()))
 
     class Meta:
         ordering = ['date_happening']
@@ -34,7 +65,8 @@ class Profile(models.Model):
     bio = models.TextField(null=True, blank=True)
     picture = models.ImageField(upload_to="profile_pictures", null=True, blank=True)
     friends = models.ManyToManyField('Profile', blank=True, related_name="+")
-    shared_events = models.ManyToManyField('Event', blank=True, related_name="people_who_shared")
+    events_posted = models.ManyToManyField('Event', blank=True, related_name="people_who_posted_it")
+    shared_events = models.ManyToManyField('Event', blank=True, related_name="people_who_shared_it")
     group_requests = models.ManyToManyField('Group', blank=True, related_name="invited_people")
     friend_requests = models.ManyToManyField('Profile', blank=True, related_name="requested_friends")
     past_events = models.ManyToManyField('Event', blank=True, related_name="+")
@@ -71,6 +103,11 @@ class Group(models.Model):
     def __unicode__(self):
         return self.name
 
+    def admin_already_members(self):
+        if self.admin.exists():
+            return self.admin.filter(pk__in=self.members.all().values_list('pk', flat=True))
+        return []
+
 
 class Comment(models.Model):
     message = models.CharField(null=True, blank=True, max_length=255)
@@ -85,7 +122,7 @@ class Comment(models.Model):
 
     def __unicode__(self):
         if self.author and self.event:
-            return self.author + " about " + self.event
+            return "%s about %s" % (self.author, self.event)
         return "Generic comment"
     
 
@@ -95,10 +132,12 @@ class Notification(models.Model):
     sender_pk = models.CharField(null=True, blank=True, max_length=255)
     user = models.ForeignKey('Profile', null=True, blank=True, related_name='notifications')
     read = models.BooleanField(default=False)
+    date_notified = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = "Notification"
         verbose_name_plural = "Notifications"
+        ordering = ['-date_notified']
 
     def __unicode__(self):
         return self.message

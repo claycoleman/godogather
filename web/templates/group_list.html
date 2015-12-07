@@ -11,24 +11,24 @@
             <h1 class="bold">Your Groups</h1>
             {% if groups %}
                 {% for group in groups %}
-                    <a href="{% url 'group_detail_view' group.name|slugify %}">{{ group }}</a></br>
+                    <a href="{% url 'group_detail_view' group.pk %}">{{ group }}</a></br>
                 {% endfor %}
                 <br><br>
             {% else %}   
                 <h3>You're not in any groups! Create a new one?</h3>
             {% endif %}
-            {% if group_requests %}
+            {% if requested_groups %}
                 <strong><h4>Groups you've requested to join:</h4></strong>
-                {% for group in group_requests %}
+                {% for group in requested_groups %}
                     {{ group }}<br>
                 {% endfor %}
                 <br>
                 <br>
             {% endif %}
             
-            {% if requested_groups %}
+            {% if group_requests %}
                 <strong><h4>Groups that've added you to join:</h4></strong>
-                {% for group in requested_groups %}
+                {% for group in group_requests %}
                     {{ group }}<br>
                 {% endfor %}
                 <br><br>

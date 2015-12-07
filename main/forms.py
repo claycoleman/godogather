@@ -66,13 +66,11 @@ class GroupModelCreateForm(forms.ModelForm):
 class GroupModelUpdateForm(forms.ModelForm):  
     class Meta:
         model = Group
-        exclude = ['member_requests']
+        exclude = ['member_requests', 'admin']
 
     def __init__(self, *args, **kwargs):
         super(GroupModelUpdateForm, self).__init__(*args, **kwargs)
         self.fields["members"].widget = forms.CheckboxSelectMultiple()
-
-        self.fields["admin"].widget = forms.CheckboxSelectMultiple()
 
 
 
@@ -118,7 +116,7 @@ class ProfileModelCreateForm(forms.ModelForm):
 class ProfileModelUpdateForm(forms.ModelForm):  
     class Meta:
         model = Profile
-        exclude = ['user', 'past_events', 'friends', 'friend_requests']
+        exclude = ['user', 'past_events', 'friends', 'friend_requests', 'events_posted', 'shared_events', 'group_requests']
 
 
 class ContactForm(forms.Form):

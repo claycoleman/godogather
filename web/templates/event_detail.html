@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 
-{% block refresh %}<meta http-equiv="refresh" content="120">{% endblock %}
+{% block refresh %}<meta http-equiv="refresh" content="120"><link rel="stylesheet" type="text/css" href="{% static 'css/popup.css' %}">{% endblock %}
+
 
 
 {% block title %}{{ event }} Details{% endblock title %}
@@ -28,7 +30,9 @@
                     {% endif %}
                     {% if event.people_coming.count > 0 %}
                         {% for person in event.people_coming.all %}
-                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}"><img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}"></a>{% if not forloop.last %}, {% endif %}
+                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}">
+                            <img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}">
+                            </a>
                         {% endfor %}
                     {% else %}
                         <h5>No one has confirmed yet!</h5>
@@ -36,17 +40,30 @@
                     <h3>People who for sure can't make it: </h3>
                     {% if event.people_not_coming.count > 0 %}
                         {% for person in event.people_not_coming.all %}
-                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}"><img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}"></a>{% if not forloop.last %}, {% endif %}
+                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}">
+                            <img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}">
+                            </a>
                         {% endfor %}
                     {% else %}
                         <h5>No one has turned us down yet!</h5>
                     {% endif %}
-
                     <br>
+                    <div id="sharing">
+                        {% if event.shareable and request.user.profile not in event.host.all %}
+                            {% if event not in request.user.profile.events_posted.all %}
+                                <a class="btn btn-success" href="#" alt='{{event.pk}}' id='share-event'>Share this event to your feed!</a>
+                            {% else %}
+                                <h4 class="green">You have shared {{ event.name }} to your feed.</h4>&nbsp;&nbsp;<a class="btn btn-danger" href="#" alt="{{ event.pk }}" id="share-event">Unshare</a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <br id="comment-section">
                     <br>
                     <a href="{% url 'event_list_view' %}">Back to event list</a>
             </div>
             <div class="col-sm-6">
+                    <h3>Share: <a class="btn btn-primary" target="_blank" href='{{share_url}}'><i class='fa fa-facebook'></i></a>&nbsp;&nbsp;<a class="btn btn-danger" target="_blank" href='{{google_cal}}'><i class='fa fa-google'></i>&nbsp;&nbsp;Calendar</a>&nbsp;&nbsp;<a class="btn btn-info" target="_blank" href='{{apple_cal}}'><i class='fa fa-apple'></i>&nbsp;&nbsp;Calendar</a></h3>
                     <h2>{{ event.location }}</h2>
                     <iframe width="100%" height="300" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;q={{event.test_location}}&amp;spn=56.506174,79.013672&amp;t=m&amp;z=16&amp;output=embed"></iframe>
                     <!--<div style="width: 100%; overflow: hidden; height: 300px;">
@@ -57,7 +74,7 @@
                     {% if event.groups.all %}
                         <h4>Groups:</h4>
                         {% for group in event.groups.all %}
-                            <a href="{% url 'group_detail_view' group.name|slugify %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}
+                            <a href="{% url 'group_detail_view' group.pk %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     {% endif %}
                     <br>
@@ -70,18 +87,21 @@
                     {% endif %}
             </div>
         </div>
-        <div class="row">
+        <br>
+        <div class="row" style="background: rgba(0, 0, 0, 0.1);">
             <div class="col-sm-10 col-sm-offset-1">
-                <h3>Comments</h3>
                 <div id="comments">
-                    {% for comment in event.comment_set.all %}
+                    <h3>Comments</h3>
+
+                    {% for comment in comments %}
                         {% if not comment.comment_in_response_to %}
-                        <div class="comment event-comment" id="{{comment.id}}">
+                        <div class="comment event-comment">
+                        <div id="{{comment.id}}">
                         <strong id="{{comment.id}}author">{{comment.author}}</strong>
 
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-                        <small>{{ comment.date_posted }}
+                        <small><span class='date-posted'>{{ comment.date_posted|date:'c' }}</span>
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
                         <a href="#comment-form" alt="{{ comment.pk }}" class="reply-link">Reply</a>
@@ -92,14 +112,14 @@
                         <p>
                             {{ comment.message }}
                         </p>
-
+                        </div>
                         </div>
                         {% if comment.replies %}
                             {% for child in comment.replies.all %}
                                 <div class="comment event-comment-reply">
                                     <strong>{{child.author}}</strong>
                                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                    <small>{{ child.date_posted }}
+                                    <small><span class='date-posted'>{{ child.date_posted|date:'c' }}</span>
                                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                     {% if request.user.profile == child.author %}
                                     <a class="delete-button" id="your comment" href="{% url 'comment_delete_view' child.pk %}"><i class='fa fa-times'></i>&nbsp;&nbsp;&nbsp;Delete your comment</a>{% endif %}</small><br>
@@ -118,12 +138,14 @@
                         <br>
                         <input class="form-control" type="submit" value="Comment">
                     </form>
-                    <br>
+                    
                 </div>
             </div>
         </div>
+        <br>
     </div>
 </div>
 
+<script src="{% static 'js/jquery.popup.min.js' %}"></script>
 
 {% endblock %}  

@@ -90,6 +90,11 @@ li.hz > a {
     padding: 3px 10px;
 }
 
+.unread {
+    background-color: rgba(39, 163, 156, 0.3);
+
+}
+
 #footer {
   background-color: rgb(39, 163, 156);
   width: 100%;
@@ -142,7 +147,7 @@ body {
     margin-bottom: 85px;
 }
 
-.overflow li, .errors * {
+.overflow li, .no_bullet, .errors * {
     list-style-type: none;
 }
 
@@ -186,25 +191,41 @@ span.glyphicon-fullscreen {
 }
 
 div.event-comment {
-    border-color: rgba(100,100,100, 0.2);
-    border-style: solid;
-    border-width:1px;
+    padding-left: 10px;
+    padding-top: 10px;
+  height: 100%;
+
+}
+
+div#comments {
+    padding: 10px;
 }
 
 div.comment:nth-child(even) {
     background: #EEE;
+    border-top:1px solid rgba(255,255,255, 0.2);
+    border-bottom:1px solid rgba(255,255,255, 0.2);
 }
 div.comment:nth-child(odd) {
     background: #FFF;
+
+    border-top:1px solid rgba(100,100,100, 0.2);
+    border-bottom:1px solid rgba(100,100,100, 0.2);
 }
 
-.reply-target {
-  background-color: lightgray;
+
+div.reply-target {
+  background: rgba(39, 163, 156, 0.3);
+  height: 100%;
+  width: 100%;
 }
+
 
 .event-comment-reply {
-    margin-left: 50px;
-    padding-left: 10px;
+    padding-left: 60px;
+    padding-top: 10px;
+    height: 100%;
+    
 }
 
 .navbar-li {
@@ -215,4 +236,8 @@ div.comment:nth-child(odd) {
     line-height: 1.428571429;
     color: #333333;
     white-space: nowrap;
+}
+
+a.tooltipped:hover {
+    text-decoration: none;
 }

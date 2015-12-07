@@ -1,0 +1,40 @@
+<h3>Your Facebook Friends on Horizon</h3>
+<div id="friends">
+{% if friends.exists %}
+    {% for friend in friends %}
+        <div class="event-detail" style="border-bottom: 1px solid #EEE; min-height: 40px;">
+            <img class="tiny-thumb" src="{{friend.picture.url}}">
+            <a href="{% url 'profile_detail_view' friend.pk %}" >{{ friend }}</a>
+            <strong id='div-invite-friend-{{friend.pk}}'>
+            {% if group not in friend.group_requests.all %}                
+                <a id='invite-friend-{{friend.pk}}' class="btn btn-sm btn-success add-friend" style="float: right; margin-top: 5px;" href="#invite-to-group" alt='{{friend.pk}}'>Add!</a>
+            {% else %}
+                <h5 style="float: right;" class="green">Added!</h5>
+            {% endif %}
+            </strong>
+        </div>
+    {% endfor %}
+{% else %}
+    <h5>You have no friends to add!</h5>
+{% endif %}
+</div>
+
+<script type="text/javascript">
+$('#friends').on('click', '.add-friend', function(e) {
+    e.preventDefault();
+    console.log('user adding facebook friend');
+    console.log('#'+e.target.id)
+    var person_pk = $('#'+e.target.id).attr('alt');
+    $.ajax({
+        type: 'GET',
+        url: '/request_friendship/',
+        data: {
+            pk: person_pk,
+        },
+        success: function(data) {
+            $("#div-invite-friend-"+person_pk).html('');
+            $("#div-invite-friend-"+person_pk).html('<h5 style="float: right;" class="green">Added!</h5>');
+        }
+    });
+});
+</script>

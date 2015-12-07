@@ -26,7 +26,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{% url 'event_list_view' %}"><strong>GoDogether</strong></a>
+          <a class="navbar-brand" href="{% url 'event_list_view' %}"><strong>Bridged</strong></a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -57,16 +57,22 @@
               </ul>
             </li>
             <li class="dropdown {% block groups-active %}{% endblock %}">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-users fa-lg"></i><span class="caret"></span></a>
-              <ul class="dropdown-menu">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-users fa-lg"></i><div id="group_request_bubble">{% if request.user.profile.group_requests.exists %} <div id='group_request_noti' class="noti_bubble">{{ request.user.profile.group_requests.all | length}}</div>{% endif %}</div></a>
+              <ul class="dropdown-menu group-add-menu">
                 <li><a><b>Groups</b></a></li>
                 <li role="separator" class="divider"></li>
-                {% for group in request.user.profile.groups_in.all|slice:"0:5" %}
-                <li><a href="{% url 'group_event_list' group.name|slugify %}">{{ group }}</a></li>
-                {% if forloop.last %}
+                {% if request.user.profile.group_requests.exists %} 
+                  {% for group in request.user.profile.group_requests.all|slice:"0:5" %}
+                          <li class="hz" id='group-li-{{ group.pk }}'>
+                            <a href='#' id="rejection-group-{{ group.pk }}" class="reject-button" alt="{{ group.pk }}"><i class="fa fa-times red" id="times-{{group.pk}}" alt="{{ group.pk }}"></i></a>
+                            <a href="{% url 'profile_detail_view' group.pk %}">{{ group }}</a>
+                            <a href='#' id="addition-group-{{ group.pk }}" class="add-button" alt="{{ group.pk }}"><i class="fa fa-check green" id="check-{{group.pk}}" alt="{{ group.pk }}"></i></a>
+                          </li>
+                      {% endfor %}
+                  {% else %}
+                    <li><a>No group requests!</a></li>
+                  {% endif %}
                 <li role="separator" class="divider"></li>
-                {% endif %}
-                {% endfor %}
                 <li><a href="{% url 'group_list_view' %}">See all of your groups</a></li>
                 <!--<li role="separator" class="divider"></li>
                 <li><a href="#">Separated link</a></li>-->
@@ -74,17 +80,22 @@
             </li>
             <li class="dropdown icon_list">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-bell fa-lg"></i><div id="notification_request_bubble">{% if request.user.profile.unread_notifications.exists %} <div id='notification_request_count' class="noti_bubble">{{ request.user.profile.unread_notifications | length}}</div>{% endif %}</div></a>
-                <ul id="notification-menu" class="dropdown-menu">
+                <ul id="notification-menu" class="dropdown-menu notification-menu">
                             <li><a href="{% url 'full_notifications' %}"><b>Notifications</b></a></li>
                             <li role="separator" class="divider"></li>
                     {% if request.user.profile.unread_notifications.exists %} 
 
                         {% for notification in request.user.profile.unread_notifications %}
-                            <li class="hz" id='notif-{{ notification.pk }}'>
+                            <li class="hz" id='notif-{{ notification.pk }}' alt="{{notification.pk}}">
                               {% if notification.notification_type == 'Friend Request' %}
-                              <a href="{% url 'profile_detail_view' notification.sender_pk %}">{{ notification.message|safe }}</a>
-                              <a href='#' class="clear-button" alt="{{ notification.pk }}"><i class="fa fa-check green" id="clear-check-{{notification.pk}}" alt="{{ notification.pk }}"></i></a>
-                              {% elif notification.notification_type == 'Group Request' %}
+                              <a class="clear-button" id="clear-link-{{notification.pk}}" href="{% url 'profile_detail_view' notification.sender_pk %}" alt="{{ notification.pk }}">{{ notification.message|safe }}</a>
+                              <a class="clear-button" id="fun" alt="{{ notification.pk }}"><i class="fa fa-check green" id="clear-check-{{notification.pk}}" alt="{{ notification.pk }}" alt="{{ notification.pk }}"></i></a>
+                              {% elif 'Group' in notification.notification_type %}
+                              <a class="clear-button" id="clear-link-{{notification.pk}}" href="{% url 'group_detail_view' notification.sender_pk %}" alt="{{ notification.pk }}">{{ notification.message|safe }}</a>
+                              <a class="clear-button" id="fun" alt="{{ notification.pk }}"><i class="fa fa-check green" id="clear-check-{{notification.pk}}" alt="{{ notification.pk }}" alt="{{ notification.pk }}"></i></a>
+                              {% elif 'event' in notification.notification_type|lower %}
+                              <a id="clear-link-{{notification.pk}}" {% if 'Cancelled' not in notification.notification_type %}class="clear-button" href="{% url 'event_detail_view' notification.sender_pk %}{% if 'comment' in notification.notification_type|lower %}#comment-section{% endif %}"{% endif %} alt="{{ notification.pk }}">{{ notification.message|safe }}</a>
+                              <a class="clear-button" id="fun" alt="{{ notification.pk }}"><i class="fa fa-check green" id="clear-check-{{notification.pk}}" alt="{{ notification.pk }}" alt="{{ notification.pk }}"></i></a>
                               {% endif %}
                             </li>
                         {% endfor %}
@@ -123,7 +134,8 @@
       <div class="push"></div>
     </div>
      {% endif %}
-
+  
+  <p id="profile-pk" class="hidden">{{request.user.profile.pk}}</p>
 
 <!-- +++++ Footer Section +++++ -->
   {% if not no_footer %}
@@ -142,7 +154,7 @@
                       </p>
                   </div><!-- /col-sm-4 -->
                   <div class="col-sm-4">
-                      <h4>About <strong>GoDogether</strong></h4>
+                      <h4>About <strong>Bridged</strong></h4>
                       <a href="{% url 'about_view' %}">Read on here</a>
                   </div><!-- /col-sm-4 -->
               </div>

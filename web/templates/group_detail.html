@@ -12,19 +12,18 @@
     <div class="row">
         <h1 class="text-center">{{ group.name }}</h1>
         <div id="group-detail">
-            <div class="col-sm-6">
-                <br>    
-                <br>    
+            <div class="col-sm-5 col-sm-offset-1">
                 <h3>Members:</h3>
                 {% for member in group.members.all %}
-                    <a href="{% url 'profile_detail_view' member.pk %}">{{ member }}</a>{% if not forloop.last %},{% endif %}
+                    <a class="tooltipped" href="{% url 'profile_detail_view' member.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ member }}">
+                        <img class="tiny-thumb" src="{{ member.picture.url }}" alt="{{ member }}">
+                    </a>
                 {% endfor %}
 
                 <br><br>
                 
                 {% if logged_in %}
                     {% if is_member %}
-                        <a class="btn btn-success" href="{% url 'group_event_list' group.name|slugify %}">Events Feed for {{ group }}</a>
                         <div id="membership">
                         {% if not is_admin %}
                             <h3>You're a member of {{ group }}!</h3>
@@ -32,7 +31,9 @@
                         <br>
                         <br>
                         <a class="btn btn-default popup" href="/ajax/friends/?group_pk={{ group.pk }}">Add friends to {{ group }}</a>
-                        {% if not is_admin or group.admin.count != 1 %}
+
+                        {% if not is_admin or group.admin_already_members.count != 1 %}
+                        <br><br>
                         <a id="{{ group.name }}" class="btn btn-danger leave_group" href = "#">Leave {{ group }}</a></div>
                         {% endif %}
                         <br><br>
@@ -66,7 +67,9 @@
                 
             </div>
             </div>
-            <div class="col-sm-5 col-sm-offset-1">
+            <div class="col-sm-6">
+                <br>
+                <a class="btn btn-success" href="{% url 'group_event_list' group.pk %}">Events Feed for {{ group }}</a>
                 {% if is_admin %}
                 <div id="adminship">
                 <br>
@@ -77,14 +80,15 @@
                 <br>
                 {% if group.member_requests.exists %}
                     <h4>People requesting to join {{ group }}</h4>
+                    <div class="overflow">
                     {% for potential in group.member_requests.all %}
-                        <h5>{{ potential }}</h5>
-                        <div id="accept-request-{{potential.pk}}">
+                        <h5 style="margin-left: 10px;">{{ potential }}</h5>
+                        <div id="accept-request-{{potential.pk}}" style="margin-left: 10px;">
                             <a id="addition-{{ potential.pk }}" class="btn btn-success btn-sm accept_request_from_user" href = "#" alt='{{ potential.pk }}'>Accept {{ potential.first_name }}</a>&nbsp;
                             <a id="rejection-{{ potential.pk }}" class="btn btn-danger btn-sm reject_request_from_user" href = "#" alt='{{ potential.pk }}'>Reject {{ potential.first_name }}</a>
                         </div>
-                        <br>
                     {% endfor %}
+                    </div>
                 {% else %}
                     <h4>No one has requested to join {{ group }} right now! Consider gaining some popularity.</h4>
                 {% endif %}

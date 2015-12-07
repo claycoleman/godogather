@@ -28,7 +28,7 @@
             <h3>{{ profile.first_name }}'s groups</h3>
 
             {% for group in profile.groups_in.all %}
-                <a href="{% url 'group_detail_view' group.name|slugify %}">{{ group }}</a>{% if not forloop.last %},{% endif %}
+                <a href="{% url 'group_detail_view' group.pk %}">{{ group }}</a>{% if not forloop.last %},{% endif %}
             {% endfor %}
     
             <br>

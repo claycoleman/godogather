@@ -1,8 +1,9 @@
-import pytz
+import pytz, requests, urllib
+from itertools import chain
 from operator import attrgetter
 from datetime import datetime
 
-from django.shortcuts import render, render_to_response, redirect
+from django.shortcuts import render, render_to_response, redirect, resolve_url
 from django.http import JsonResponse
 from django.utils import timezone
 from django.template import RequestContext
@@ -13,6 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Q
+from project.local import FB_APP_ID
 
 
 from main.models import Event, Group, Profile, Comment, Notification
@@ -25,8 +27,21 @@ from main.forms import SearchProfile, EventModelCreateForm, EventModelUpdateForm
 @login_required
 def event_detail_view(request, pk):  
     event = Event.objects.get(pk=pk)
-
+    comments = event.comment_set.all().order_by('-date_posted')
     context = {}
+
+    # TO DO -- fix the redirect-uri
+    context['share_url'] = 'https://www.facebook.com/dialog/feed?app_id={0}&display=popup&name={2}&description={3}&caption=Horizon%20events&link={1}&redirect_uri=http://social.coleclayman.us'.format(FB_APP_ID, urllib.quote_plus("http://127.0.0.1:8000%s" % resolve_url('event_detail_view', pk=pk)), 'Check out "%s" on Horizon Events!' % event.name, event.description)
+    
+    url_date_starting = datetime.combine(date=event.date_happening, time=event.time_starting).isoformat().replace('-', '').replace(':', '')
+    url_date_ending = datetime.combine(date=event.date_happening, time=event.time_ending).isoformat().replace('-', '').replace(':', '')
+    
+    context['google_cal'] = "https://www.google.com/calendar/render?action=TEMPLATE&text={0}&dates={1}/{2}&details=For+details,+link+here%3a+http://www.example.com&location={3}&sf=true&output=xml".format(event.name, url_date_starting, url_date_ending, event.location)
+
+
+    context['apple_cal'] = "http://127.0.0.1:8000%s" % event.ics.url
+
+    context['comments'] = comments
     context['event'] = event
     context['friends'] = list(request.user.profile.friends.all())
     form = CommentForm()
@@ -46,21 +61,84 @@ def event_detail_view(request, pk):
                     new_comment.comment_in_response_to = parent
                     parent.save()
 
+                    reply_pks = []
+                    parent_notified = False
+                    for reply in parent.replies.all():
+                        if reply.author != request.user.profile and reply.author.pk not in reply_pks:
+                            if reply.author == parent.author:
+                                parent_notified = True    
+                            reply_pks.append(reply.author.pk)
+                            new_notif = Notification.objects.create(user=reply.author)
+                            new_notif.notification_type = "Reply to same comment on event"
+                            new_notif.message = "%s also replied to a comment you replied to. %s." % (request.user.profile.first_name, event.name)
+                            new_notif.sender_pk = event.pk
+                            new_notif.save()
+
+                    if not parent_notified and parent.author != request.user.profile:
+                        new_notif = Notification.objects.create(user=parent.author)
+                        new_notif.notification_type = "Reply to your comment on event"
+                        new_notif.message = "%s replied to your comment on the event %s." % (request.user.profile.first_name, event.name)
+                        new_notif.sender_pk = event.pk
+                        new_notif.save()
+
                 new_comment.save()
-                return redirect('event_detail_view', pk)
+
+                for host in event.host.exclude(pk=request.user.profile.pk):
+                    if host.notifications.filter(read=False, sender_pk=event.pk, notification_type__istartswith='Comment on').exists():
+                        notif = host.notifications.get(read=False, sender_pk=event.pk, notification_type__istartswith='Comment on')
+
+                        if 'multiple' not in notif.notification_type:
+                            prev_pk = notif.notification_type.partition('event ')[2]
+
+                            if request.user.profile.pk != prev_pk:
+                                notif.message = "%s and 1 other person commented on your event %s." % (request.user.profile.first_name, event.name)
+                                notif.notification_type = "Comment on your event multiple %s" % request.user.profile.pk
+                            else:
+                                notif.message = "%s commented on your event %s." % (request.user.profile.first_name, event.name)
+                                notif.notification_type = "Comment on your event %s" % (request.user.profile.pk)
+
+                        else:
+                            prev_pk = notif.notification_type.partition('multiple ')[2]
+
+                            if request.user.profile.pk != prev_pk:
+                                notif.message = "%s and other people commented on your event %s." % (request.user.profile.first_name, event.name)
+                                notif.notification_type = "Comment on your event multiple %s" % request.user.profile.pk
+
+                        notif.date_posted = datetime.now()
+                        notif.save()
+                    else:
+                        new_notif = Notification.objects.create(user=host)
+                        new_notif.notification_type = "Comment on your event %d" % request.user.profile.pk
+                        new_notif.message = "%s commented on your event %s." % (request.user.profile.first_name, event.name)
+                        new_notif.sender_pk = event.pk
+                        new_notif.save()
+                return redirect('{}#comment-section'.format(resolve_url('event_detail_view', pk=pk)))
 
     return render_to_response('event_detail.html', context, context_instance=RequestContext(request))
 
 @login_required
 def event_list_view(request):
+
     if not request.user.is_authenticated():
         return redirect('new_user')
 
     context = {}
+    context['friends_pk'] = request.user.profile.friends.all().values_list('pk',flat=True)
+    context['groups_pk'] = request.user.profile.groups_in.all().values_list('pk',flat=True)
+
     order = request.GET.get('order', '')
 
-    friend_events = Event.objects.filter(Q(host=request.user.profile.friends.all(), public=True) | Q(groups=request.user.profile.groups_in.all()) | Q(people_who_shared=request.user.profile.friends.all()))
-    my_events = request.user.profile.events_hosted.all()
+    friend_events = []
+    for friend in request.user.profile.friends.all():
+        friend_events = list(chain(friend_events, friend.events_posted.filter(public=True)))
+
+    group_events = []
+
+    for group in request.user.profile.groups_in.all():
+        group_events = list(chain(group_events, group.event_set.all()))
+
+    friend_events = list(set(friend_events) | set(group_events))
+    my_events = request.user.profile.events_posted.all()
 
     if order:
         context['order'] = True
@@ -79,6 +157,14 @@ def event_list_view(request):
             for host in event.host.all():
                 host.events_hosted.remove(event)
                 host.past_events.add(event)
+            event.people_coming.clear()
+            event.people_not_coming.clear()
+            event.people_who_posted_it.clear()
+            event.people_who_shared_it.clear()
+            try:
+                os.remove(event.ics.file.name)
+            except:
+                pass
             events.remove(event)
 
     context['today'] = datetime.now()
@@ -90,14 +176,24 @@ def event_list_view(request):
 
 @login_required
 def event_create_view(request):
-
     context = {} 
-    form = EventModelCreateForm()
+
+    group_pk = request.GET.get('group_pk', '')
+
     friends = request.user.profile.friends.all()
     groups = request.user.profile.groups_in.all()
 
+    if group_pk != '':
+        form = EventModelCreateForm()
+        form.fields['groups'].queryset = groups
+        form.fields['groups'].initial = [Group.objects.get(pk=group_pk), ]
+
+    else:
+        form = EventModelCreateForm()
+        form.fields['groups'].queryset = groups
+
+
     form.fields['host'].queryset = friends
-    form.fields['groups'].queryset = groups
 
     context['form'] = form
     if request.method == 'POST':
@@ -135,6 +231,8 @@ def event_create_view(request):
                 new_event.host.add(request.user.profile)
                 for host in new_event.host.all():
                     new_event.people_coming.add(host)
+                    host.events_posted.add(new_event)
+                new_event.create_apple_ics()
                 return redirect('event_detail_view', new_event.pk)
         else:
             print form.errors
@@ -160,12 +258,11 @@ def event_update_view(request, pk):
 
     context['event'] = event
 
+    date_happening = event.date_happening
+    time_starting = event.time_starting
+    location = event.location
+
     form = EventModelUpdateForm(request.POST or None, instance=event)
-    print form.fields['time_starting'].initial
-    form.fields['time_starting'].initial = event.time_starting
-    form.fields['time_ending'].initial = event.time_ending
-    print form.fields['time_starting'].initial
-    print form.fields['time_ending'].initial
 
 
     friends = request.user.profile.friends.all()
@@ -178,8 +275,8 @@ def event_update_view(request, pk):
     if request.method == 'POST':
         if form.is_valid():
             should_save = True
-            new_event = form.save(commit=False)
-            event = datetime.combine(new_event.date_happening, new_event.time_starting)
+            updated_event = form.save(commit=False)
+            event = datetime.combine(updated_event.date_happening, updated_event.time_starting)
             timezone_inst = request.session.get('django_timezone')
             if not timezone_inst:
                 timezone_inst = 'UTC'
@@ -195,7 +292,7 @@ def event_update_view(request, pk):
                 form.fields['host'].queryset = friends
                 context['form'] = form
 
-            elif not new_event.public and len(form.cleaned_data['groups']) is 0:
+            elif not updated_event.public and len(form.cleaned_data['groups']) is 0:
                 should_save = False
                 context['errors'] = "An event must either be public, or have at least one group to be displayed in."
                 form = EventModelCreateForm(initial=return_dict(form.data))
@@ -204,11 +301,39 @@ def event_update_view(request, pk):
                 context['form'] = form
 
             if should_save:
-                new_event.save()
+                updated_event.save()
                 form.save_m2m()
-                new_event.host.add(request.user.profile)
-                for host in new_event.host.all():
-                    new_event.people_coming.add(host)
+                updated_event.host.add(request.user.profile)
+                for host in updated_event.host.all():
+                    updated_event.people_coming.add(host)
+                
+                new_event.create_apple_ics()
+
+                changed = ""
+
+                if location != updated_event.location:
+                    changed = "location"
+                if date_happening != updated_event.date_happening:
+                    if "location" in changed:
+                        changed += " and date"
+                    else:
+                        changed += "date"
+                if time_starting != updated_event.time_starting:
+                    if 'date' in changed or 'location' in changed:
+                        if 'and' in changed:
+                            changed = changed.replace(' and', ',')
+                        changed += " and "
+                    changed += "time"
+
+                if changed != "":
+                    for person in updated_event.people_coming.exclude(pk=request.user.profile.pk):
+                        new_notif = Notification.objects.create(user=person)
+                        new_notif.notification_type = "Event Updated"
+                        new_notif.message = "%s changed the %s of the event %s!" % (request.user.profile.first_name, changed, updated_event.name)
+                        new_notif.sender_pk = updated_event.pk
+                        new_notif.save()
+
+
                 if request.POST.get('_finish'):
                     return redirect('event_detail_view', pk)
 
@@ -226,8 +351,16 @@ def event_update_view(request, pk):
 
 @login_required
 def event_delete_view(request, pk):
+    event = Event.objects.get(pk=pk)
 
-    Event.objects.get(pk=pk).delete()
+    for person in event.people_coming.exclude(pk=request.user.profile.pk):
+        new_notif = Notification.objects.create(user=person)
+        new_notif.notification_type = "Event Cancelled"
+        new_notif.message = "%s <strong>cancelled</strong> the event %s." % (request.user.profile.first_name, event.name)
+        new_notif.sender_pk = event.pk
+        new_notif.save()
+
+    event.delete()
 
     return redirect('event_list_view')
 
@@ -239,23 +372,23 @@ def comment_delete_view(request, pk):
     event_pk = comment.event.pk
     comment.delete()
 
-    return redirect('event_detail_view', event_pk)
+    return redirect('{}#comment-section'.format(resolve_url('event_detail_view', pk=event_pk)))
 
 
 # Group Views!
 
-def group_detail_view(request, slug):  
+def group_detail_view(request, pk):  
     context = {}
 
-    name = slug.replace('-', ' ')
-    group = Group.objects.get(name__iexact=name)
+    group = Group.objects.get(pk=pk)
     context['group'] = group
 
 
     if request.user.is_authenticated():
         context['logged_in'] = True
-        context['is_member'] = request.user.profile in group.members.all()
-        context['is_admin'] = request.user.profile in group.admin.all()
+        is_member = request.user.profile in group.members.all()
+        context['is_member'] = is_member
+        context['is_admin'] = is_member and request.user.profile in group.admin.all()
         context['group_requested_by_member'] = request.user.profile in group.member_requests.all()
         context['member_requested_by_group'] = group in request.user.profile.group_requests.all()
 
@@ -276,13 +409,13 @@ def group_list_view(request):
 
 
 @login_required
-def group_event_list(request, slug):
+def group_event_list(request, pk):
     context = {}
-    name = slug.replace('-', ' ')
-    group = Group.objects.get(name__iexact=name)
+
+    group = Group.objects.get(pk=pk)
     context['group'] = group
     if request.user.profile not in group.members.all():
-        return redirect('group_detail_view', slugify(group.name))
+        return redirect('group_detail_view', pk)
     group_events = Event.objects.filter(groups=group)
     my_events = request.user.profile.events_hosted.filter(groups=group)
 
@@ -307,7 +440,14 @@ def group_event_list(request, slug):
             for host in event.host.all():
                 host.events_hosted.remove(event)
                 host.past_events.add(event)
-            event.people_who_shared.clear()
+            event.people_coming.clear()
+            event.people_not_coming.clear()
+            event.people_who_posted_it.clear()
+            event.people_who_shared_it.clear()
+            try:
+                os.remove(event.ics.file.name)
+            except:
+                pass
             events.remove(event)
 
     context['today'] = timezone.now()
@@ -338,7 +478,7 @@ def group_create_view(request):
             new_group.admin.add(request.user.profile)
             new_group.members.add(request.user.profile)
                 
-            return redirect('group_list_view')
+            return redirect('group_detail_view', group.pk)
         else:
             context['errors'] = form.errors
     return render_to_response('group_create.html', context, context_instance=RequestContext(request))
@@ -358,24 +498,19 @@ def group_update_view(request, pk):
     group_members = group.members.exclude(pk=request.user.profile.pk)
 
     form.fields['members'].queryset = group_members
-    form.fields['admin'].queryset = group_members
     context['form'] = form
 
     if request.method == 'POST':
         form = GroupModelUpdateForm(request.POST, request.FILES, instance=group)
         if form.is_valid():
-            new_group = form.save(commit=False)
-            new_group.save()
-            for admin in new_group.admin.all():
-                new_group.invited_people.add(admin)
+            updated_group = form.save(commit=False)
             form.save_m2m()
-            new_group.admin.add(request.user.profile)
-            new_group.members.add(request.user.profile)
+            updated_group.members.add(request.user.profile)
 
-            context['saved'] = '%s saved!' % new_group.name
+            context['saved'] = '%s saved!' % updated_group.name
 
             if request.POST.get('_finish'):
-                return redirect('group_detail_view', slugify(new_group.name))
+                return redirect('group_detail_view', updated_group.pk)
         else:
             context['errors'] = form.errors
 
@@ -409,6 +544,7 @@ def profile_detail_view(request, pk):
     return render_to_response('profile_detail.html', context, context_instance=RequestContext(request))
 
 
+@login_required
 def friend_list(request):
     context = {}
     context['friends'] = request.user.profile.friends.all()
@@ -549,7 +685,7 @@ def new_user(request):
                 context['valid'] = "Login Failed! Try again"
     return render_to_response('new_user.html', context, context_instance=RequestContext(request))
 
-
+@login_required
 def full_notifications(request):
     context = {}
     context['profile'] = request.user.profile
@@ -559,8 +695,10 @@ def full_notifications(request):
     return render_to_response('full_notifications.html', context, context_instance=RequestContext(request))
 
 
+
 def about_view(request):
     return render(request, 'about.html')
+
 
 
 def thank_you(request):
@@ -589,6 +727,8 @@ def contact_view(request):
 
 
 # ajax views
+
+@login_required
 def accept_request(request):
     pk = request.GET.get('pk')
     prof = Profile.objects.get(pk=pk)
@@ -596,7 +736,7 @@ def accept_request(request):
     new_notif = Notification.objects.create()
     new_notif.user = prof
     new_notif.notification_type = "Friend Request"
-    new_notif.message = "<strong>%s</strong> accepted your friend request!" % request.user.profile.first_name
+    new_notif.message = "%s accepted your friend request!" % request.user.profile.first_name
     new_notif.sender_pk = request.user.profile.pk
     new_notif.save()
 
@@ -613,6 +753,7 @@ def accept_request(request):
     return JsonResponse(prof_list, safe=False)
 
 
+@login_required
 def reject_request(request):
     pk = request.GET.get('pk')
     prof = Profile.objects.get(pk=pk)
@@ -628,6 +769,7 @@ def reject_request(request):
     return JsonResponse(prof_list, safe=False)
 
 
+@login_required
 def request_friendship(request):
     pk = request.GET.get('pk')
     prof = Profile.objects.get(pk=pk)
@@ -640,6 +782,7 @@ def request_friendship(request):
     return JsonResponse(prof_list, safe=False)
 
 
+@login_required
 def cancel_request(request):
     pk = request.GET.get('pk')
     prof = Profile.objects.get(pk=pk)
@@ -653,6 +796,7 @@ def cancel_request(request):
 
 
 
+@login_required
 def delete_friendship(request):
     pk = request.GET.get('pk')
     prof = Profile.objects.get(pk=pk)
@@ -667,6 +811,7 @@ def delete_friendship(request):
 
 
 
+@login_required
 def request_membership_in_group(request):
     pk = request.GET.get('pk')
     group = Group.objects.get(pk=pk)
@@ -679,6 +824,7 @@ def request_membership_in_group(request):
     return JsonResponse(group_list, safe=False)
 
 
+@login_required
 def cancel_request_membership_in_group(request):
     pk = request.GET.get('pk')
     group = Group.objects.get(pk=pk)
@@ -691,6 +837,7 @@ def cancel_request_membership_in_group(request):
     return JsonResponse(group_list, safe=False)
 
 
+@login_required
 def invite_friend_to_group(request):
     person_pk = request.GET.get('person_pk')
     group_pk = request.GET.get('group_pk')
@@ -706,6 +853,8 @@ def invite_friend_to_group(request):
     return JsonResponse(group_list, safe=False)
 
 
+
+@login_required
 def cancel_invite_friend_to_group(request):
     person_pk = request.GET.get('person_pk')
     group_pk = request.GET.get('group_pk')
@@ -721,6 +870,8 @@ def cancel_invite_friend_to_group(request):
     return JsonResponse(group_list, safe=False)
 
 
+
+@login_required
 def reject_invitation_from_group(request):
     person_pk = request.GET.get('person_pk')
     group_pk = request.GET.get('group_pk')
@@ -733,11 +884,39 @@ def reject_invitation_from_group(request):
 
     group_list = []
     group_list.append(group.name)
+    group_list.append(friend.first_name)
+    group_list.append(friend.group_requests.count())
 
     return JsonResponse(group_list, safe=False)
 
 
-def group_invitation_accepted(request):
+@login_required
+def user_accepts_invitation(request):
+    group_pk = request.GET.get('group_pk')
+    group = Group.objects.get(pk=group_pk)
+    member_ids = group.members.all().values_list('pk', flat=True)
+
+    for admin in group.admin.filter(pk__in=member_ids):
+        new_notif = Notification.objects.create(notification_type='Group Invitation')
+        new_notif.user = admin
+        new_notif.message = "%s accepted the invitation to join %s!" % (request.user.profile.first_name, group.name)
+        new_notif.sender_pk = group.pk
+        new_notif.save()
+
+    group.members.add(request.user.profile)
+    request.user.profile.group_requests.remove(group)
+    group.member_requests.remove(request.user.profile)
+
+    group_list = []
+    group_list.append(group.name)
+    group_list.append(request.user.profile.first_name)
+    group_list.append(request.user.profile.group_requests.count())    
+
+    return JsonResponse(group_list, safe=False)
+
+
+@login_required
+def group_approves_request(request):
     person_pk = request.GET.get('person_pk')
     group_pk = request.GET.get('group_pk')
 
@@ -752,9 +931,16 @@ def group_invitation_accepted(request):
     group_list.append(group.name)
     group_list.append(friend.first_name)
 
+    new_notif = Notification.objects.create(notification_type='Group Request')
+    new_notif.user = friend
+    new_notif.message = "%s accepted your request to join!" % group.name
+    new_notif.sender_pk = group.pk
+    new_notif.save()
+
     return JsonResponse(group_list, safe=False)
 
 
+@login_required
 def leave_group(request):
     pk = request.GET.get('pk')
     group = Group.objects.get(pk=pk)
@@ -767,15 +953,28 @@ def leave_group(request):
     return JsonResponse(group_list, safe=False)
 
 
+@login_required
 def can_come(request):
     pk = request.GET.get('pk', '')
     event = Event.objects.get(pk=pk)
     event.people_not_coming.remove(request.user.profile)
     event.people_coming.add(request.user.profile)
- 
+
     hosts = ""
     host_list = [e for e in event.host.all()]
     for count, e in enumerate(host_list):
+        if e.notifications.filter(read=False, sender_pk=event.pk, notification_type__istartswith='Confirm can come').exists():
+            notif = e.notifications.get(read=False, sender_pk=event.pk, notification_type__istartswith='Confirm can come')
+            
+            notif.message = "%d people are now coming to your event %s." % (event.people_coming.count(), event.name)
+            notif.date_posted = datetime.now()
+            notif.save()
+        else:
+            new_notif = Notification.objects.create(user=e)
+            new_notif.notification_type = "Confirm can come to event"
+            new_notif.message = "%s is coming to %s, the event you're hosting." % (request.user.profile.first_name, event.name)
+            new_notif.sender_pk = event.pk
+            new_notif.save()
         if count >= len(host_list)-1:
             hosts += "%s" % e
         else:
@@ -785,6 +984,7 @@ def can_come(request):
     return JsonResponse([event.name, hosts, date, "People coming: %d" % event.people_coming.count(), host_list[0].picture.url, posted, event.description, "People not coming: %d" % event.people_not_coming.count()], safe=False)
 
 
+@login_required
 def cannot_come(request):
     pk = request.GET.get('pk', '')
     event = Event.objects.get(pk=pk)
@@ -801,6 +1001,7 @@ def cannot_come(request):
     return JsonResponse([event.name, hosts, date, event.people_coming.count(), host_list[0].picture.url], safe=False)
 
 
+@login_required
 def cancel_decision(request):
     pk = request.GET.get('pk', '')
     event = Event.objects.get(pk=pk)
@@ -809,6 +1010,18 @@ def cancel_decision(request):
     hosts = ""
     host_list = [e for e in event.host.all()]
     for count, e in enumerate(host_list):
+        if e.notifications.filter(read=False, sender_pk=event.pk, notification_type__istartswith='Confirm can come').exists():
+            notif = e.notifications.get(read=False, sender_pk=event.pk, notification_type__istartswith='Confirm can come')
+            
+            notif.message = "%d people are now coming to your event %s." % (event.people_coming.count(), event.name)
+            notif.date_posted = datetime.now()
+            notif.save()
+        else:
+            new_notif = Notification.objects.create(user=e)
+            new_notif.notification_type = "Confirm can come to event"
+            new_notif.message = "%d people are now coming to your event %s." % (event.people_coming.count(), event.name)
+            new_notif.sender_pk = event.pk
+            new_notif.save()
         if count >= len(host_list)-1:
             hosts += "%s" % e
         else:
@@ -818,6 +1031,7 @@ def cancel_decision(request):
     return JsonResponse([event.name, hosts, date, event.people_coming.count(), host_list[0].picture.url, posted, event.description], safe=False)
 
 
+@login_required
 def clear_notification(request):
     pk = request.GET.get('pk', '')
     notif = Notification.objects.get(pk=pk)
@@ -826,6 +1040,7 @@ def clear_notification(request):
     return JsonResponse([request.user.profile.unread_notifications().count(),], safe=False)
 
 
+@login_required
 def ajax_friends(request):
     context = {}
     pk = request.GET.get('group_pk')
@@ -838,7 +1053,40 @@ def ajax_friends(request):
     return render_to_response('friend_invite.html', context, context_instance=RequestContext(request))
 
 
+@login_required
+def ajax_facebook_friends(request):
+    context = {}
+
+    social = request.user.social_auth.get(provider='facebook')
+    response = requests.get('https://graph.facebook.com/v2.5/{0}/friends'.format(social.uid),params={'access_token': social.extra_data['access_token']})
+    json = response.json()
+    friends = json.get('data')
+    friend_list = []
+    for friend in friends:
+        friend_list.append(friend.get('id'))
+
+    friends = Profile.objects.filter(user__social_auth__uid__in=friend_list)
+    friends = friends.exclude(pk__in=request.user.profile.friends.values_list('pk', flat=True))
+    context['friends'] = friends
+
+    return render_to_response('facebook_friends.html', context, context_instance=RequestContext(request))
+
+@login_required
+def share_event(request):
+    pk = request.GET.get('pk', '')
+    event = Event.objects.get(pk=pk)
+
+    if event not in request.user.profile.events_posted.all():
+        request.user.profile.events_posted.add(event)
+        request.user.profile.shared_events.add(event)
+        added = True
+    else:
+        request.user.profile.events_posted.remove(event)
+        request.user.profile.shared_events.remove(event)
+        added = False
+    
+    return JsonResponse([event.name, added], safe=False)
+
+
 def slugify(string):
     return string.lower().replace(' ', '-')
-
-
