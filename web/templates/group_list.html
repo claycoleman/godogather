@@ -11,7 +11,7 @@
             <h1 class="bold">Your Groups</h1>
             {% if groups %}
                 {% for group in groups %}
-                    <a href="{% url 'group_detail_view' group.pk %}">{{ group }}</a></br>
+                    <a href="{% url 'group_event_list' group.pk %}">{{ group }}</a></br>
                 {% endfor %}
                 <br><br>
             {% else %}   

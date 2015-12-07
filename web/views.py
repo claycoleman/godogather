@@ -377,24 +377,6 @@ def comment_delete_view(request, pk):
 
 # Group Views!
 
-def group_detail_view(request, pk):  
-    context = {}
-
-    group = Group.objects.get(pk=pk)
-    context['group'] = group
-
-
-    if request.user.is_authenticated():
-        context['logged_in'] = True
-        is_member = request.user.profile in group.members.all()
-        context['is_member'] = is_member
-        context['is_admin'] = is_member and request.user.profile in group.admin.all()
-        context['group_requested_by_member'] = request.user.profile in group.member_requests.all()
-        context['member_requested_by_group'] = group in request.user.profile.group_requests.all()
-
-    return render_to_response('group_detail.html', context, context_instance=RequestContext(request))
-
-
 @login_required
 def group_list_view(request):
     groups = Group.objects.filter(members=request.user.profile)
@@ -414,8 +396,13 @@ def group_event_list(request, pk):
 
     group = Group.objects.get(pk=pk)
     context['group'] = group
-    if request.user.profile not in group.members.all():
-        return redirect('group_detail_view', pk)
+
+    is_member = request.user.profile in group.members.all()
+    context['is_member'] = is_member
+    context['is_admin'] = is_member and request.user.profile in group.admin.all()
+    context['group_requested_by_member'] = request.user.profile in group.member_requests.all()
+    context['member_requested_by_group'] = group in request.user.profile.group_requests.all()
+
     group_events = Event.objects.filter(groups=group)
     my_events = request.user.profile.events_hosted.filter(groups=group)
 
@@ -478,7 +465,7 @@ def group_create_view(request):
             new_group.admin.add(request.user.profile)
             new_group.members.add(request.user.profile)
                 
-            return redirect('group_detail_view', group.pk)
+            return redirect('group_event_list', group.pk)
         else:
             context['errors'] = form.errors
     return render_to_response('group_create.html', context, context_instance=RequestContext(request))
@@ -510,7 +497,7 @@ def group_update_view(request, pk):
             context['saved'] = '%s saved!' % updated_group.name
 
             if request.POST.get('_finish'):
-                return redirect('group_detail_view', updated_group.pk)
+                return redirect('group_event_list', updated_group.pk)
         else:
             context['errors'] = form.errors
 
@@ -820,6 +807,15 @@ def request_membership_in_group(request):
     group_list = []
 
     group_list.append(group.name)
+
+    member_ids = group.members.all().values_list('pk', flat=True)
+
+    for admin in group.admin.filter(pk__in=member_ids):
+        new_notif = Notification.objects.create(notification_type='Group Request')
+        new_notif.user = admin
+        new_notif.message = "%s has requested to join %s!" % (request.user.profile.first_name, group.name)
+        new_notif.sender_pk = group.pk
+        new_notif.save()
 
     return JsonResponse(group_list, safe=False)
 

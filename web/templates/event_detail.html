@@ -74,7 +74,7 @@
                     {% if event.groups.all %}
                         <h4>Groups:</h4>
                         {% for group in event.groups.all %}
-                            <a href="{% url 'group_detail_view' group.pk %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}
+                            <a href="{% url 'group_event_list' group.pk %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     {% endif %}
                     <br>

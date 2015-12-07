@@ -35,7 +35,7 @@
                         {% endif %}
                     </div>
                     <div class="col-sm-8">
-                        <a href="{% if 'Friend' in notification.notification_type %}{% url 'profile_detail_view' notification.sender_pk %}{% elif 'Group' in notification.notification_type %}{% url 'group_detail_view' notification.sender_pk %}{% elif 'Event' in notification.notification_type and 'Cancelled' not in notification.notification_type %}{% url 'event_detail_view' notification.sender_pk %}{% endif %}">
+                        <a href="{% if 'Friend' in notification.notification_type %}{% url 'profile_detail_view' notification.sender_pk %}{% elif 'Group' in notification.notification_type %}{% url 'group_event_list' notification.sender_pk %}{% elif 'Event' in notification.notification_type and 'Cancelled' not in notification.notification_type %}{% url 'event_detail_view' notification.sender_pk %}{% endif %}">
                         <h5>{{notification|safe}}</h5></a>
                     </div>
                     <div class="col-sm-3 text-right notification-menu">
@@ -72,7 +72,7 @@
             {% if group_requests %}
                 {% for new_request in group_requests %}
                 <div id="notif-group-div-{{ new_request.pk }}">
-                  <a href="{% url 'group_detail_view' new_request.pk %}">{{ new_request }}</a><br>
+                  <a href="{% url 'group_event_list' new_request.pk %}">{{ new_request }}</a><br>
                   <a href='#' id="addition-{{ new_request.pk }}" class="add-button" alt="{{ new_request.pk }}"><i class="fa fa-check green" id="check-{{new_request.pk}}" alt="{{ new_request.pk }}"></i>&nbsp;Join</a>&nbsp;&nbsp;&nbsp;&nbsp;
                   <a href='#' id="rejection-{{ new_request.pk }}" class="reject-button red" alt="{{ new_request.pk }}"><i class="fa fa-times red" id="times-{{new_request.pk}}" alt="{{ new_request.pk }}"></i>&nbsp;Decline</a>
                 </div>

@@ -91,7 +91,7 @@
                               <a class="clear-button" id="clear-link-{{notification.pk}}" href="{% url 'profile_detail_view' notification.sender_pk %}" alt="{{ notification.pk }}">{{ notification.message|safe }}</a>
                               <a class="clear-button" id="fun" alt="{{ notification.pk }}"><i class="fa fa-check green" id="clear-check-{{notification.pk}}" alt="{{ notification.pk }}" alt="{{ notification.pk }}"></i></a>
                               {% elif 'Group' in notification.notification_type %}
-                              <a class="clear-button" id="clear-link-{{notification.pk}}" href="{% url 'group_detail_view' notification.sender_pk %}" alt="{{ notification.pk }}">{{ notification.message|safe }}</a>
+                              <a class="clear-button" id="clear-link-{{notification.pk}}" href="{% url 'group_event_list' notification.sender_pk %}" alt="{{ notification.pk }}">{{ notification.message|safe }}</a>
                               <a class="clear-button" id="fun" alt="{{ notification.pk }}"><i class="fa fa-check green" id="clear-check-{{notification.pk}}" alt="{{ notification.pk }}" alt="{{ notification.pk }}"></i></a>
                               {% elif 'event' in notification.notification_type|lower %}
                               <a id="clear-link-{{notification.pk}}" {% if 'Cancelled' not in notification.notification_type %}class="clear-button" href="{% url 'event_detail_view' notification.sender_pk %}{% if 'comment' in notification.notification_type|lower %}#comment-section{% endif %}"{% endif %} alt="{{ notification.pk }}">{{ notification.message|safe }}</a>

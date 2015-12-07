@@ -35,7 +35,6 @@ urlpatterns = [
     # group urls    
     url(r'^groups/$', 'web.views.group_list_view', name='group_list_view'),
     url(r'^groups/(?P<pk>\d+)/events/$', 'web.views.group_event_list', name='group_event_list'),
-    url(r'^groups/(?P<pk>\d+)/$', 'web.views.group_detail_view', name='group_detail_view'),
     url(r'^group_delete/(?P<pk>\d+)/$', 'web.views.group_delete_view', name='group_delete_view'),
     url(r'^group_update/(?P<pk>\d+)/$', 'web.views.group_update_view', name='group_update_view'),
     url(r'^group_create/$', 'web.views.group_create_view', name='group_create_view'),
