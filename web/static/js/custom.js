@@ -19,6 +19,8 @@ $(function() {
     $(".main-events-going-to").css({'max-height': (window.innerHeight-430)*2/3+'px', 'overflow': 'scroll'});
     $(".main-group-list").css({'max-height': (window.innerHeight-430)/4+'px', 'overflow': 'scroll'});
     $(".main-feed").css({'max-height': (window.innerHeight/2)+'px', 'overflow': 'scroll'});
+    $("div.main").css({'min-height': (window.innerHeight-165)+'px'});
+    $("div.wrapper").css({'min-height': (window.innerHeight-165)+'px'});
     $('a.tooltipped').tooltip();
     var date_str = $('#current-date').text();
     var d = new Date(date_str);
