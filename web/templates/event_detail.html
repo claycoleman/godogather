@@ -58,13 +58,22 @@
                             {% endif %}
                         {% endif %}
                     </div>  
-
+                    <br>
                     {% if request.user.profile in event.host.all %}
                     <div style="float:left;">                    
                         <a class="btn btn-primary" href="{% url 'event_update_view' event.pk %}">Edit your event</a>&nbsp;&nbsp;<a class="btn btn-danger delete-button" href="{% url 'event_delete_view' event.pk %}" id="{{ event }}">Delete this event</a>
                     </div>
                     {% else %}
-                    <!-- Can or cannot go buttons -->
+
+                    <div class="event-detail-buttons">
+                        {% if request.user.profile in event.people_coming.all %}
+                            <span class="green stan"><i class="fa fa-check-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;You're going!</span>&nbsp;&nbsp;<a class="btn btn-danger cancel-decision" id="reject-button-{{event.pk}}" alt="{{event.pk}}"  href="#"><i class="fa fa-times-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;Back out...</a>
+                        {% elif request.user.profile in event.people_not_coming.all %}
+                            <span class="red stan"><i class="fa fa-times-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;You're not going...</span>&nbsp;&nbsp;<a class="btn btn-success cancel-decision" id="confirm-button-{{event.pk}}" alt="{{ event.pk }}"  href="#"><i class="fa fa-check-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;Cancel</a>
+                        {% else %}
+                            <a class="btn btn-success confirm-can-come" alt="{{event.pk}}" id="confirm-button-{{event.pk}}" href="#"><i class="fa fa-check-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;Count me in!</a>&nbsp;&nbsp;<a class="btn btn-danger confirm-cannot-come" alt="{{event.pk}}" id="reject-button-{{event.pk}}" href="#"><i class="fa fa-times-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;Can't make it!</a>
+                        {% endif %}
+                    </div>
                     {% endif %}
 
                     <br id="comment-section">

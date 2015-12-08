@@ -19,9 +19,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from web import urls as web_urls
+from mobi import urls as mobi_urls
 
 urlpatterns = [
     url(r'^nimda/', include(admin.site.urls)),
     url(r'^', include(web_urls)),
+    url(r'^', include(mobi_urls)),
     url('', include('social.apps.django_app.urls', namespace='social')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -70,7 +70,8 @@ class Profile(models.Model):
     group_requests = models.ManyToManyField('Group', blank=True, related_name="invited_people")
     friend_requests = models.ManyToManyField('Profile', blank=True, related_name="requested_friends")
     past_events = models.ManyToManyField('Event', blank=True, related_name="+")
-
+    # followers = models.ManyToManyField('Profile', blank=True, related_name="people_to_notify")
+    
     def __unicode__(self):
         return "%s %s" % (self.first_name, self.last_name)
 

@@ -136,6 +136,59 @@ $('.event-detail').on('click', '.cancel-decision', function(e) {
 });
 
                         
+$('.event-detail-buttons').on('click', '.confirm-can-come', function(e) {
+    e.preventDefault();
+    console.log('coming!');
+    prk = $("#"+e.target.id).attr('alt');
+    $.ajax({
+        type: 'GET',
+        url: '/can_come/',
+        data: {
+            pk: prk
+        },
+        success: function(data) {
+            $(".event-detail-buttons").html('<span class="green stan"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;You\'re going!</span>&nbsp;&nbsp;<a class="btn btn-danger cancel-decision" id="reject-button-' + prk + '" alt="' + prk + '"  href="#"><i class="fa fa-times-circle" alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Back out...</a>');
+        }
+    });
+    
+});
+
+$('.event-detail-buttons').on('click', '.confirm-cannot-come', function(e) {
+    e.preventDefault();
+    console.log('won\'t make it...');
+    prk = $("#"+e.target.id).attr('alt');
+    $.ajax({
+        type: 'GET',
+        url: '/cannot_come/',
+        data: {
+            pk: prk,
+        },
+        success: function(data) {
+            $(".event-detail-buttons").html('<span class="red stan"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;You\'re not going...</span>&nbsp;&nbsp;<a class="btn btn-success cancel-decision" id="confirm-button-' + prk + '" alt="' + prk + '"  href="#"><i class="fa fa-check-circle" alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Cancel</a>');
+
+        }
+    });
+}); // <a class="btn btn-sm btn-warning cancel-decision" id="confirm-button-' + prk + '" alt="' + prk + '" href="#" style="float:left"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Well, I can\'t commit now...!</a>
+
+
+$('.event-detail-buttons').on('click', '.cancel-decision', function(e) {
+    e.preventDefault();
+    console.log('won\'t make it...');
+    prk = $("#"+e.target.id).attr('alt');
+    $.ajax({
+        type: 'GET',
+        url: '/cancel_decision/',
+        data: {
+            pk: prk,
+        },
+        success: function(data) {
+            $(".event-detail-buttons").html('<a class="btn btn-success confirm-can-come" alt="' + prk + '" id="confirm-button-' + prk + '" href="#"><i class="fa fa-check-circle" alt="' + prk + '"  alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Count me in!</a>&nbsp;<a class="btn btn-danger confirm-cannot-come" alt="' + prk + '" id="reject-button-' + prk + '" href="#"><i class="fa fa-times-circle" alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Can\'t make it!</a>'
+                );  
+        }
+    });
+});
+
+                        
     
 
 

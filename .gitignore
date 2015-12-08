@@ -3,4 +3,6 @@
 media/
 local.py
 main/migrations/
+web/migrations/
+mobi/migrations/
 all.json
