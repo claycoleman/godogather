@@ -65,7 +65,7 @@
             <h5 class="bio">bio: {{profile.bio}}</h5><br>
             <h4><strong>{% ifequal request.user.profile profile  %}Your{% else %}{{profile.first_name}}'s{% endifequal %} Search Username</strong>:</h4><h4>{{ profile.username }}</h4>
             <h3>Events {% ifequal request.user.profile profile  %}You've{% else %}{{profile.first_name}} Has{% endifequal %} Posted</h3>
-            {% if profile.events_hosted.all %}
+            {% if profile.events_posted.all %}
             <div class="main-feed">
                 {% for event in profile.events_posted.all %}
                     <hr>

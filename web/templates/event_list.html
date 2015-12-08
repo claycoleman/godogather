@@ -53,7 +53,7 @@
                             <br style="clear:both;">
                             {% if request.user.profile in event.people_who_shared_it.all %}
                                     <p><strong>You</strong> shared this event!</p>
-                            {% elif request.user.profile not in event.host.all and not groups_in|intersection:event.groups.all and not friends_pk|intersection:event.host.all %}
+                            {% elif request.user.profile not in event.host.all and not groups_in|intersection:event.groups.all or not friends_pk|intersection:event.host.all %}
                                     <p>shared by {% for sharer in event.people_who_shared_it.all %}<a href="{% url 'profile_detail_view' sharer.pk %}">{{sharer.first_name}}</a>{% if not forloop.last %}, {% endif %}
                                     {% endfor %}</p>
                             {% endif %}

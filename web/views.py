@@ -124,8 +124,8 @@ def event_list_view(request):
         return redirect('new_user')
 
     context = {}
-    context['friends_pk'] = request.user.profile.friends.all().values_list('pk',flat=True)
-    context['groups_pk'] = request.user.profile.groups_in.all().values_list('pk',flat=True)
+    context['friends_pk'] = request.user.profile.friends.values_list('pk', flat=True)
+    context['groups_in'] = request.user.profile.groups_in.values_list('pk', flat=True)
 
     order = request.GET.get('order', '')
 
