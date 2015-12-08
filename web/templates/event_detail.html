@@ -57,7 +57,15 @@
                                 <h4 class="green">You have shared {{ event.name }} to your feed.</h4>&nbsp;&nbsp;<a class="btn btn-danger" href="#" alt="{{ event.pk }}" id="share-event">Unshare</a>
                             {% endif %}
                         {% endif %}
+                    </div>  
+
+                    {% if request.user.profile in event.host.all %}
+                    <div style="float:left;">                    
+                        <a class="btn btn-primary" href="{% url 'event_update_view' event.pk %}">Edit your event</a>&nbsp;&nbsp;<a class="btn btn-danger delete-button" href="{% url 'event_delete_view' event.pk %}" id="{{ event }}">Delete this event</a>
                     </div>
+                    {% else %}
+                    <!-- Can or cannot go buttons -->
+                    {% endif %}
 
                     <br id="comment-section">
                     <br>
@@ -81,14 +89,6 @@
                     <br>
                     <h3>Share: <a class="btn btn-primary" target="_blank" href='{{share_url}}'><i class='fa fa-facebook'></i></a>&nbsp;&nbsp;<a class="btn btn-danger" target="_blank" href='{{google_cal}}'><i class='fa fa-google'></i>&nbsp;&nbsp;Calendar</a>&nbsp;&nbsp;<a class="btn btn-info" target="_blank" href='{{apple_cal}}'><i class='fa fa-apple'></i>&nbsp;&nbsp;Calendar</a></h3>
                     <br>
-                    <br>
-
-                    {% if request.user.profile in event.host.all %}
-                    <div style="float:left;">                    
-                        <a class="btn btn-primary" href="{% url 'event_update_view' event.pk %}">Edit your event</a>&nbsp;&nbsp;<a class="btn btn-danger delete-button" href="{% url 'event_delete_view' event.pk %}" id="{{ event }}">Delete this event</a>
-                    </div>
-
-                    {% endif %}
 
             </div>
         </div>
