@@ -130,6 +130,7 @@ def event_list_view(request):
 
     friend_events = []
     for friend in request.user.profile.friends.all():
+        print "friend"
         friend_events = list(chain(friend_events, friend.events_posted.filter(public=True)))
 
     group_events = []
@@ -813,7 +814,7 @@ def request_membership_in_group(request):
     for admin in group.admin.filter(pk__in=member_ids):
         new_notif = Notification.objects.create(notification_type='Group Request')
         new_notif.user = admin
-        new_notif.message = "%s has requested to join %s!" % (request.user.profile.first_name, group.name)
+        new_notif.message = "%s has requested to join your group %s." % (request.user.profile.first_name, group.name)
         new_notif.sender_pk = group.pk
         new_notif.save()
 

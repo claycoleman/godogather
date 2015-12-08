@@ -9,6 +9,4 @@ def values_list(queryset, attr):
 
 @register.filter(name='intersection')
 def intersection(a, queryset):
-    if not a or not queryset:
-        return False
     return bool(set(a) & set(queryset.values_list('pk', flat=True)))
