@@ -59,16 +59,15 @@
             {% endif %}
             <br>
             <br>
-            <a href="{% url 'profile_list_view' %}">Back to profile list</a>
         </div>
         <div class="col-sm-4">
         <br>
-            <h5 class="bio">{{profile.bio}}</h5><br>
+            <h5 class="bio">bio: {{profile.bio}}</h5><br>
             <h4><strong>{% ifequal request.user.profile profile  %}Your{% else %}{{profile.first_name}}'s{% endifequal %} Search Username</strong>:</h4><h4>{{ profile.username }}</h4>
             <h3>Events {% ifequal request.user.profile profile  %}You've{% else %}{{profile.first_name}} Has{% endifequal %} Posted</h3>
             {% if profile.events_hosted.all %}
             <div class="main-feed">
-                {% for event in profile.events_hosted.all %}
+                {% for event in profile.events_posted.all %}
                     <hr>
                     <h5>{{ event }}</h5>
                     <h6 style="color: darkgrey">Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h6>
