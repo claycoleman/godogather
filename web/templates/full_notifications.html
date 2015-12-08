@@ -8,12 +8,12 @@
 <div class="container">
     <div class="row">
     <h1 class="text-center">Notifications</h1>
-        <div class="col-sm-6">
+        <div class="col-md-6">
             <h3 class="text-center">Notifications</h3>
             <hr>
             {% for notification in request.user.profile.notifications.all|slice:"0:20" %}
                 <div id="notif-row-{{notification.pk}}" class="row notification-item {% if not notification.read %}unread{% endif %}">
-                    <div class="col-sm-1 text-center">
+                    <div class="col-md-1 text-center">
                         {% if 'Friend' in notification.notification_type %}
                             <i class='fa fa-user-plus fa-lg' style='margin-top: 10px;'></i>
                         {% elif 'Group' in notification.notification_type %}
@@ -33,14 +33,14 @@
                         {% elif 'Confirm' in notification.notification_type %}
                             <i class='fa fa-check-square-o fa-lg' style='margin-top: 10px;'></i>
                         {% elif 'Shared' in notification.notification_type %}
-                            <i class='fa fa-check-share-box-o fa-lg' style='margin-top: 10px;'></i>
+                            <i class='fa fa-share-square-o fa-lg' style='margin-top: 10px;'></i>
                         {% endif %}
                     </div>
-                    <div class="col-sm-8">
+                    <div class="col-md-8">
                         <a href="{% if 'Friend' in notification.notification_type %}{% url 'profile_detail_view' notification.sender_pk %}{% elif 'Group' in notification.notification_type %}{% url 'group_event_list' notification.sender_pk %}{% elif 'Event' in notification.notification_type and 'Cancelled' not in notification.notification_type %}{% url 'event_detail_view' notification.sender_pk %}{% endif %}">
                         <h5>{{notification|safe}}</h5></a>
                     </div>
-                    <div class="col-sm-3 text-right notification-menu">
+                    <div class="col-md-3 text-right notification-menu">
                         {% if not notification.read %}
                             <a id="notif-clear-button-{{notification.pk}}" style="float: left; margin-top: 7px;" class="clear-button" alt="{{ notification.pk }}"><i class="fa fa-check-circle green" id="clear-check-{{notification.pk}}" alt="{{ notification.pk }}"></i></a>
                         {% endif %}
@@ -51,7 +51,7 @@
                 </div>
             {% endfor %}
         </div>
-        <div class="col-sm-3">
+        <div class="col-md-3">
             <h3 class="text-center">Friend Requests</h3>
             <hr>
             <ul class="add-menu no_bullet">
@@ -68,7 +68,7 @@
             {% endif %}
             </ul>
         </div>
-        <div class="col-sm-3 group-add-menu no_bullet">
+        <div class="col-md-3 group-add-menu no_bullet">
             <h3 class="text-center">Group Requests</h3>
             <hr>
             {% if group_requests %}

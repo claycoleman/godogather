@@ -3553,7 +3553,7 @@ input[type="button"].btn-block {
   background-color: #e5e5e5;
 }
 
-.dropdown-menu > li > a {
+.dropdown-menu > li > a, .dropdown-menu > div > li > a {
   display: block;
   padding: 3px 20px;
   clear: both;

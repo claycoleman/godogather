@@ -36,10 +36,12 @@
             <li class="dropdown {% block home-active %}{% endblock %}"><a href="{% url 'event_list_view' %}">Home</a></li>
             {% if request.user.is_authenticated %}
             <li id="noti_Container" class="dropdown request_list">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user-plus fa-lg"></i><div id="friend_request_bubble">{% if request.user.profile.friend_requests.exists %} <div id='friend_request_noti' class="noti_bubble">{{ request.user.profile.friend_requests.all | length}}</div>{% endif %}</div></a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span id='mobile-friend-text'></span><i id='friend-request-nav-icon' class="fa fa-user-plus fa-lg"></i><div id="friend_request_bubble">{% if request.user.profile.friend_requests.exists %} <div id='friend_request_noti' class="noti_bubble">{{ request.user.profile.friend_requests.all | length}}</div>{% endif %}</div></a>
                 <ul id="add-menu" class="dropdown-menu add-menu">
+                  <div class="non-mobile">
                     <li><a><b>Friends</b></a></li>
                     <li role="separator" class="divider"></li>
+                  </div>
                     {% if request.user.profile.friend_requests.exists %} 
                         {% for friend_request in request.user.profile.friend_requests.all %}
                             <li class="hz" id='li-{{ friend_request.pk }}'>
@@ -58,10 +60,12 @@
               </ul>
             </li>
             <li class="dropdown {% block groups-active %}{% endblock %}">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-users fa-lg"></i><div id="group_request_bubble">{% if request.user.profile.group_requests.exists %} <div id='group_request_noti' class="noti_bubble">{{ request.user.profile.group_requests.all | length}}</div>{% endif %}</div></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span id='mobile-group-text'></span><i  id='group-request-nav-icon' class="fa fa-users fa-lg"></i><div id="group_request_bubble">{% if request.user.profile.group_requests.exists %} <div id='group_request_noti' class="noti_bubble">{{ request.user.profile.group_requests.all | length}}</div>{% endif %}</div></a>
               <ul class="dropdown-menu group-add-menu">
-                <li><a><b>Groups</b></a></li>
-                <li role="separator" class="divider"></li>
+                <div class="non-mobile">
+                  <li><a><b>Groups</b></a></li>
+                  <li role="separator" class="divider"></li>
+                </div>
                 {% if request.user.profile.group_requests.exists %} 
                   {% for group in request.user.profile.group_requests.all|slice:"0:5" %}
                           <li class="hz" id='group-li-{{ group.pk }}'>
@@ -80,10 +84,12 @@
               </ul>
             </li>
             <li class="dropdown icon_list">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-bell fa-lg"></i><div id="notification_request_bubble">{% if request.user.profile.unread_notifications.exists %} <div id='notification_request_count' class="noti_bubble">{{ request.user.profile.unread_notifications | length}}</div>{% endif %}</div></a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span id='mobile-notification-text'></span><i id='notification-nav-icon' class="fa fa-bell fa-lg"></i><div id="notification_request_bubble">{% if request.user.profile.unread_notifications.exists %} <div id='notification_request_count' class="noti_bubble">{{ request.user.profile.unread_notifications | length}}</div>{% endif %}</div></a>
                 <ul id="notification-menu" class="dropdown-menu notification-menu">
+                          <div class="non-mobile">
                             <li><a href="{% url 'full_notifications' %}"><b>Notifications</b></a></li>
                             <li role="separator" class="divider"></li>
+                          </div>
                     {% if request.user.profile.unread_notifications.exists %} 
 
                         {% for notification in request.user.profile.unread_notifications %}
@@ -146,20 +152,20 @@
       <div id="footer">
           <div class="container">
               <div class="row">
-                  <div class="col-sm-4">
+                  <div class="col-md-4">
                       <h4>Got Feedback? Get in touch here</h4>
                       <a href="{% url 'contact_view' %}">Contact us</a>
-                  </div><!-- /col-sm-4 -->
-                  <div class="col-sm-4">
+                  </div><!-- /col-md-4 -->
+                  <div class="col-md-4">
                       <h4>Download the App!</h4>
                       <p>
                           <a href="#">App Store</a><br/>
                       </p>
-                  </div><!-- /col-sm-4 -->
-                  <div class="col-sm-4">
+                  </div><!-- /col-md-4 -->
+                  <div class="col-md-4">
                       <h4>About <strong>WAYD</strong></h4>
                       <a href="{% url 'about_view' %}">Read on here</a>
-                  </div><!-- /col-sm-4 -->
+                  </div><!-- /col-md-4 -->
               </div>
           </div>
       </div>

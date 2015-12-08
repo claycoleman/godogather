@@ -8,7 +8,7 @@
 {% block body %}
 <div class="container">
     <div class="row">
-        <div class="col-sm-8">
+        <div class="col-md-8">
             <h2>Friend Search</h2>
             <h4>Your username (for friends to find you more easily): {{ request.user.username }}</h4>
             <form action="{% url 'search_profiles' %}" enctype="form-data" method="POST" >
@@ -23,14 +23,14 @@
     {% if profiles %}
         <div class="row">
          {% for profile in profiles %}
-            <div class="col-sm-4 text-right">
+            <div class="col-md-4 text-right">
                 <div class="row">
-                    <div class="col-sm-4">
+                    <div class="col-md-4">
                         {% if profile.picture %}
                         <img src="{{ profile.picture.url }}" class="thumb">
                         {% endif %}
                     </div>
-                    <div class="col-sm-8">
+                    <div class="col-md-8">
                         <h3><a href="{% url 'profile_detail_view' profile.pk %}">{{ profile }}</a></h3>
                         <h4>{{ profile.username }}</h4>
                         <div class="friend_request_section" id="friend_request_section-{{ profile.pk }}">
@@ -57,7 +57,7 @@
         {% endfor %}
         </div>
     {% elif not get %}
-        <div class="col-sm-8">
+        <div class="col-md-8">
             <h3>&nbsp;&nbsp;&nbsp;No search results!</h3>
         </div>
     {% endif %}

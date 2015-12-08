@@ -1,9 +1,23 @@
 $(function() {
+    console.log(window.innerWidth);
+    if (window.innerWidth<768) {
+        $('#notification-nav-icon').remove();
+        $('#mobile-notification-text').html('Notifications<span class="caret"></span>');
+        $('#friend-request-nav-icon').remove();
+        $('#mobile-friend-text').html('Friend Requests<span class="caret"></span>');
+        $('#group-request-nav-icon').remove();
+        $('#mobile-group-text').html('Group Requests<span class="caret"></span>');
+        $('.non-mobile').remove();
+        $('.request_list').removeClass('request_list');
+        $('.icon_list').removeClass('icon_list');
+    } else {
+        $('.dropdown').on('hide.bs.dropdown', function(e) {
+        return false;
+    });
+    }
     $(".main-event-feed").css({'max-height': (window.innerHeight-370)+'px', 'overflow': 'scroll'});
     $(".main-events-going-to").css({'max-height': (window.innerHeight-430)*2/3+'px', 'overflow': 'scroll'});
     $(".main-group-list").css({'max-height': (window.innerHeight-430)/4+'px', 'overflow': 'scroll'});
-    $("div.main").css({'min-height': (window.innerHeight-155)+'px', 'overflow': 'scroll'});
-    $("div.wrapper").css({'min-height': (window.innerHeight-155)+'px', 'overflow': 'scroll'});
     $(".main-feed").css({'max-height': (window.innerHeight/2)+'px', 'overflow': 'scroll'});
     $('a.tooltipped').tooltip();
     var date_str = $('#current-date').text();
@@ -76,7 +90,7 @@ $('.event-detail').on('click', '.confirm-can-come', function(e) {
             pk: prk
         },
         success: function(data) {
-            $("#event-detail-"+prk).html('<br><img style="max-height: 40px; max-width: 40px; float:left" src="' + data[4] + '"><h4 style="float: left;"><strong class="black">&nbsp;' + data[1] + '</strong></h4><h5 class="darkgrey" style="float: right;">Posted <span class="date-posted">' + data[5] + '</span></h5><br style="clear:both;"><h2 class="text-center"><a href="/event_detail/' + prk +'">' + data[0] + '</a></h2><div class="row"><div class="col-sm-4"><h4>' + data[2] + '</h4><h5>' + data[3] + '</h5><h5>' + data[7] + '</h5></div><div class="col-sm-8 text-right"><h3>' + data[6] + '</h3></div></div><a class="btn btn-default" alt="' + prk + '"  href="/event_detail/' + prk +'">More details...</a><div class="text-right" style="float:right;"><span class="green stan"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;You\'re going!</span>&nbsp;&nbsp;<a class="btn btn-danger cancel-decision" id="reject-button-' + prk + '" alt="' + prk + '"  href="#"><i class="fa fa-times-circle" alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Back out...</a></div></div><br><br>');
+            $("#event-detail-"+prk).html('<br><img style="max-height: 40px; max-width: 40px; float:left" src="' + data[4] + '"><h4 style="float: left;"><strong class="black">&nbsp;' + data[1] + '</strong></h4><h5 class="darkgrey" style="float: right;">Posted <span class="date-posted">' + data[5] + '</span></h5><br style="clear:both;"><h2 class="text-center"><a href="/event_detail/' + prk +'">' + data[0] + '</a></h2><div class="row"><div class="col-md-4"><h4>' + data[2] + '</h4><h5>' + data[3] + '</h5><h5>' + data[7] + '</h5></div><div class="col-md-8 text-right"><h3>' + data[6] + '</h3></div></div><a class="btn btn-default" alt="' + prk + '"  href="/event_detail/' + prk +'">More details...</a><div class="text-right" style="float:right;"><span class="green stan"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;You\'re going!</span>&nbsp;&nbsp;<a class="btn btn-danger cancel-decision" id="reject-button-' + prk + '" alt="' + prk + '"  href="#"><i class="fa fa-times-circle" alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Back out...</a></div></div><br><br>');
             standardizeDates("#event-detail-"+prk);
         }
     });
@@ -114,7 +128,7 @@ $('.event-detail').on('click', '.cancel-decision', function(e) {
         },
         success: function(data) {
             $("#event-detail-"+prk).html(
-                '<br><img style="max-height: 40px; max-width: 40px; float:left" src="' + data[4] + '"><h4 style="float: left;"><strong class="black">&nbsp;' + data[1] + '</strong></h4><h5 class="darkgrey" style="float: right;">Posted <span class="date-posted">' + data[5] + '</span></h5><div class="row" style="clear:both;"><h2 class="text-center"><a href="/event_detail/' + prk +'">' + data[0] + '</a></h2><div class="col-sm-7"><h4>' + data[2] + '</h4></div><div class="col-sm-5 text-right"><h5>' + data[6] + '</h5></div></div><a class="btn btn-default" alt="' + prk + '"  href="/event_detail/' + prk +'">More details...</a><div class="text-right" style="float:right;"><a class="btn btn-success confirm-can-come" alt="' + prk + '" id="confirm-button-' + prk + '" href="#"><i class="fa fa-check-circle" alt="' + prk + '"  alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Count me in!</a>&nbsp;<a class="btn btn-danger confirm-cannot-come" alt="' + prk + '" id="reject-button-' + prk + '" href="#"><i class="fa fa-times-circle" alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Can\'t make it!</a></div></div><br><br>'
+                '<br><img style="max-height: 40px; max-width: 40px; float:left" src="' + data[4] + '"><h4 style="float: left;"><strong class="black">&nbsp;' + data[1] + '</strong></h4><h5 class="darkgrey" style="float: right;">Posted <span class="date-posted">' + data[5] + '</span></h5><div class="row" style="clear:both;"><h2 class="text-center"><a href="/event_detail/' + prk +'">' + data[0] + '</a></h2><div class="col-md-7"><h4>' + data[2] + '</h4></div><div class="col-md-5 text-right"><h5>' + data[6] + '</h5></div></div><a class="btn btn-default" alt="' + prk + '"  href="/event_detail/' + prk +'">More details...</a><div class="text-right" style="float:right;"><a class="btn btn-success confirm-can-come" alt="' + prk + '" id="confirm-button-' + prk + '" href="#"><i class="fa fa-check-circle" alt="' + prk + '"  alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Count me in!</a>&nbsp;<a class="btn btn-danger confirm-cannot-come" alt="' + prk + '" id="reject-button-' + prk + '" href="#"><i class="fa fa-times-circle" alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Can\'t make it!</a></div></div><br><br>'
                 );  
             standardizeDates("#event-detail-"+prk); 
         }
@@ -540,6 +554,3 @@ $('#sharing').on('click', '#share-event', function(e) {
 });
 
 
-$('.dropdown').on('hide.bs.dropdown', function(e) {
-    return false;
-});

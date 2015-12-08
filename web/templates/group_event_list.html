@@ -12,7 +12,7 @@
         <div class="row">
             
             <h1 class="text-center bold">{{ group }}</h1>
-            <div class="col-sm-8">
+            <div class="col-md-8">
                 <h3>Event Feed for this group</h3>
                 <h5 style="float: left;" class="text-left" ><strong>Current date: </strong>{{ today }}</h5>
                 <a style="float: right;" href="{% url 'group_event_list' group.pk %}" class="btn btn-default {% if not order %}active{% endif %}">Order by event date</a>
@@ -29,10 +29,10 @@
                             <h5 class="darkgrey" style="float: right;">Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</span></h5> 
                             <div class="row" style="clear:both;">
                                 <h2 class="text-center"><a href="{% url 'event_detail_view' event.pk %}">{{ event.name }}</a></h2>
-                                <div class="col-sm-7">
+                                <div class="col-md-7">
                                     <h4>{{ event.date_happening|date:"l, M d" }} at {{ event.time_starting|time:"g:i A" }}</h4>
                                 </div>
-                                <div class="col-sm-5 text-right">
+                                <div class="col-md-5 text-right">
                                     <br>
                                     <h5>{{ event.description }}</h5>
                                 </div>
@@ -51,12 +51,12 @@
                             <br style="clear:both;">
                             <h2 class="text-center"><a href="{% url 'event_detail_view' event.pk %}">{{ event.name }}</a></h2>
                             <div class="row">
-                                <div class="col-sm-4">
+                                <div class="col-md-4">
                                     <h4>{{ event.date_happening|date:"l, M d" }} at {{ event.time_starting|time:"g:i A" }}</h4>
                                     <h5>People coming: {{ event.people_coming.count}}</h5>
                                     <h5>People coming: {{ event.people_not_coming.count}}</h5>
                                 </div>
-                                <div class="col-sm-8 text-right">
+                                <div class="col-md-8 text-right">
                                     <h3>{{ event.description }}</h3>
                                 </div>
                             </div>
@@ -83,10 +83,10 @@
                                 <h5 class="darkgrey" style="float: right;">Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</span></h5> 
                                 <div class="row" style="clear:both;">
                                     <h2 class="text-center"><a href="{% url 'event_detail_view' event.pk %}">{{ event.name }}</a></h2>
-                                    <div class="col-sm-7">
+                                    <div class="col-md-7">
                                         <h4>{{ event.date_happening|date:"l, M d" }} at {{ event.time_starting|time:"g:i A" }}</h4>
                                     </div>
-                                    <div class="col-sm-5 text-right">
+                                    <div class="col-md-5 text-right">
                                     <br>
                                     <h5>{{ event.description }}</h5>
                                 </div>
@@ -112,7 +112,7 @@
                     </div>
                 {% endif %}
                 <div id="group-detail">
-            <div class="col-sm-4">
+            <div class="col-md-4">
                 <a class="btn" href = "{% url 'event_create_view' %}?group_pk={{group.pk}}" %}><i class='fa fa-plus-circle'></i> Create a new event in {{group}}</a>
                 <h3>Members:</h3>
                 {% for member in group.members.all %}

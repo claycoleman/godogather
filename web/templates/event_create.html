@@ -9,7 +9,7 @@
         <form action="{% url 'event_create_view' %}" enctype="multipart/form-data" method="POST" >
     <div class="row">
             {% csrf_token %}    
-            <div class="col-sm-7">
+            <div class="col-md-7">
                 <h2>Create an event</h2>
                     Name: {{ form.name|addcss:"form-control" }}
                     Description: {{ form.description|addcss:"form-control" }}
@@ -17,7 +17,7 @@
                     {{ form.test_location|addcss:"form-control"}}
                     
             </div>
-            <div class="col-sm-5">
+            <div class="col-md-5">
                 <h2>&nbsp;</h2>
                 Host: <small>(besides yourself, of course)</small><div class="overflow form-control">{{form.host}}
                 </div>
@@ -41,7 +41,7 @@
             <br>
         {% endif %}
         <div class="row">
-            <div class="col-sm-8 col-sm-offset-2">
+            <div class="col-md-8 col-md-offset-2">
 <input class="form-control btn-default" type="submit" value="Create event" />
                     <br>
                     <br>

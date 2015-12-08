@@ -10,7 +10,7 @@
 <div class="container">
     <div class="row">
             <h1 class="text-center bold">{{ profile }}</h1>
-        <div class="col-sm-8">
+        <div class="col-md-8">
             <br> 
             {% if profile.picture %}
                 <img src="{{ profile.picture.url }}">
@@ -60,7 +60,7 @@
             <br>
             <br>
         </div>
-        <div class="col-sm-4">
+        <div class="col-md-4">
         <br>
             <h5 class="bio">bio: {{profile.bio}}</h5><br>
             <h4><strong>{% ifequal request.user.profile profile  %}Your{% else %}{{profile.first_name}}'s{% endifequal %} Search Username</strong>:</h4><h4>{{ profile.username }}</h4>

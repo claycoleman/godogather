@@ -12,7 +12,7 @@
     <div class="row">
         <h1 class="text-center">{{ group.name }}</h1>
         <div id="group-detail">
-            <div class="col-sm-5 col-sm-offset-1">
+            <div class="col-md-5 col-md-offset-1">
                 <h3>Members:</h3>
                 {% for member in group.members.all %}
                     <a class="tooltipped" href="{% url 'profile_detail_view' member.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ member }}">
@@ -67,7 +67,7 @@
                 
             </div>
         </div>
-            <div class="col-sm-6">
+            <div class="col-md-6">
                 <br>
                 <a class="btn btn-success" href="{% url 'group_event_list' group.pk %}">Events Feed for {{ group }}</a>
                 {% if is_admin %}

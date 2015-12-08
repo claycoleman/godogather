@@ -12,14 +12,14 @@
         <h2>Edit <i>"{{ event.name }}"</i></h2>    
         {% if saved %}<p class="green">{{ saved }}</p>{% endif %} 
         {% csrf_token %}      
-            <div class="col-sm-7">
+            <div class="col-md-7">
                     Name: {{ form.name|addcss:"form-control" }}
                     Description: {{ form.description|addcss:"form-control" }}
                     Location: <small>(please include street address, city and zip)</small> {{ form.location|addcss:"form-control" }}
                     {{ form.test_location|addcss:"form-control"}}
                     
             </div>
-            <div class="col-sm-5">
+            <div class="col-md-5">
                 Host: <small>(besides yourself, of course)</small><div class="overflow form-control">{{form.host}}
                 </div>
                 <hr>
@@ -45,10 +45,10 @@
 
 
         <div class="row">
-            <div class="col-sm-4 col-sm-offset-2">
+            <div class="col-md-4 col-md-offset-2">
                 <input class="form-control btn-default submit" type="submit" value="Save and finish" name="_finish" />
             </div>
-            <div class="col-sm-4 ">
+            <div class="col-md-4 ">
                 <input class="form-control btn-default submit" type="submit" value="Save and continue editing" name="_continue"/>            
             </div>
         </div>

@@ -11,15 +11,15 @@
         <br>
         <form action="{% url 'contact_view' %}" enctype="multipart/form-data" method="POST" >
         {% csrf_token %} 
-            <div class="col-sm-6">
+            <div class="col-md-6">
                 Author: {{ form.author }}
                 Email: {{ form.email }}
             </div>
-            <div class="col-sm-6">
+            <div class="col-md-6">
                 Comment: {{ form.comment }}
             </div>
 
-            <div class="col-sm-8 col-sm-offset-2"><br>
+            <div class="col-md-8 col-md-offset-2"><br>
                 <input class="form-control" type="submit" value="Send!">
             </div>
         </form>

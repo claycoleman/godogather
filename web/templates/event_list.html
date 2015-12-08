@@ -10,7 +10,7 @@
 <div class="main">
     <div class="container">
         <div class="row">
-            <div class="col-sm-9">
+            <div class="col-md-9">
                 <h1 class="text-center bold">Event Feed</h1>
                 <h5 style="float: left;" class="text-left"><strong>Current date: </strong><span id="current-date">{{ today |date:"c"}}</span></h5>
                 <a style="float: right;" href="{% url 'event_list_view' %}" class="btn btn-default {% if not order %}active{% endif %}">Order by event date</a>
@@ -31,10 +31,10 @@
                             <div class="row" style="clear:both;">
                             
                                 <h2 class="text-center"><a href="{% url 'event_detail_view' event.pk %}">{{ event.name }}</a></h2>
-                                <div class="col-sm-7">
+                                <div class="col-md-7">
                                     <h4>{{ event.date_happening|date:"l, M d" }} at {{ event.time_starting|time:"g:i A" }}</h4>
                                 </div>
-                                <div class="col-sm-5 text-right">
+                                <div class="col-md-5 text-right">
                                     <br>
                                     <h5>{{ event.description }}</h5>
                                 </div>
@@ -59,12 +59,12 @@
                             {% endif %}
                             <h2 class="text-center"><a href="{% url 'event_detail_view' event.pk %}">{{ event.name }}</a></h2>
                             <div class="row">
-                                <div class="col-sm-4">
+                                <div class="col-md-4">
                                     <h4>{{ event.date_happening|date:"l, M d" }} at {{ event.time_starting|time:"g:i A" }}</h4>
                                     <h5>People coming: {{ event.people_coming.count}}</h5>
                                     <h5>People not coming: {{ event.people_not_coming.count}}</h5>
                                 </div>
-                                <div class="col-sm-8 text-right">
+                                <div class="col-md-8 text-right">
                                     <h3>{{ event.description }}</h3>
                                 </div>
                             </div>
@@ -104,10 +104,10 @@
                                 {% endif %}
                                     
                                     <h2 class="text-center"><a href="{% url 'event_detail_view' event.pk %}">{{ event.name }}</a></h2>
-                                    <div class="col-sm-7">
+                                    <div class="col-md-7">
                                         <h4>{{ event.date_happening|date:"l, M d" }} at {{ event.time_starting|time:"g:i A" }}</h4>
                                     </div>
-                                    <div class="col-sm-5 text-right">
+                                    <div class="col-md-5 text-right">
                                     <h5>{{ event.description }}</h5>
                                 </div>
                                 </div>
@@ -135,7 +135,7 @@
                     <h4><a class="btn btn-primary form-control" href="{% url 'search_profiles' %}">Search for friends</a></h4>
                     </div>
                 {% endif %}
-            <div class="col-sm-3">
+            <div class="col-md-3">
                 <br>
                 <br>
                 <a class="btn btn-lg" href = "{% url 'event_create_view' %}" %}><i class='fa fa-plus-circle'></i> Create a new event</a>
