@@ -39,7 +39,7 @@ def event_detail_view(request, pk):
     context['google_cal'] = "https://www.google.com/calendar/render?action=TEMPLATE&text={0}&dates={1}/{2}&details=For+details,+link+here%3a+http://www.example.com&location={3}&sf=true&output=xml".format(event.name, url_date_starting, url_date_ending, event.location)
 
 
-    context['apple_cal'] = "http://127.0.0.1:8000%s" % event.ics.url
+    context['apple_cal'] = "http://social.coleclayman.us%s" % event.ics.url
 
     context['comments'] = comments
     context['event'] = event

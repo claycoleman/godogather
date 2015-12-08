@@ -20,7 +20,7 @@
                     <h3>{{ event.date_happening }}</h3>
                     <h4>From {{ event.time_starting }} to
                     {{ event.time_ending }}</h4>
-                    <h6>Posted at {{ event.date_posted }}</h6>
+                    <h6>Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</span></h6>
                     {% if event.people_coming.count == 0 %}
                         <h3>{{ event.people_coming.count }}  showing up: </h3>
                     {% elif event.people_coming.count == 1 %}
@@ -47,6 +47,7 @@
                     {% else %}
                         <h5>No one has turned us down yet!</h5>
                     {% endif %}
+                    <br>
                     <br>
                     <div id="sharing">
                         {% if event.shareable and request.user.profile not in event.host.all %}

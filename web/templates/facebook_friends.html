@@ -6,7 +6,10 @@
             <img class="tiny-thumb" src="{{friend.picture.url}}">
             <a href="{% url 'profile_detail_view' friend.pk %}" >{{ friend }}</a>
             <strong id='div-invite-friend-{{friend.pk}}'>
-            {% if group not in friend.group_requests.all %}                
+            {% if friend in request.user.profile.friend_requests.all %}     
+                <a id='reject-friend-{{friend.pk}}' class="btn btn-sm btn-danger reject-friend" style="float: right; margin-top: 5px;" href="#invite-to-group" alt='{{friend.pk}}'>Reject...</a>     
+                <a id='accept-friend-{{friend.pk}}' class="btn btn-sm btn-success accept-friend" style="float: right; margin-top: 5px;" href="#invite-to-group" alt='{{friend.pk}}'>Accept!</a>&nbsp;  
+            {% elif request.user.profile not in friend.friend_requests.all %} 
                 <a id='invite-friend-{{friend.pk}}' class="btn btn-sm btn-success add-friend" style="float: right; margin-top: 5px;" href="#invite-to-group" alt='{{friend.pk}}'>Add!</a>
             {% else %}
                 <h5 style="float: right;" class="green">Added!</h5>
@@ -34,6 +37,42 @@ $('#friends').on('click', '.add-friend', function(e) {
         success: function(data) {
             $("#div-invite-friend-"+person_pk).html('');
             $("#div-invite-friend-"+person_pk).html('<h5 style="float: right;" class="green">Added!</h5>');
+        }
+    });
+});
+
+$('#friends').on('click', '.accept-friend', function(e) {
+    e.preventDefault();
+    console.log('user adding facebook friend');
+    console.log('#'+e.target.id)
+    var person_pk = $('#'+e.target.id).attr('alt');
+    $.ajax({
+        type: 'GET',
+        url: '/accept_request/',
+        data: {
+            pk: person_pk,
+        },
+        success: function(data) {
+            $("#div-invite-friend-"+person_pk).html('');
+            $("#div-invite-friend-"+person_pk).html('<h5 style="float: right;" class="green">Accepted!</h5>');
+        }
+    });
+});
+
+$('#friends').on('click', '.reject-friend', function(e) {
+    e.preventDefault();
+    console.log('user adding facebook friend');
+    console.log('#'+e.target.id)
+    var person_pk = $('#'+e.target.id).attr('alt');
+    $.ajax({
+        type: 'GET',
+        url: '/reject_request/',
+        data: {
+            pk: person_pk,
+        },
+        success: function(data) {
+            $("#div-invite-friend-"+person_pk).html('');
+            $("#div-invite-friend-"+person_pk).html('<h5 style="float: right;" class="red">Rejected...</h5>');
         }
     });
 });
