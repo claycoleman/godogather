@@ -116,7 +116,7 @@ class ProfileModelCreateForm(forms.ModelForm):
 class ProfileModelUpdateForm(forms.ModelForm):  
     class Meta:
         model = Profile
-        exclude = ['user', 'past_events', 'friends', 'friend_requests', 'events_posted', 'shared_events', 'group_requests']
+        exclude = ['user', 'past_events', 'friends', 'friend_requests', 'events_posted', 'shared_events', 'group_requests', 'followers']
 
 
 class ContactForm(forms.Form):
