@@ -26,9 +26,11 @@
                     <h2 class="text-center">Sign In</h2>
                     <br>
                     <h5>Don't have an account? That's okay - just use your Facebook profile to create one now!</h5><br>
-                    <h4><a class="btn btn-primary btn-lg" href="{% url 'social:begin' 'facebook' %}?next={% if next %}{{next}}{% else %}{% url 'event_list_view' %}{% endif %}">
-                        <i class="fa fa-facebook fa-lg"></i>&nbsp;&nbsp;|&nbsp;&nbsp;Log In with Facebook
-                    </a></h4>
+                    <div class="text-center">
+                        <h4><a class="btn btn-primary btn-lg" href="{% url 'social:begin' 'facebook' %}?next={% if next %}{{next}}{% else %}{% url 'event_list_view' %}{% endif %}">
+                            <i class="fa fa-facebook fa-lg"></i>&nbsp;&nbsp;|&nbsp;&nbsp;Log In with Facebook
+                        </a></h4>
+                    </div>
                 </div>
             </div>
         </div>

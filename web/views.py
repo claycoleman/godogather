@@ -31,7 +31,7 @@ def event_detail_view(request, pk):
     context = {}
 
     # TO DO -- fix the redirect-uri
-    context['share_url'] = 'https://www.facebook.com/dialog/feed?app_id={0}&display=popup&name={2}&description={3}&caption=Horizon%20events&link={1}&redirect_uri=http://social.coleclayman.us'.format(FB_APP_ID, urllib.quote_plus("http://127.0.0.1:8000%s" % resolve_url('event_detail_view', pk=pk)), 'Check out "%s" on Horizon Events!' % event.name, event.description)
+    context['share_url'] = 'https://www.facebook.com/dialog/feed?app_id={0}&display=popup&name={2}&description={3}&caption=WAYD%20events&link={1}&redirect_uri=http://social.coleclayman.us'.format(FB_APP_ID, urllib.quote_plus("http://127.0.0.1:8000%s" % resolve_url('event_detail_view', pk=pk)), 'Check out "%s" on WAYD Events!' % event.name, event.description)
     
     url_date_starting = datetime.combine(date=event.date_happening, time=event.time_starting).isoformat().replace('-', '').replace(':', '')
     url_date_ending = datetime.combine(date=event.date_happening, time=event.time_ending).isoformat().replace('-', '').replace(':', '')
@@ -116,6 +116,7 @@ def event_detail_view(request, pk):
 
     return render_to_response('event_detail.html', context, context_instance=RequestContext(request))
 
+
 @login_required
 def event_list_view(request):
 
@@ -130,7 +131,6 @@ def event_list_view(request):
 
     friend_events = []
     for friend in request.user.profile.friends.all():
-        print "friend"
         friend_events = list(chain(friend_events, friend.events_posted.filter(public=True)))
 
     group_events = []
@@ -589,6 +589,7 @@ def profile_create_view(request):
     new_profile.last_name = new_profile.user.last_name
 
     new_profile.save()
+    print 'lol'
 
     return redirect('event_list_view')
 
