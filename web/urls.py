@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^ajax/facebook_friends/$', 'web.views.ajax_facebook_friends'),
     url(r'^invite_friend_to_group/$', 'web.views.invite_friend_to_group'),
     url(r'^share_event/$', 'web.views.share_event'),
+    url(r'^subscribe/(?P<pk>\d+)/$', 'web.views.subscribe', name='subscribe'),
 
     # event urls
     url(r'^event_detail/(?P<pk>\d+)/$', 'web.views.event_detail_view', name='event_detail_view'),

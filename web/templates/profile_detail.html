@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load values_list %}
 
 {% block refresh %}<meta http-equiv="refresh" content="120">{% endblock %}
 
@@ -62,6 +63,17 @@
         </div>
         <div class="col-md-4">
         <br>
+
+            {% ifnotequal request.user.profile profile %}
+                {% if request.user.profile.pk not in profile.followers|values_list:'pk' %}
+                    <a class="btn btn-warning" href="{% url 'subscribe' profile.pk %}"><i class='fa fa-star'></i>&nbsp;&nbsp;Favorite {{ profile.first_name }}</a><br>
+                    <small>(receive notifications whenever {{ profile.first_name }} posts an event)</small>
+                {% else %}
+                    <a class="btn btn-danger" href="{% url 'subscribe' profile.pk %}"><i class='fa fa-star-o'></i>&nbsp;&nbsp;Unfavorite {{ profile.first_name }}</a><br>
+                    <small>(stop receiving notifications whenever {{ profile.first_name }} posts an event)</small>
+                {% endif %}
+                
+            {% endifnotequal %}
             <h5 class="bio">bio: {{profile.bio}}</h5><br>
             <h4><strong>{% ifequal request.user.profile profile  %}Your{% else %}{{profile.first_name}}'s{% endifequal %} Search Username</strong>:</h4><h4>{{ profile.username }}</h4>
             <h3>Events {% ifequal request.user.profile profile  %}You've{% else %}{{profile.first_name}} Has{% endifequal %} Posted</h3>

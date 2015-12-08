@@ -141,5 +141,7 @@ class Notification(models.Model):
         ordering = ['-date_notified']
 
     def __unicode__(self):
+        if not self.message:
+            return 'Uh oh'
         return self.message
 

@@ -406,6 +406,7 @@ $('.notification-menu').on('click', '.clear-button', function(e) {
             pk: prk,
         },
         success: function(data) {
+            $("#notif-row-"+prk).removeClass('unread');
             $("#notif-"+prk).remove('');
             if (data[0] == 0) {
                 $("#notification_request_bubble").html('');

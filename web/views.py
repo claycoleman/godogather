@@ -233,6 +233,12 @@ def event_create_view(request):
                 for host in new_event.host.all():
                     new_event.people_coming.add(host)
                     host.events_posted.add(new_event)
+                    for follower in host.followers.all():
+                        new_notif = Notification.objects.create(user=follower)
+                        new_notif.notification_type = "Following posted event"
+                        new_notif.message = "%s posted a new event, \"%s\"." % (host.first_name, new_event.name)
+                        new_notif.sender_pk = new_event.pk
+                        new_notif.save()
                 new_event.create_apple_ics()
                 return redirect('event_detail_view', new_event.pk)
         else:
@@ -1078,6 +1084,14 @@ def share_event(request):
         request.user.profile.events_posted.add(event)
         request.user.profile.shared_events.add(event)
         added = True
+        for follower in request.user.profile.followers.all():
+            if follower not in event.host.all():
+                if not follower.notifications.filter(read=False, sender_pk=event.pk, notification_type__iendswith=request.user.profile.pk).exists():
+                    new_notif = Notification.objects.create(user=follower)
+                    new_notif.notification_type = "Following shared event %s" % request.user.profile.pk
+                    new_notif.message = "%s shared a new event, \"%s\"." % (request.user.profile.first_name, event.name)
+                    new_notif.sender_pk = event.pk
+                    new_notif.save()
     else:
         request.user.profile.events_posted.remove(event)
         request.user.profile.shared_events.remove(event)
@@ -1090,9 +1104,23 @@ def share_event(request):
             new_notif.message = '%s shared your event "%s".' % (request.user.profile.first_name, event.name)
             new_notif.sender_pk = event.pk
             new_notif.save()
+
+    
     
     return JsonResponse([event.name, added], safe=False)
 
+
+@login_required
+def subscribe(request, pk):
+    profile = Profile.objects.get(pk=pk)
+    
+    print 
+    if request.user.profile.pk not in profile.followers.values_list('pk', flat=True):
+        profile.followers.add(request.user.profile)
+    else:
+        profile.followers.remove(request.user.profile)
+
+    return redirect('profile_detail_view', pk)
 
 def slugify(string):
     return string.lower().replace(' ', '-')
