@@ -64,7 +64,7 @@
         <div class="col-sm-4">
         <br>
             <h5 class="bio">{{profile.bio}}</h5><br>
-            <h4><strong>Your Search Username</strong>:</h4><h4>{{ profile.username }}</h4>
+            <h4><strong>{% ifequal request.user.profile profile  %}Your{% else %}{{profile.first_name}}'s{% endifequal %} Search Username</strong>:</h4><h4>{{ profile.username }}</h4>
             <h3>Events {% ifequal request.user.profile profile  %}You've{% else %}{{profile.first_name}} Has{% endifequal %} Posted</h3>
             {% if profile.events_hosted.all %}
             <div class="main-feed">
@@ -78,7 +78,7 @@
             {% else %}
                 <br>
                 <br>
-                <h4>You have no upcoming events!</h4>
+                <h4>{% ifequal request.user.profile profile  %}You have{% else %}{{profile.first_name}} has{% endifequal %} no upcoming events!</h4>
             {% endif %}
 
         </div>

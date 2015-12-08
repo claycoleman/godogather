@@ -26,7 +26,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{% url 'event_list_view' %}"><strong>Bridged</strong></a>
+          <a class="navbar-brand" href="{% url 'event_list_view' %}"><strong>Horizon</strong></a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -103,6 +103,8 @@
                     {% else %}
                       <li><a>No notifications!</a></li>
                     {% endif %}
+                    <li role="separator" class="divider"></li>
+                  <li><a href="{% url 'full_notifications' %}">See all your notifications</a></li>
               </ul>
             </li>
             <li class="dropdown {% block user_active %}{% endblock %}">
@@ -154,7 +156,7 @@
                       </p>
                   </div><!-- /col-sm-4 -->
                   <div class="col-sm-4">
-                      <h4>About <strong>Bridged</strong></h4>
+                      <h4>About <strong>Horizon</strong></h4>
                       <a href="{% url 'about_view' %}">Read on here</a>
                   </div><!-- /col-sm-4 -->
               </div>

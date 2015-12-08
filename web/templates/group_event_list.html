@@ -113,6 +113,7 @@
                 {% endif %}
                 <div id="group-detail">
             <div class="col-sm-4">
+                <a class="btn" href = "{% url 'event_create_view' %}?group_pk={{group.pk}}" %}><i class='fa fa-plus-circle'></i> Create a new event in {{group}}</a>
                 <h3>Members:</h3>
                 {% for member in group.members.all %}
                     <a class="tooltipped" href="{% url 'profile_detail_view' member.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ member }}">

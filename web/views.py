@@ -1080,6 +1080,14 @@ def share_event(request):
         request.user.profile.events_posted.remove(event)
         request.user.profile.shared_events.remove(event)
         added = False
+
+    for host in event.host.all():
+        if not host.notifications.filter(read=False, sender_pk=event.pk, notification_type__iendswith=request.user.profile.pk).exists():
+            new_notif = Notification.objects.create(user=host)
+            new_notif.notification_type = "Shared your event %s" % request.user.profile.pk
+            new_notif.message = '%s shared your event "%s".' % (request.user.profile.first_name, event.name)
+            new_notif.sender_pk = event.pk
+            new_notif.save()
     
     return JsonResponse([event.name, added], safe=False)
 

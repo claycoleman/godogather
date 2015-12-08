@@ -32,6 +32,8 @@
                             <i class='fa fa-comment fa-lg' style='margin-top: 10px;'></i>
                         {% elif 'Confirm' in notification.notification_type %}
                             <i class='fa fa-check-square-o fa-lg' style='margin-top: 10px;'></i>
+                        {% elif 'Shared' in notification.notification_type %}
+                            <i class='fa fa-check-share-box-o fa-lg' style='margin-top: 10px;'></i>
                         {% endif %}
                     </div>
                     <div class="col-sm-8">
