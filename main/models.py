@@ -9,8 +9,6 @@ from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 
 
-
-
 class Event(models.Model):
     name = models.CharField(null=True, blank=True, max_length=255)
     description = models.TextField(null=True, blank=True)
@@ -27,6 +25,7 @@ class Event(models.Model):
     public = models.BooleanField(default=False)
     shareable = models.BooleanField(default=True)
     ics = models.FileField(upload_to="event_ics", null=True, blank=True)
+    invitees = models.ManyToManyField('Profile', blank=True, related_name='events_invited_to')
 
     def __unicode__(self):
         return self.name
@@ -48,7 +47,6 @@ class Event(models.Model):
         app_event['uid'] = self.pk
         app_event['dtstart'] = url_date_starting
         app_event['dtend'] = url_date_ending
-        print app_event
         cal.add_component(app_event)
 
         self.ics.save('{0}.ics'.format(self.pk), ContentFile(cal.to_ical()))
@@ -144,4 +142,20 @@ class Notification(models.Model):
         if not self.message:
             return 'Uh oh'
         return self.message
+
+
+class FriendList(models.Model):
+    name = models.CharField(null=True, blank=True, max_length=255)
+    owner = models.ForeignKey('Profile', null=True, blank=True, related_name='lists')
+    people = models.ManyToManyField('Profile', blank=True, related_name='+')
+
+    class Meta:
+        verbose_name = "List"
+        verbose_name_plural = "Lists"
+        ordering = ['name']
+
+    def __unicode__(self):
+        if not self.name:
+            return 'Uh oh'
+        return self.name
 

@@ -17,8 +17,8 @@ from django.db.models import Q
 from project.local import FB_APP_ID
 
 
-from main.models import Event, Group, Profile, Comment, Notification
-from main.forms import SearchProfile, EventModelCreateForm, EventModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, UserLogin, ProfileModelCreateForm, ProfileModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, ContactForm, CommentForm
+from main.models import Event, Group, Profile, Comment, Notification, FriendList
+from main.forms import SearchProfile, EventModelCreateForm, EventModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, UserLogin, ProfileModelCreateForm, ProfileModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, ContactForm, CommentForm, FriendListCreate
 
 
 
@@ -30,17 +30,12 @@ def event_detail_view(request, pk):
     comments = event.comment_set.all().order_by('-date_posted')
     context = {}
 
+    context['invitees'] = event.invitees.exclude(Q(pk__in=event.people_coming.values_list('pk', flat=True)) | Q(pk__in=event.people_not_coming.values_list('pk', flat=True)))
     # TO DO -- fix the redirect-uri
-    context['share_url'] = 'https://www.facebook.com/dialog/feed?app_id={0}&display=popup&name={2}&description={3}&caption=WAYD%20events&link={1}&redirect_uri=http://social.coleclayman.us'.format(FB_APP_ID, urllib.quote_plus("http://127.0.0.1:8000%s" % resolve_url('event_detail_view', pk=pk)), 'Check out "%s" on WAYD Events!' % event.name, event.description)
     
-    url_date_starting = datetime.combine(date=event.date_happening, time=event.time_starting).isoformat().replace('-', '').replace(':', '')
-    url_date_ending = datetime.combine(date=event.date_happening, time=event.time_ending).isoformat().replace('-', '').replace(':', '')
     
-    context['google_cal'] = "https://www.google.com/calendar/render?action=TEMPLATE&text={0}&dates={1}/{2}&details=For+details,+link+here%3a+http://www.example.com&location={3}&sf=true&output=xml".format(event.name, url_date_starting, url_date_ending, event.location)
-
-
-    context['apple_cal'] = "http://social.coleclayman.us%s" % event.ics.url
-
+    context['date_ending'] = datetime.combine(date=event.date_happening, time=event.time_ending).isoformat('T')
+    
     context['comments'] = comments
     context['event'] = event
     context['friends'] = list(request.user.profile.friends.all())
@@ -140,6 +135,8 @@ def event_list_view(request):
 
     friend_events = list(set(friend_events) | set(group_events))
     my_events = request.user.profile.events_posted.all()
+    invited_events = request.user.profile.events_invited_to.all()
+    my_events = list(set(my_events) | set(invited_events))
 
     if order:
         context['order'] = True
@@ -149,7 +146,8 @@ def event_list_view(request):
 
     for event in events:
         event_date = datetime.combine(date=event.date_happening, time=event.time_starting)
-        timezone_inst = request.session.get('django_timezone')
+        
+        timezone_inst = ""
         if not timezone_inst:
             timezone_inst = 'UTC'
 
@@ -203,13 +201,18 @@ def event_create_view(request):
             should_save = True
             new_event = form.save(commit=False)
             event = datetime.combine(new_event.date_happening, new_event.time_starting)
-            timezone_inst = request.session.get('django_timezone')
+            event_ending = datetime.combine(new_event.date_happening, new_event.time_ending)
+
+            timezone_inst = form.data['timezone']
             if not timezone_inst:
                 timezone_inst = 'UTC'
                 print "UTC'd"
             event = event.replace(tzinfo=pytz.timezone(timezone_inst))
+            event = event.astimezone(pytz.utc)
+            event_ending = event_ending.replace(tzinfo=pytz.timezone(timezone_inst))
+            event_ending = event_ending.astimezone(pytz.utc)
 
-            print timezone.localtime(event)
+            
             if event < timezone.now():
                 should_save = False
                 context['errors'] = "The event date was already in the past! Try again."
@@ -227,6 +230,9 @@ def event_create_view(request):
                 context['form'] = form
 
             if should_save:
+                new_event.date_happening = event.date()
+                new_event.time_starting = event.time()
+                new_event.time_ending = event_ending.time()
                 new_event.save()
                 form.save_m2m()
                 new_event.host.add(request.user.profile)
@@ -256,6 +262,7 @@ def return_dict(dictionary):
         form_dict[key] = dictionary[key]
     return form_dict
 
+
 @login_required
 def event_update_view(request, pk):
     context = {}
@@ -284,13 +291,16 @@ def event_update_view(request, pk):
             should_save = True
             updated_event = form.save(commit=False)
             event = datetime.combine(updated_event.date_happening, updated_event.time_starting)
-            timezone_inst = request.session.get('django_timezone')
+            event_ending = datetime.combine(updated_event.date_happening, updated_event.time_ending)
+
+            timezone_inst = form.data['timezone']
             if not timezone_inst:
                 timezone_inst = 'UTC'
                 print "UTC'd"
             event = event.replace(tzinfo=pytz.timezone(timezone_inst))
-            print event
-            print timezone.now()
+            event = event.astimezone(pytz.utc)
+            event_ending = event_ending.replace(tzinfo=pytz.timezone(timezone_inst))
+            event_ending = event_ending.astimezone(pytz.utc)
             if event < timezone.now():
                 should_save = False
                 context['errors'] = "The event date was already in the past! Try again."
@@ -308,13 +318,16 @@ def event_update_view(request, pk):
                 context['form'] = form
 
             if should_save:
+                updated_event.date_happening = event.date()
+                updated_event.time_starting = event.time()
+                updated_event.time_ending = event_ending.time()
                 updated_event.save()
                 form.save_m2m()
                 updated_event.host.add(request.user.profile)
                 for host in updated_event.host.all():
                     updated_event.people_coming.add(host)
                 
-                new_event.create_apple_ics()
+                updated_event.create_apple_ics()
 
                 changed = ""
 
@@ -399,6 +412,10 @@ def group_list_view(request):
 
 @login_required
 def group_event_list(request, pk):
+    if not request.user.is_authenticated():
+        return redirect('new_user')
+
+    
     context = {}
 
     group = Group.objects.get(pk=pk)
@@ -413,8 +430,6 @@ def group_event_list(request, pk):
     group_events = Event.objects.filter(groups=group)
     my_events = request.user.profile.events_hosted.filter(groups=group)
 
-
-
     order = request.GET.get('order', '')
 
     if order:
@@ -425,7 +440,8 @@ def group_event_list(request, pk):
 
     for event in events:
         event_date = datetime.combine(date=event.date_happening, time=event.time_starting)
-        timezone_inst = request.session.get('django_timezone')
+        
+        timezone_inst = ""
         if not timezone_inst:
             timezone_inst = 'UTC'
 
@@ -444,10 +460,9 @@ def group_event_list(request, pk):
                 pass
             events.remove(event)
 
-    context['today'] = timezone.now()
+    context['today'] = datetime.now()
     context['events'] = events
     context['my_events'] = my_events
-
 
     return render_to_response('group_event_list.html', context, context_instance=RequestContext(request))
 
@@ -721,6 +736,91 @@ def contact_view(request):
     return render_to_response('contact.html', context, context_instance=RequestContext(request))
 
 
+# friendlist views
+
+@login_required
+def friend_list_detail_view(request, pk):
+    friend_list = FriendList.objects.get(pk=pk)
+    if request.user.profile != friend_list.owner:
+        return redirect('friend_list_list_view')
+
+    context = {}
+    context['friend_list'] = friend_list
+
+    return render_to_response('friend_list_detail.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def friend_list_list_view(request):
+
+    friend_lists = request.user.profile.lists.all()
+
+    context = {}
+    context['friend_lists'] = friend_lists
+    form = FriendListCreate(request.POST or None)
+    context['form'] = form
+    if request.method == "POST":
+        if form.is_valid():
+            name = form.cleaned_data['name'].strip()
+            if name != "" and name is not None:
+                new_friend_list, created = FriendList.objects.get_or_create(owner=request.user.profile, name=name)
+                if created:
+                    return redirect('friend_list_detail_view', new_friend_list.pk)
+                else:
+                    context['errors'] = "You already have a group named \"%s\"! Try creating a different group." % name
+
+    return render_to_response('friend_list_list.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def pick_friends_for_list(request, pk):
+
+    context = {}
+
+    friend_list = FriendList.objects.get(pk=pk)
+
+    context['friend_list'] = friend_list
+    context['friends'] = request.user.profile.friends.exclude(pk__in=friend_list.people.values_list('pk', flat=True))
+
+
+    return render_to_response('pick_friends_for_list.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def invite_friends_to_event_view(request, pk):
+    context = {}
+    event = Event.objects.get(pk=pk)
+    context['event'] = event
+
+    friends = request.user.profile.friends.exclude(events_going_to=event)
+
+    context['friends'] = friends
+
+    return render_to_response('invite_friends_to_event.html', context, context_instance=RequestContext(request))
+
+
+
+@login_required
+def invite_friend_lists_to_event_view(request, pk):
+    context = {}
+    event = Event.objects.get(pk=pk)
+    context['event'] = event
+
+    friend_lists = request.user.profile.lists.all()
+
+    context['friend_lists'] = friend_lists
+
+    return render_to_response('invite_friend_lists_to_event.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def friend_list_delete_view(request, pk):
+
+    FriendList.objects.get(pk=pk).delete()
+
+    return redirect('friend_list_list_view')
+
+
 # ajax views
 
 @login_required
@@ -983,7 +1083,8 @@ def can_come(request):
             hosts += "%s" % e
         else:
             hosts += "%s, " % e
-    date = "%s at %s" % (event.date_happening.strftime('%A, %b %-d'), event.time_starting.strftime('%-I:%M %p'))
+    event_date = datetime.combine(event.date_happening, event.time_starting)
+    date = "%s" % event_date.isoformat('T')
     posted = "%s" % event.date_posted.isoformat(' ')
     return JsonResponse([event.name, hosts, date, "People coming: %d" % event.people_coming.count(), host_list[0].picture.url, posted, event.description, "People not coming: %d" % event.people_not_coming.count()], safe=False)
 
@@ -993,6 +1094,7 @@ def cannot_come(request):
     pk = request.GET.get('pk', '')
     event = Event.objects.get(pk=pk)
     event.people_coming.remove(request.user.profile)
+    event.invitees.remove(request.user.profile)
     event.people_not_coming.add(request.user.profile)
     hosts = ""
     host_list = [e for e in event.host.all()]
@@ -1001,7 +1103,8 @@ def cannot_come(request):
             hosts += "%s" % e.first_name
         else:
             hosts += "%s, " % e.first_name
-    date = "%s at %s" % (event.date_happening.strftime('%a, %b %-d'), event.time_starting.strftime('%-I:%M %p'))
+    event_date = datetime.combine(event.date_happening, event.time_starting)
+    date = "%s" % event_date.isoformat('T')    
     return JsonResponse([event.name, hosts, date, event.people_coming.count(), host_list[0].picture.url], safe=False)
 
 
@@ -1030,7 +1133,8 @@ def cancel_decision(request):
             hosts += "%s" % e
         else:
             hosts += "%s, " % e
-    date = "%s at %s" % (event.date_happening.strftime('%A, %b %-d'), event.time_starting.strftime('%-I:%M %p'))
+    event_date = datetime.combine(event.date_happening, event.time_starting)
+    date = "%s" % event_date.isoformat('T')
     posted = "%s" % event.date_posted.isoformat(' ')
     return JsonResponse([event.name, hosts, date, event.people_coming.count(), host_list[0].picture.url, posted, event.description], safe=False)
 
@@ -1092,20 +1196,18 @@ def share_event(request):
                     new_notif.message = "%s shared a new event, \"%s\"." % (request.user.profile.first_name, event.name)
                     new_notif.sender_pk = event.pk
                     new_notif.save()
+
+        for host in event.host.all():
+            if not host.notifications.filter(read=False, sender_pk=event.pk, notification_type__iendswith=request.user.profile.pk).exists():
+                new_notif = Notification.objects.create(user=host)
+                new_notif.notification_type = "Shared your event %s" % request.user.profile.pk
+                new_notif.message = '%s shared your event "%s".' % (request.user.profile.first_name, event.name)
+                new_notif.sender_pk = event.pk
+                new_notif.save()
     else:
         request.user.profile.events_posted.remove(event)
         request.user.profile.shared_events.remove(event)
         added = False
-
-    for host in event.host.all():
-        if not host.notifications.filter(read=False, sender_pk=event.pk, notification_type__iendswith=request.user.profile.pk).exists():
-            new_notif = Notification.objects.create(user=host)
-            new_notif.notification_type = "Shared your event %s" % request.user.profile.pk
-            new_notif.message = '%s shared your event "%s".' % (request.user.profile.first_name, event.name)
-            new_notif.sender_pk = event.pk
-            new_notif.save()
-
-    
     
     return JsonResponse([event.name, added], safe=False)
 
@@ -1114,13 +1216,90 @@ def share_event(request):
 def subscribe(request, pk):
     profile = Profile.objects.get(pk=pk)
     
-    print 
     if request.user.profile.pk not in profile.followers.values_list('pk', flat=True):
         profile.followers.add(request.user.profile)
     else:
         profile.followers.remove(request.user.profile)
 
     return redirect('profile_detail_view', pk)
+
+
+@login_required
+def add_friend_to_friend_list(request):
+    friend_pk = request.GET.get('friend_pk')
+    list_pk = request.GET.get('list_pk')
+
+    friend = Profile.objects.get(pk=friend_pk)
+    friend_list = FriendList.objects.get(pk=list_pk)
+
+    friend_list.people.add(friend)
+
+    return JsonResponse({'success': True})
+
+
+@login_required
+def invite_friend_to_event(request):
+    friend_pk = request.GET.get('friend_pk')
+    event_pk = request.GET.get('event_pk')
+    event = Event.objects.get(pk=event_pk)
+
+    extend_event_invite(request.user.profile.first_name, friend_pk, event)
+
+    return JsonResponse({'success': True})
+
+
+@login_required
+def invite_friend_list_to_event(request):
+    friend_list_pk = request.GET.get('friend_list_pk')
+    event_pk = request.GET.get('event_pk')
+    event = Event.objects.get(pk=event_pk)
+    friend_list = FriendList.objects.get(pk=friend_list_pk)
+
+    for friend_pk in friend_list.people.values_list('pk', flat=True):
+        if friend_pk not in event.people_coming.values_list('pk', flat=True):
+            extend_event_invite(request.user.profile.first_name, friend_pk, event)
+
+    return JsonResponse({'success': True})
+
+
+def extend_event_invite(first_name, friend_pk, event):
+    friend = Profile.objects.get(pk=friend_pk)
+
+    event.invitees.add(friend)
+
+    if not friend.notifications.filter(read=False, sender_pk=event.pk, notification_type__istartswith='Invited to event').exists():
+        new_notif = Notification.objects.create(user=friend)
+        new_notif.notification_type = "Invited to event"
+        new_notif.message = "%s invited you to come to the event \"%s\"!" % (first_name, event.name)
+        new_notif.sender_pk = event.pk
+        new_notif.save()
+
+
+def share_buttons(request, pk):
+    context = {}
+    event = Event.objects.get(pk=pk)
+    context['event'] = event
+
+
+    context['share_url'] = 'https://www.facebook.com/dialog/feed?app_id={0}&display=popup&name={2}&description={3}&caption=WAYD%20events&link={1}&redirect_uri=http://social.coleclayman.us'.format(FB_APP_ID, urllib.quote_plus("http://127.0.0.1:8000%s" % resolve_url('event_detail_view', pk=pk)), 'Check out "%s" on WAYD Events!' % event.name, event.description)
+
+    return render_to_response('share_buttons.html', context, context_instance=RequestContext(request))
+
+
+def calendar_buttons(request, pk):
+    context = {}
+
+    event = Event.objects.get(pk=pk)
+    context['event'] = event
+
+    url_date_starting = datetime.combine(date=event.date_happening, time=event.time_starting).isoformat().replace('-', '').replace(':', '')
+    url_date_ending = datetime.combine(date=event.date_happening, time=event.time_ending).isoformat().replace('-', '').replace(':', '')
+    context['google_cal'] = "https://www.google.com/calendar/render?action=TEMPLATE&text={0}&dates={1}/{2}&details=For+details,+link+here%3a+http://www.example.com&location={3}&sf=true&output=xml".format(event.name, url_date_starting, url_date_ending, event.location)
+
+
+    context['apple_cal'] = "http://social.coleclayman.us%s" % event.ics.url
+
+    return render_to_response('calendar_buttons.html', context, context_instance=RequestContext(request))
 
 def slugify(string):
     return string.lower().replace(' ', '-')

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Event, Profile, Group, Comment, Notification
+from .models import Event, Profile, Group, Comment, Notification, FriendList
 
 
 class EventAdmin(admin.ModelAdmin):
@@ -42,3 +42,4 @@ admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Notification)
+admin.site.register(FriendList)

@@ -36,10 +36,12 @@
                             <i class='fa fa-share-square-o fa-lg' style='margin-top: 10px;'></i>
                         {% elif 'Following' in notification.notification_type %}
                             <i class='fa fa-star-o fa-lg' style='margin-top: 10px;'></i>
+                        {% elif 'Invited' in notification.notification_type %}
+                            <i class='fa fa-envelope-o fa-lg' style='margin-top: 10px;'></i>
                         {% endif %}
                     </div>
                     <div class="col-md-8">
-                        <a href="{% if 'Friend' in notification.notification_type %}{% url 'profile_detail_view' notification.sender_pk %}{% elif 'Group' in notification.notification_type %}{% url 'group_event_list' notification.sender_pk %}{% elif 'Event' in notification.notification_type and 'Cancelled' not in notification.notification_type %}{% url 'event_detail_view' notification.sender_pk %}{% endif %}">
+                        <a href="{% if 'Friend' in notification.notification_type %}{% url 'profile_detail_view' notification.sender_pk %}{% elif 'Group' in notification.notification_type %}{% url 'group_event_list' notification.sender_pk %}{% elif 'event' in notification.notification_type|lower and 'Cancelled' not in notification.notification_type %}{% url 'event_detail_view' notification.sender_pk %}{% endif %}">
                         <h5>{{notification|safe}}</h5></a>
                     </div>
                     <div class="col-md-3 text-right notification-menu">
@@ -86,6 +88,8 @@
             {% endif %}
         </div>
     </div>
+        <br>
+
 </div>
 
 

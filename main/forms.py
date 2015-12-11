@@ -5,7 +5,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserCreationForm, UserChangeForm
 
-from .models import Event, Group, Profile
+from .models import Event, Group, Profile, FriendList
 
 #Event forms
 
@@ -126,5 +126,8 @@ class ContactForm(forms.Form):
 
 
 class CommentForm(forms.Form):
-    message = forms.CharField(required=False, label="Enter your comment here!", widget=forms.Textarea(attrs={'id': 'comment_body', 'class': "form-control", 'placeholder':"Type your comment here"}))
+    message = forms.CharField(required=False, label="Enter your comment here!", widget=forms.Textarea(attrs={'id': 'comment_body', 'class': "form-control", 'placeholder':"Why I oughta..."}))
 
+
+class FriendListCreate(forms.Form):
+    name = forms.CharField(required=False, label="Enter the name of your new Friend List here!", widget=forms.TextInput(attrs={'id': 'comment_body', 'class': "form-control", 'placeholder':"Type the name here"}))

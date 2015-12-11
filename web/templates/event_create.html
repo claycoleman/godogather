@@ -47,6 +47,7 @@
                     <br>
             </div>
         </div>
+        <input id="current-timezone" name="timezone" class="hidden" value="UTC">
         </form>
     </div>
 </div>
@@ -61,5 +62,6 @@
 
 {% block scripts %}
     <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
+    <script type="text/javascript" src="{% static 'js/jstz-1.0.4.min.js' %}"></script>
 {% endblock scripts %}
 

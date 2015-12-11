@@ -13,6 +13,11 @@ from .serializers import ProfileSerializer, EventSerializer, GroupSerializer
 class APIProfileList(generics.ListCreateAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+    
+
+class APIFriends(generics.ListCreateAPIView):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
 
 
 class APIProfileDetail(generics.RetrieveUpdateDestroyAPIView):

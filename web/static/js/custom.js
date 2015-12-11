@@ -1,5 +1,6 @@
 $(function() {
     console.log(window.innerWidth);
+    
     if (window.innerWidth<768) {
         $('#notification-nav-icon').remove();
         $('#mobile-notification-text').html('Notifications<span class="caret"></span>');
@@ -15,26 +16,53 @@ $(function() {
         return false;
     });
     }
-    $(".main-event-feed").css({'max-height': (window.innerHeight-370)+'px', 'overflow': 'scroll'});
-    $(".main-events-going-to").css({'max-height': (window.innerHeight-430)*2/3+'px', 'overflow': 'scroll'});
-    $(".main-group-list").css({'max-height': (window.innerHeight-430)/4+'px', 'overflow': 'scroll'});
-    $(".main-feed").css({'max-height': (window.innerHeight/2)+'px', 'overflow': 'scroll'});
+    // $(".main-event-feed").css({'max-height': (window.innerHeight-370)+'px', 'overflow': 'auto'});
+    $(".main-events-going-to").css({'max-height': (window.innerHeight-480)*2/3+'px', 'overflow': 'auto'});
+    $(".main-group-list").css({'max-height': (window.innerHeight-480)/4+'px', 'overflow': 'auto'});
+    $(".main-feed").css({'max-height': (window.innerHeight/2)+'px', 'overflow': 'auto'});
     $("div.main").css({'min-height': (window.innerHeight-165)+'px'});
     $("div.wrapper").css({'min-height': (window.innerHeight-165)+'px'});
     $('a.tooltipped').tooltip();
-    var date_str = $('#current-date').text();
-    var d = new Date(date_str);
+    
+    moment.locale('en', {
+        calendar : {
+            lastDay : '[Yesterday at] LT',
+            sameDay : '[Today at] LT',
+            nextDay : '[Tomorrow at] LT',
+            lastWeek : '[last] dddd [at] LT',
+            nextWeek : 'dddd [at] LT',
+            sameElse : 'dddd, MMM Do [at] LT'
+        }
+    });
+
+    var d = new Date();
     $('#current-date').text(moment(d).format('MMMM Do YYYY, h:mm a'));
+    standardizeDatesStarting();
+    standardizeDatesHappening();
     var date_array = $('.date-posted')
     for (i=0; i < date_array.length; i++) {
         var date = new Date(date_array[i].innerHTML);
         date_array[i].innerHTML = moment(date).fromNow();
     }
+
+    var start = new Date($('.datepicker').val() + 'T' + $('#id_time_starting').val())
+    var end = new Date($('.datepicker').val() + 'T' + $('#id_time_ending').val())
     $('.datepicker').datepicker({ dateFormat: 'yy-mm-dd', changeMonth: true, changeYear: true, selectOtherMonths: true, showOtherMonths: true});
+    $('.datepicker').val(moment(start).format('YYYY-MM-DD'))
     $('.timepicker').timepicker({ 'timeFormat': 'h:i a', 'scrollDefault': 'now', 'step': 15  });
-    var options = {'width': '600px', 'height': '300px', 'overflow': 'scroll'};
+    $('#id_time_starting').val(moment(start).format('hh:mm a'))
+    $('#id_time_ending').val(moment(end).format('hh:mm a'))
+
+
+    var options = {'width': '625px', 'height': '300px', 'overflow': 'auto'};
     try {
         $('a.popup').popup(options);
+        $('a.popup-mini').popup({'width': '100px;', 'height': '75px', 'overflow': 'auto'});
+    }
+    catch(err) {
+    }
+    try {
+        $('#current-timezone').val(jstz.determine().name());
     }
     catch(err) {
     }
@@ -47,11 +75,35 @@ $(function() {
 });
 
 
-function standardizeDates(location) {
-    var span = $(location).children('h5').children()[0]
 
+function standardizeDatesStarting() {
+    var span = $(".date-starting")
+    for (i=0; i < span.length; i++) {
+        var date = new Date(span[i].innerHTML);
+        span[i].innerHTML = moment(date).calendar();
+    } 
+    
+}
+
+function standardizeDatesHappening() {
+    var span = $("#rawdate")
+    var date = new Date(span.html());
+    $('#date-happens').html(moment(date).format('MMM Do YYYY'));
+    $('#from-time').html(moment(date).format('[From] h:mm a [to]'));
+    $('#from-time').html($('#from-time').html() + " " + moment(new Date($('#rawdate-end').html())).format('h:mm a'));
+}
+
+function standardizeDatesStartingWithLocation(location) {
+    var span = $(location).find('.date-starting')[0]
+    console.log(span.innerHTML);
     var date = new Date(span.innerHTML.replace(' ', 'T'));
-    console.log(date);
+    span.innerHTML = moment(date).calendar();
+}
+
+function standardizeDatesPosted(location) {
+    var span = $(location).children('h5').children()[0]
+    console.log(span.innerHTML);
+    var date = new Date(span.innerHTML.replace(' ', 'T'));
     span.innerHTML = moment(date).fromNow();
 }
 
@@ -92,8 +144,9 @@ $('.event-detail').on('click', '.confirm-can-come', function(e) {
             pk: prk
         },
         success: function(data) {
-            $("#event-detail-"+prk).html('<br><img style="max-height: 40px; max-width: 40px; float:left" src="' + data[4] + '"><h4 style="float: left;"><strong class="black">&nbsp;' + data[1] + '</strong></h4><h5 class="darkgrey" style="float: right;">Posted <span class="date-posted">' + data[5] + '</span></h5><br style="clear:both;"><h2 class="text-center"><a href="/event_detail/' + prk +'">' + data[0] + '</a></h2><div class="row"><div class="col-md-4"><h4>' + data[2] + '</h4><h5>' + data[3] + '</h5><h5>' + data[7] + '</h5></div><div class="col-md-8 text-right"><h3>' + data[6] + '</h3></div></div><a class="btn btn-default" alt="' + prk + '"  href="/event_detail/' + prk +'">More details...</a><div class="text-right" style="float:right;"><span class="green stan"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;You\'re going!</span>&nbsp;&nbsp;<a class="btn btn-danger cancel-decision" id="reject-button-' + prk + '" alt="' + prk + '"  href="#"><i class="fa fa-times-circle" alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Back out...</a></div></div><br><br>');
-            standardizeDates("#event-detail-"+prk);
+            $("#event-detail-"+prk).html('<br><img style="max-height: 40px; max-width: 40px; float:left" src="' + data[4] + '"><h4 style="float: left;"><strong class="black">&nbsp;' + data[1] + '</strong></h4><h5 class="darkgrey" style="float: right;">Posted <span class="date-posted">' + data[5] + '</span></h5><br style="clear:both;"><h2 class="text-center"><a href="/event_detail/' + prk +'">' + data[0] + '</a></h2><div class="row"><div class="col-md-4"><h4 class="date-starting">' + data[2] + '</h4><h5>' + data[3] + '</h5><h5>' + data[7] + '</h5></div><div class="col-md-8 text-right"><h3>' + data[6] + '</h3></div></div><a class="btn btn-default" alt="' + prk + '"  href="/event_detail/' + prk +'">More details...</a><div class="text-right" style="float:right;"><span class="green stan"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;You\'re going!</span>&nbsp;&nbsp;<a class="btn btn-danger cancel-decision" id="reject-button-' + prk + '" alt="' + prk + '"  href="#"><i class="fa fa-times-circle" alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Back out...</a></div></div><br><br>');
+            standardizeDatesPosted("#event-detail-"+prk);
+            standardizeDatesStartingWithLocation("#event-detail-"+prk);
         }
     });
     
@@ -110,9 +163,9 @@ $('.event-detail').on('click', '.confirm-cannot-come', function(e) {
             pk: prk,
         },
         success: function(data) {
-            $("#event-detail-"+prk).html('<br><img style="max-height: 40px; max-width: 40px; float:left" src="' + data[4] +'"><h4 style="float: left;"><strong style="color: darkgray">&nbsp;' + data[1] + '</strong></h4><div class="text-right" style="float:right"><span class="red stan"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;You\'re not going...</span><br><br><a class="btn btn-sm btn-success cancel-decision" id="confirm-button-' + prk + '" alt="' + prk + '"  href="#"><i class="fa fa-check-circle" alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Cancel</a></div><h2 class="text-center darkgray"><a style="color: #424242" href="/event_detail/' + prk +'">' + data[0] + '</a></h2><h5 style="color: darkgray" class="text-left">' + data[2] + '</h5><br>');
-            standardizeDates("#event-detail-"+prk);
-
+            $("#event-detail-"+prk).html('<br><img style="max-height: 40px; max-width: 40px; float:left" src="' + data[4] +'"><h4 style="float: left;"><strong style="color: darkgray">&nbsp;' + data[1] + '</strong></h4><div class="text-right" style="float:right"><span class="red stan"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;You\'re not going...</span><br><br><a class="btn btn-sm btn-success cancel-decision" id="confirm-button-' + prk + '" alt="' + prk + '"  href="#"><i class="fa fa-check-circle" alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Cancel</a></div><h2 class="text-center darkgray"><a style="color: #424242" href="/event_detail/' + prk +'">' + data[0] + '</a></h2><h5 style="color: darkgray" class="text-left date-starting">' + data[2] + '</h5><br>');
+            standardizeDatesPosted("#event-detail-"+prk);
+            standardizeDatesStartingWithLocation("#event-detail-"+prk);
         }
     });
 }); // <a class="btn btn-sm btn-warning cancel-decision" id="confirm-button-' + prk + '" alt="' + prk + '" href="#" style="float:left"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Well, I can\'t commit now...!</a>
@@ -130,9 +183,10 @@ $('.event-detail').on('click', '.cancel-decision', function(e) {
         },
         success: function(data) {
             $("#event-detail-"+prk).html(
-                '<br><img style="max-height: 40px; max-width: 40px; float:left" src="' + data[4] + '"><h4 style="float: left;"><strong class="black">&nbsp;' + data[1] + '</strong></h4><h5 class="darkgrey" style="float: right;">Posted <span class="date-posted">' + data[5] + '</span></h5><div class="row" style="clear:both;"><h2 class="text-center"><a href="/event_detail/' + prk +'">' + data[0] + '</a></h2><div class="col-md-7"><h4>' + data[2] + '</h4></div><div class="col-md-5 text-right"><h5>' + data[6] + '</h5></div></div><a class="btn btn-default" alt="' + prk + '"  href="/event_detail/' + prk +'">More details...</a><div class="text-right" style="float:right;"><a class="btn btn-success confirm-can-come" alt="' + prk + '" id="confirm-button-' + prk + '" href="#"><i class="fa fa-check-circle" alt="' + prk + '"  alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Count me in!</a>&nbsp;<a class="btn btn-danger confirm-cannot-come" alt="' + prk + '" id="reject-button-' + prk + '" href="#"><i class="fa fa-times-circle" alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Can\'t make it!</a></div></div><br><br>'
+                '<br><img style="max-height: 40px; max-width: 40px; float:left" src="' + data[4] + '"><h4 style="float: left;"><strong class="black">&nbsp;' + data[1] + '</strong></h4><h5 class="darkgrey" style="float: right;">Posted <span class="date-posted">' + data[5] + '</span></h5><div class="row" style="clear:both;"><h2 class="text-center"><a href="/event_detail/' + prk +'">' + data[0] + '</a></h2><div class="col-md-7"><h4 class="date-starting">' + data[2] + '</h4></div><div class="col-md-5 text-right"><h5>' + data[6] + '</h5></div></div><a class="btn btn-default" alt="' + prk + '"  href="/event_detail/' + prk +'">More details...</a><div class="text-right" style="float:right;"><a class="btn btn-success confirm-can-come" alt="' + prk + '" id="confirm-button-' + prk + '" href="#"><i class="fa fa-check-circle" alt="' + prk + '"  alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Count me in!</a>&nbsp;<a class="btn btn-danger confirm-cannot-come" alt="' + prk + '" id="reject-button-' + prk + '" href="#"><i class="fa fa-times-circle" alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Can\'t make it!</a></div></div><br><br>'
                 );  
-            standardizeDates("#event-detail-"+prk); 
+            standardizeDatesPosted("#event-detail-"+prk); 
+            standardizeDatesStartingWithLocation("#event-detail-"+prk);
         }
     });
 });
@@ -245,6 +299,7 @@ $('.friend_request_section').on('click', '.delete-friend-button', function(e) {
             success: function(data) {
                 $("#friend_request_section-"+prk).html('');
                 $("#friend_request_section-"+prk).html('<h3 class="btn btn-default"> Your friendship with ' + data[0] + ' has been deleted.</h3>');
+                setTimeout(function(){ location.reload(); }, 1400);
             }
 
         });
@@ -558,6 +613,7 @@ $('#group-detail').on('click', '.leave_group', function(e) {
                 $("#membership").html('');
                 $("#adminship").html('');
                 $("#membership").html('<h3 class="red">You left ' + data[0] + '...</h3>');
+                setTimeout(function(){ location.reload(); }, 1400);
             }
         });
     }
@@ -589,24 +645,26 @@ $('.reply-link').on('click', function(event) {
     $('#comment_body').focus();
 });
 
-$('#sharing').on('click', '#share-event', function(e) {
-    e.preventDefault();
-    console.log('Share!');
-    var prk = $(this).attr('alt');
-    $.ajax({
-        type: 'GET',
-        url: '/share_event/',
-        data: {
-            pk: prk,
-        },
-        success: function(data) {
-            if (data[1]) {
-                $("#sharing").html('<h4 class="green">You shared ' + data[0] + ' to your feed.</h4>&nbsp;&nbsp;<a class="btn btn-danger" href="#" alt="' + prk + '" id="share-event">Undo</a>');
-            } else {
-                $("#sharing").html('<a class="btn btn-success" href="#" alt="' + prk + '" id="share-event">Share this event to your feed!</a>');
+
+
+ $('#sharing').on('click', '#share-event', function(e) {
+        e.preventDefault();
+        console.log('Share!');
+        var prk = $(this).attr('alt');
+        $.ajax({
+            type: 'GET',
+            url: '/share_event/',
+            data: {
+                pk: prk,
+            },
+            success: function(data) {
+                if (data[1]) {
+                    $("#sharing").html('<h4 class="green">You shared ' + data[0] + ' to your feed.</h4>&nbsp;&nbsp;<a class="btn btn-danger" href="#" alt="' + prk + '" id="share-event">Undo</a>');
+                } else {
+                    $("#sharing").html('<a class="btn btn-success" href="#" alt="' + prk + '" id="share-event">Share this event to your feed!</a>');
+                }
             }
-        }
+        });
     });
-});
 
 

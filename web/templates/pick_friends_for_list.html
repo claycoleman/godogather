@@ -1,0 +1,49 @@
+
+<div class="container">
+    <div class="row">
+                <h2>Choose friends for your Friend List -- <i>{{friend_list}}</i></h2>
+        <div class="col-md-7" id="pick-friend-list" alt="{{ friend_list.pk }}">
+        {% if friends.exists %}
+            {% for friend in friends %}
+                <div class="row">
+                    <div class="col-md-10">
+                        <h4>{{ friend }}&nbsp;&nbsp;</h4>
+                    </div>
+                    <div class="col-md-2" >
+                        <a style="margin-top: -3px;" class="btn btn-success add-friend-to-list" href="#" id="{{ friend.pk }}">Add</a>
+                    </div>
+                </div>
+                
+            {% endfor %}
+        {% else %}
+            <h4>You have no more friends to add to this Friend List!</h4>
+        {% endif %}
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+$('#pick-friend-list').on('click', '.add-friend-to-list', function(e){
+    e.preventDefault();
+    console.log('Share!');
+    var friend_pk = e.target.id;
+    $.ajax({
+        type: 'GET',
+        url: '/add_friend_to_friend_list/',
+        data: {
+            friend_pk: friend_pk,
+            list_pk: $('#pick-friend-list').attr('alt'),
+
+        },
+        success: function(data) {
+            $('#'+friend_pk).removeClass('add-friend-to-list');
+            $('#'+friend_pk).removeClass('btn-success');
+            $('#'+friend_pk).addClass('btn-default');
+            $('#'+friend_pk).addClass('green');
+            $('#'+friend_pk).text('Added!');
+
+        }
+    });
+});
+</script>

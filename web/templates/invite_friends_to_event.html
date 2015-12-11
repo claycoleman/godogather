@@ -1,0 +1,53 @@
+
+<div class="container">
+    <div class="row">
+                <h2>Invite friends to {{event}}</h2>
+        <div class="col-md-7" id="pick-friend-list" alt="{{ event.pk }}">
+        {% if friends.exists %}
+            {% for friend in friends %}
+                <div class="row">
+                    <div class="col-md-9">
+                        <h4>{{ friend }}&nbsp;&nbsp;</h4>
+                    </div>
+                    <div class="col-md-3" >
+                        {% if friend in event.invitees.all %}
+                            <a style="margin-top: -3px;" class="btn btn-default green" id="{{ friend.pk }}">Invited!</a>
+                        {% else %}
+                            <a style="margin-top: -3px;" class="btn btn-success invite_friend_to_event" href="#" id="{{ friend.pk }}">Add</a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+            {% endfor %}
+        {% else %}
+            <h4>You have no more friends to invite to this event!</h4>
+        {% endif %}
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+$('#pick-friend-list').on('click', '.invite_friend_to_event', function(e){
+    e.preventDefault();
+    var friend_pk = e.target.id;
+    $.ajax({
+        type: 'GET',
+        url: '/invite_friend_to_event/',
+        data: {
+            friend_pk: friend_pk,
+            event_pk: $('#pick-friend-list').attr('alt'),
+
+        },
+        success: function(data) {
+            $('#'+friend_pk).removeClass('invite_friend_to_event');
+            $('#'+friend_pk).removeClass('btn-success');
+            $('#'+friend_pk).addClass('btn-default');
+            $('#'+friend_pk).addClass('green');
+            $('#'+friend_pk).text('Invited!');
+            $('#'+friend_pk).attr('href', '');
+
+        }
+    });
+});
+</script>

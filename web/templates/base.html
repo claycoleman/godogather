@@ -8,7 +8,8 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <script src="{% static 'js/jquery-1.11.3.min.js' %}"></script>
     <title>{% block title %}{% endblock %}</title>
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Lato:700,300' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:300' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}">
@@ -54,8 +55,10 @@
                       <li><a>No friend requests!</a></li>
                     {% endif %}
                     <li role="separator" class="divider"></li>
+                    <li><a href="{% url 'friend_list' %}">Your Friends</a></li>
+                    <li><a href="{% url 'friend_list_list_view' %}">Your Friend Lists</a></li>
+                    <li role="separator" class="divider"></li>
                     <li><a href="{% url 'search_profiles' %}">Search for people</a></li>
-                    <li><a href="{% url 'friend_list' %}">See all of your friends</a></li>
                      
               </ul>
             </li>

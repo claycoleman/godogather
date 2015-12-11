@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from main.models import Profile, Comment, Event, Group, Notification
 
+
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile

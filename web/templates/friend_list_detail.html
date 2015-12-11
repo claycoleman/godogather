@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block body %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            
+            <h2>{{ friend_list.name }}</h2>
+            <hr>  
+            <a href="{% url 'pick_friends_for_list' friend_list.pk %}" class="btn btn-primary popup">Choose friends for this list</a>
+            {% if friend_list.people.exists %}
+                {% for friend in friend_list.people.all %}
+                    <h4><a href="{% url 'profile_detail_view' friend.pk %}">{{ friend }}</a></h4>
+                {% endfor %}
+            {% else %}
+                <h4>This list doesn't have any one in it yet! Choose some friends for {{friend_list.name}} above.</h4>
+            {% endif %}
+
+
+            <br>
+            <br>
+            <a class="btn btn-danger delete-button" href="{% url 'friend_list_delete_view' friend_list.pk %}" id="{{ friend_list }}">Delete {{ friend_list }}</a><br>
+            <a href="{% url 'friend_list_list_view' %}">Back to all your Friend Lists</a>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}  
+
+{% block links %}<link rel="stylesheet" type="text/css" href="{% static 'css/popup.css' %}">{% endblock links %}
+
+{% block scripts %}
+        <script src="{% static 'js/jquery.popup.min.js' %}"></script>
+{% endblock scripts %}

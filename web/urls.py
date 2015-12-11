@@ -23,6 +23,9 @@ urlpatterns = [
     url(r'^invite_friend_to_group/$', 'web.views.invite_friend_to_group'),
     url(r'^share_event/$', 'web.views.share_event'),
     url(r'^subscribe/(?P<pk>\d+)/$', 'web.views.subscribe', name='subscribe'),
+    url(r'^add_friend_to_friend_list/$', 'web.views.add_friend_to_friend_list'),
+    url(r'^invite_friend_to_event/$', 'web.views.invite_friend_to_event'),
+    url(r'^invite_friend_list_to_event/$', 'web.views.invite_friend_list_to_event'),
 
     # event urls
     url(r'^event_detail/(?P<pk>\d+)/$', 'web.views.event_detail_view', name='event_detail_view'),
@@ -30,6 +33,10 @@ urlpatterns = [
     url(r'^event_delete/(?P<pk>\d+)/$', 'web.views.event_delete_view', name='event_delete_view'),
     url(r'^event_update/(?P<pk>\d+)/$', 'web.views.event_update_view', name='event_update_view'),
     url(r'^event_create/$', 'web.views.event_create_view', name='event_create_view'),
+    url(r'^invite_friends_to_event/(?P<pk>\d+)/$', 'web.views.invite_friends_to_event_view', name='invite_friends_to_event_view'),
+    url(r'^invite_friend_lists_to_event/(?P<pk>\d+)/$', 'web.views.invite_friend_lists_to_event_view', name='invite_friend_lists_to_event_view'),
+    url(r'^share_buttons/(?P<pk>\d+)/$', 'web.views.share_buttons', name='share_buttons'),
+    url(r'^calendar_buttons/(?P<pk>\d+)/$', 'web.views.calendar_buttons', name='calendar_buttons'),
     # url(r'^search/events/$', 'web.views.search_events', name='search_events'),
 
 
@@ -40,6 +47,14 @@ urlpatterns = [
     url(r'^group_update/(?P<pk>\d+)/$', 'web.views.group_update_view', name='group_update_view'),
     url(r'^group_create/$', 'web.views.group_create_view', name='group_create_view'),
     # url(r'^search/groups/$', 'web.views.search_groups', name='search_groups'),
+
+
+    # friendlist urls
+    url(r'^friend_list_detail/(?P<pk>\d+)/$', 'web.views.friend_list_detail_view', name='friend_list_detail_view'),
+    url(r'^friend_list_list/$', 'web.views.friend_list_list_view', name='friend_list_list_view'),
+    url(r'^friend_list_delete/(?P<pk>\d+)/$', 'web.views.friend_list_delete_view', name='friend_list_delete_view'),
+    url(r'^pick_friends_for_list/(?P<pk>\d+)/$', 'web.views.pick_friends_for_list', name='pick_friends_for_list'),
+
 
 
     # userprofile urls

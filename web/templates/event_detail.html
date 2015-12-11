@@ -5,7 +5,7 @@
 
 
 
-{% block title %}{{ event }} Details{% endblock title %}
+{% block title %}{{ event }}{% endblock title %}
 
 
 {% block body %}
@@ -13,58 +13,49 @@
 <div class="main">
     <div class="container">
         <div class="row">
-            <h1 class="text-center"><b>{{ event.name }}</b></h1>
-            <div class="col-md-6">
-                    <h4><strong>Description:</strong> {{ event.description }}</h4>
-                    <h2>Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong class='black'>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h2>
-                    <h3>{{ event.date_happening }}</h3>
-                    <h4>From {{ event.time_starting }} to
-                    {{ event.time_ending }}</h4>
+            <div class="col-md-5 col-md-offset-1">
+            <br>
+                    <a href="{% url 'profile_detail_view' event.host.first.pk %}"><img style="max-height: 80px; max-width: 80px; border-radius: 40px; -webkit-border-radius: 40px; -moz-border-radius: 40px; float:left; margin-top: 6px; margin-right: 6px;" src="{{event.host.first.picture.url}}"></a><h1><b>{{ event.name|upper}}</b></h1>
+                    <h5 class="georgia" style="margin-left: 10px;">Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong class='black'>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h5>
+                    <br>
+                    <h4 class="georgia">{{ event.description }}</h4>
+                    <div class="row">
+                        <div class="col-xs-1 text-center col-xs-offset-1">
+                            <i class="fa fa-clock-o fa-2x" style="margin-top: 13px; margin-left: 1px;"></i>
+                        </div>
+                        <div class="col-xs-9">
+                            <span class="hidden" id="rawdate">{{ event.date_happening|date:"c" }}T{{ event.time_starting|time:"H:i" }}:00.000000+00:00</span>
+                            <span class="hidden" id="rawdate-end">{{ date_ending }}</span>
+                            <h5 style="margin-bottom: -5px" id="date-happens">{{ event.date_happening }}</h5>
+                            <h5 id="from-time">From {{ event.time_starting }} to {{ event.time_ending }}</h5>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-1 text-right  col-xs-offset-1" style="margin-top: 6px;">
+                            <i class="fa fa-map-marker fa-2x"></i>
+                        </div>
+                        <div class="col-xs-9">
+                            <h5>{{ event.location }}</h5>
+                        </div>
+                    </div>
+                    <br>
+                    <iframe width="100%" height="200" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;q={{event.test_location}}&amp;spn=56.506174,79.013672&amp;t=m&amp;z=16&amp;output=embed"></iframe>
+                    
                     <h6>Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</span></h6>
-                    {% if event.people_coming.count == 0 %}
-                        <h3>{{ event.people_coming.count }}  showing up: </h3>
-                    {% elif event.people_coming.count == 1 %}
-                        <h3>1 person showing up: </h3>
-                    {% else %}
-                        <h3>{{ event.people_coming.count }} people showing up: </h3>
-                    {% endif %}
-                    {% if event.people_coming.count > 0 %}
-                        {% for person in event.people_coming.all %}
-                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}">
-                            <img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}">
-                            </a>
-                        {% endfor %}
-                    {% else %}
-                        <h5>No one has confirmed yet!</h5>
-                    {% endif %}
-                    <h3>People who for sure can't make it: </h3>
-                    {% if event.people_not_coming.count > 0 %}
-                        {% for person in event.people_not_coming.all %}
-                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}">
-                            <img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}">
-                            </a>
-                        {% endfor %}
-                    {% else %}
-                        <h5>No one has turned us down yet!</h5>
-                    {% endif %}
+                    
+
+                    <span id="comment-section"/>
+                    <h3><a class="btn btn-primary popup-mini" href="{% url 'share_buttons' event.pk %}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Share&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>&nbsp;&nbsp;<a class="btn btn-danger popup-mini" href="{% url 'calendar_buttons' event.pk %}">Add to Calendar</a></h3>
+            </div>
+            <div class="col-md-5 col-md-offset-1">
                     <br>
                     <br>
-                    <div id="sharing">
-                        {% if event.shareable and request.user.profile not in event.host.all %}
-                            {% if event not in request.user.profile.events_posted.all %}
-                                <a class="btn btn-success" href="#" alt='{{event.pk}}' id='share-event'>Share this event to your feed!</a>
-                            {% else %}
-                                <h4 class="green">You have shared {{ event.name }} to your feed.</h4>&nbsp;&nbsp;<a class="btn btn-danger" href="#" alt="{{ event.pk }}" id="share-event">Unshare</a>
-                            {% endif %}
-                        {% endif %}
-                    </div>  
                     <br>
                     {% if request.user.profile in event.host.all %}
                     <div style="float:left;">                    
-                        <a class="btn btn-primary" href="{% url 'event_update_view' event.pk %}">Edit your event</a>&nbsp;&nbsp;<a class="btn btn-danger delete-button" href="{% url 'event_delete_view' event.pk %}" id="{{ event }}">Delete this event</a>
+                        <a class="btn btn-primary" href="{% url 'event_update_view' event.pk %}">Edit your event</a>&nbsp;&nbsp;<a class="btn btn-danger delete-button" href="{% url 'event_delete_view' event.pk %}" id="{{ event }}">Delete your event</a>
                     </div>
                     {% else %}
-
                     <div class="event-detail-buttons">
                         {% if request.user.profile in event.people_coming.all %}
                             <span class="green stan"><i class="fa fa-check-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;You're going!</span>&nbsp;&nbsp;<a class="btn btn-danger cancel-decision" id="reject-button-{{event.pk}}" alt="{{event.pk}}"  href="#"><i class="fa fa-times-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;Back out...</a>
@@ -75,15 +66,39 @@
                         {% endif %}
                     </div>
                     {% endif %}
-
-                    <br id="comment-section">
                     <br>
-                    <a href="{% url 'event_list_view' %}">Back to event list</a>
-            </div>
-            <div class="col-md-6">
+                    <h2>WHO'S COMING: </h2>
+                    {% if event.people_coming.count > 0 %}
+                        {% for person in event.people_coming.all %}
+                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}">
+                            <img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}">
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <h5>No one has confirmed yet!</h5>
+                    {% endif %}
+                    <h2>CAN'T MAKE IT: </h2>
+                    {% if event.people_not_coming.count > 0 %}
+                        {% for person in event.people_not_coming.all %}
+                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}">
+                            <img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}">
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <h5>No one has turned us down yet!</h5>
+                    {% endif %}
+                    <h2>INVITED: </h2>
+                    {% if invitees.count > 0 %}
+                        {% for person in invitees|slice:"0:4" %}
+                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}">
+                            <img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}">
+                            </a>
+                        {% endfor %}
+                    {% endif %}
+                        <a class="black popup tooltipped" href="{% url 'invite_friends_to_event_view' event.pk %}"><i class="fa fa-plus-circle fa-4x" alt="{{ person }}" style="min-width: 60px"></i></a>
+                    <br>
+                    <br>
                     
-                    <h2>{{ event.location }}</h2>
-                    <iframe width="100%" height="300" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;q={{event.test_location}}&amp;spn=56.506174,79.013672&amp;t=m&amp;z=16&amp;output=embed"></iframe>
                     <!--<div style="width: 100%; overflow: hidden; height: 300px;">
                         <iframe width="100%" height="600" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" style="border:0; margin-top: -150px;" src="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;q={{event.test_location}}&amp;spn=56.506174,79.013672&amp;t=m&amp;z=16&amp;output=embed"></iframe>
                     </div>-->
@@ -96,7 +111,11 @@
                         {% endfor %}
                     {% endif %}
                     <br>
-                    <h3>Share: <a class="btn btn-primary" target="_blank" href='{{share_url}}'><i class='fa fa-facebook'></i></a>&nbsp;&nbsp;<a class="btn btn-danger" target="_blank" href='{{google_cal}}'><i class='fa fa-google'></i>&nbsp;&nbsp;Calendar</a>&nbsp;&nbsp;<a class="btn btn-info" target="_blank" href='{{apple_cal}}'><i class='fa fa-apple'></i>&nbsp;&nbsp;Calendar</a></h3>
+                    <br>
+                    {% if event.shareable or request.user.profile in event.host.all %}
+                        <a href="{% url 'invite_friends_to_event_view' event.pk %}" class="btn btn-success popup">Invite friends to {{event}}</a>
+                        <a href="{% url 'invite_friend_lists_to_event_view' event.pk %}" class="btn btn-success popup">Invite Friend Lists to {{event}}</a>
+                    {% endif %}
                     <br>
 
             </div>
@@ -163,3 +182,4 @@
 <script src="{% static 'js/jquery.popup.min.js' %}"></script>
 
 {% endblock %}  
+                    
