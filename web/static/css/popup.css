@@ -16,7 +16,6 @@
 .popup_cont {
 	position: fixed;
 	z-index: 102;
-	overflow: auto;
 }
 
 .preloader {
@@ -51,6 +50,7 @@ div.popup {
 	background: #fff;
 	padding: 25px;
 	box-shadow: 0 3px 10px #222;
+	overflow: auto;
 }
 
 .preloader {
