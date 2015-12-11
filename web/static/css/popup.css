@@ -53,7 +53,7 @@ div.popup {
 }
 
 div.popup_content {
-	overflow: auto;
+	overflow-y: auto;
 }
 
 .preloader {
