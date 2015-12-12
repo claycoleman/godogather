@@ -28,7 +28,10 @@ class Event(models.Model):
     invitees = models.ManyToManyField('Profile', blank=True, related_name='events_invited_to')
 
     def __unicode__(self):
+        if not self.name:
+            return "this event"
         return self.name
+
 
     def create_apple_ics(self):
         url_date_starting = datetime.combine(date=self.date_happening, time=self.time_starting).isoformat().replace('-', '').replace(':', '')
@@ -68,7 +71,7 @@ class Profile(models.Model):
     group_requests = models.ManyToManyField('Group', blank=True, related_name="invited_people")
     friend_requests = models.ManyToManyField('Profile', blank=True, related_name="requested_friends")
     past_events = models.ManyToManyField('Event', blank=True, related_name="+")
-    followers = models.ManyToManyField('Profile', blank=True, related_name="people_to_notify")
+    followers = models.ManyToManyField('Profile', blank=True, related_name="people_you_follow")
     
     def __unicode__(self):
         return "%s %s" % (self.first_name, self.last_name)
@@ -91,9 +94,14 @@ class Profile(models.Model):
 
 class Group(models.Model):
     name = models.CharField(null=True, blank=True, max_length=255)
+    description = models.TextField(null=True, blank=True)
     member_requests = models.ManyToManyField('Profile', blank=True, related_name="requested_groups")
     members = models.ManyToManyField('Profile', blank=True, related_name='groups_in')
     admin = models.ManyToManyField('Profile', blank=True, related_name="groups_admined")
+    searchable = models.BooleanField(default=False)
+    open_group = models.BooleanField(default=True)
+    admin_only = models.BooleanField(default=True)
+    followers = models.ManyToManyField('Profile', blank=True, related_name="groups_you_follow")
 
     class Meta:
         verbose_name = "Group"

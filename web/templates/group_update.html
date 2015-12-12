@@ -1,35 +1,61 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 {% load addcss %}
 
+{% block title %}EDIT "{{ group.name|upper}}"{% endblock title %}
+
 {% block body %}
+
 <div class="container">
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
-            <h2>Edit {{ group }}</h2>
-            <p class="green">{{ saved }}</p>
-            <h4>{{ saved }}</h4>
+            <h2>EDIT "{{ group.name|upper}}"</h2>
             <form action="{% url 'group_update_view' group.pk %}" enctype="multipart/form-data" method="POST" >
                 {% csrf_token %}    
                 Name:
                 {{ form.name|addcss:"form-control" }}
-                Members of {{ group }}:
+                Description
+                {{ form.description|addcss:"form-control" }}
+                Members of your new Group Feed! <small>(uncheck to kick from the Group)</small>:
                 <div class="overflow form-control">{{ form.members }}</div>
                 <br>
-                <div class="red text-center"><p>{{ errors }}</p></div>    
 
-                
-                <div class="row">
-                    <div class="col-md-4 col-md-offset-2">
-                        <input class="form-control btn-default" type="submit" value="Save and finish" name="_finish" />
-                    </div>
-                    <div class="col-md-4 ">
-                        <input class="form-control btn-default" type="submit" value="Save and continue editing" name="_continue"/>            
-                    </div>
-                </div>
+                <strong class="bigger">Allow searching?</strong>{{ form.searchable }}<br style="margin-top: 100px">
+                Allow others to find this Group Feed via searching<br><br>
+                <strong class="bigger">Make Open?</strong>{{ form.open_group }}<br>
+                Allow new members to join without being approved<br><br>
+                <strong class="bigger">Only Admins Can Post?</strong>{{ form.admin_only }}<br>
+                Ensure only Group Feed Admins can post events.<br>If you're making a Group Feed for an organization, keep this yes!
                 <br>
-            </form>
+                <div class="red text-center"><p>{{ errors }}</p></div>    
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-4 col-md-offset-2">
+            <input class="form-control btn-default" type="submit" value="Save and finish" name="_finish" />
+        </div>
+        <div class="col-md-4 ">
+            <input class="form-control btn-default" type="submit" value="Save and continue editing" name="_continue"/>            
+        </div>
+    </div>
+    </form>
+    <br>
 </div>
 
 {% endblock %}
+
+
+{% block scripts %}
+    <script src="{% static 'js/switch-boxes.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/switch-boxes.css' %}">
+    <script type="text/javascript">
+        $(document).ready(function() {
+          $(':checkbox').iphoneStyle({
+              checkedLabel: 'YES',
+              uncheckedLabel: 'NO'
+            });
+        });
+  </script>
+{% endblock scripts %}
+
+

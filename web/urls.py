@@ -23,16 +23,17 @@ urlpatterns = [
     url(r'^invite_friend_to_group/$', 'web.views.invite_friend_to_group'),
     url(r'^share_event/$', 'web.views.share_event'),
     url(r'^subscribe/(?P<pk>\d+)/$', 'web.views.subscribe', name='subscribe'),
+    url(r'^subscribe_group/(?P<pk>\d+)/$', 'web.views.subscribe_group', name='subscribe_group'),
     url(r'^add_friend_to_friend_list/$', 'web.views.add_friend_to_friend_list'),
     url(r'^invite_friend_to_event/$', 'web.views.invite_friend_to_event'),
     url(r'^invite_friend_list_to_event/$', 'web.views.invite_friend_list_to_event'),
 
     # event urls
-    url(r'^event_detail/(?P<pk>\d+)/$', 'web.views.event_detail_view', name='event_detail_view'),
+    url(r'^events/(?P<pk>\d+)/$', 'web.views.event_detail_view', name='event_detail_view'),
     url(r'^home/$', 'web.views.event_list_view', name='event_list_view'),
-    url(r'^event_delete/(?P<pk>\d+)/$', 'web.views.event_delete_view', name='event_delete_view'),
-    url(r'^event_update/(?P<pk>\d+)/$', 'web.views.event_update_view', name='event_update_view'),
-    url(r'^event_create/$', 'web.views.event_create_view', name='event_create_view'),
+    url(r'^events/delete/(?P<pk>\d+)/$', 'web.views.event_delete_view', name='event_delete_view'),
+    url(r'^events/update/(?P<pk>\d+)/$', 'web.views.event_update_view', name='event_update_view'),
+    url(r'^events/create/$', 'web.views.event_create_view', name='event_create_view'),
     url(r'^invite_friends_to_event/(?P<pk>\d+)/$', 'web.views.invite_friends_to_event_view', name='invite_friends_to_event_view'),
     url(r'^invite_friend_lists_to_event/(?P<pk>\d+)/$', 'web.views.invite_friend_lists_to_event_view', name='invite_friend_lists_to_event_view'),
     url(r'^share_buttons/(?P<pk>\d+)/$', 'web.views.share_buttons', name='share_buttons'),
@@ -42,17 +43,18 @@ urlpatterns = [
 
     # group urls    
     url(r'^groups/$', 'web.views.group_list_view', name='group_list_view'),
-    url(r'^groups/(?P<pk>\d+)/events/$', 'web.views.group_event_list', name='group_event_list'),
-    url(r'^group_delete/(?P<pk>\d+)/$', 'web.views.group_delete_view', name='group_delete_view'),
-    url(r'^group_update/(?P<pk>\d+)/$', 'web.views.group_update_view', name='group_update_view'),
-    url(r'^group_create/$', 'web.views.group_create_view', name='group_create_view'),
+    url(r'^groups/(?P<pk>\d+)/$', 'web.views.group_event_list', name='group_event_list'),
+    url(r'^groups/(?P<pk>\d+)/members/$', 'web.views.group_member_view', name='group_member_view'),
+    url(r'^groups/(?P<pk>\d+)/delete/$', 'web.views.group_delete_view', name='group_delete_view'),
+    url(r'^groups/(?P<pk>\d+)/update/$', 'web.views.group_update_view', name='group_update_view'),
+    url(r'^groups/create/$', 'web.views.group_create_view', name='group_create_view'),
     # url(r'^search/groups/$', 'web.views.search_groups', name='search_groups'),
 
 
     # friendlist urls
-    url(r'^friend_list_detail/(?P<pk>\d+)/$', 'web.views.friend_list_detail_view', name='friend_list_detail_view'),
-    url(r'^friend_list_list/$', 'web.views.friend_list_list_view', name='friend_list_list_view'),
-    url(r'^friend_list_delete/(?P<pk>\d+)/$', 'web.views.friend_list_delete_view', name='friend_list_delete_view'),
+    url(r'^friends/list/(?P<pk>\d+)/$', 'web.views.friend_list_detail_view', name='friend_list_detail_view'),
+    url(r'^friends/list/$', 'web.views.friend_list_list_view', name='friend_list_list_view'),
+    url(r'^friend/list/(?P<pk>\d+)/delete/$', 'web.views.friend_list_delete_view', name='friend_list_delete_view'),
     url(r'^pick_friends_for_list/(?P<pk>\d+)/$', 'web.views.pick_friends_for_list', name='pick_friends_for_list'),
 
 
@@ -62,9 +64,8 @@ urlpatterns = [
     url(r'^people/$', 'web.views.profile_list_view', name='profile_list_view'),
     url(r'^friends/$', 'web.views.friend_list', name='friend_list'),
     url(r'^search/profiles/$', 'web.views.search_profiles', name='search_profiles'),
-    url(r'^profile_delete/(?P<pk>\d+)/$', 'web.views.profile_delete_view', name='profile_delete_view'),
-    url(r'^profile_update/(?P<pk>\d+)/$', 'web.views.profile_update_view', name='profile_update_view'),
-    url(r'^profile_create/$', 'web.views.profile_create_view', name='profile_create_view'),
+    url(r'^profile/(?P<pk>\d+)/update/$', 'web.views.profile_update_view', name='profile_update_view'),
+    url(r'^profile/create/$', 'web.views.profile_create_view', name='profile_create_view'),
     url(r'^notifications/$', 'web.views.full_notifications', name='full_notifications'),
 
     # permission urls

@@ -3,7 +3,9 @@
 {% if friends.exists %}
     {% for friend in friends %}
         <div class="event-detail" style="border-bottom: 1px solid #EEE; min-height: 40px;">
-            <img class="tiny-thumb" src="{{friend.picture.url}}">
+            {% thumbnail  friend.picture "200x200" crop="center" as im %}
+                <img src="{{ im.url }}" class="port-item" width="60" height="60" style="border-radius: 30px; float:left" alt="{{ person }}">
+            {% endthumbnail %}
             <a href="{% url 'profile_detail_view' friend.pk %}" >{{ friend }}</a>
             <strong id='div-invite-friend-{{friend.pk}}'>
             {% if friend in request.user.profile.friend_requests.all %}     

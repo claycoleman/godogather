@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load values_list %}
+{% load thumbnail %}
 
 {% block refresh %}<meta http-equiv="refresh" content="120">
 <link rel="stylesheet" type="text/css" href="{% static 'css/popup.css' %}">{% endblock %}
@@ -11,14 +12,113 @@
 <div class="main">
     <div class="container">
         <div class="row">
-            
-            <h1 class="text-center bold">{{ group }}</h1>
             <br>
-            <div class="col-md-8">
-                 <h3 class="text-center bold">Event Feed for this group</h3>
-                <h5 style="float: left;" class="text-left"><strong>Current date: </strong><span id="current-date">{{ today |date:"c"}}</span></h5>
-                <a style="float: right;" href="{% url 'event_list_view' %}" class="btn btn-default {% if not order %}active{% endif %}">Order by event date</a><a style="float: right;" href="{% url 'event_list_view' %}?order=date_posted" class="btn btn-default {% if order %}active{% endif %}">Order by date posted</a>&nbsp;&nbsp;<br>
-                    <br style="clear:both;"/>
+            <div id="group-detail">
+            <div class="col-md-5">
+                <h1 class="bold">{{ group }}</h1>
+                {% if is_member %}
+                    <h5 class="green"><i class="fa fa-check"></i>&nbsp;You are a member!</h5>
+                {% endif %}<br>
+                <h4>{{ group.description }}</h4>
+                <br>
+
+                <h3>THIS GROUP FEED'S SETTINGS</h3>
+                <br>
+                {% if group.searchable %}
+                <h4>This Group Feed is <strong>searchable</strong></h4>
+                <h5>Allows this group feed to show in searches</h5>
+                {% else %}
+                <h4>This Group Feed is <strong>not searchable</strong></h4>
+                <h5>Prevents this group feed from showing up in searches. Only members or invitees can see this page</h5>
+                {% endif %}
+                <br>
+                {% if group.open_group %}
+                <h4>This is an <strong>open</strong> Group Feed</h4>
+                <h5>Anyone can join this Group Feed without approval from the admins</h5>
+                {% else %}
+                <h4>This is a <strong>closed</strong> Group Feed</h4>
+                <h5>New members must be approved by an administrator to view events</h5>
+                {% endif %}
+                <br>
+                {% if group.admin_only %}
+                <h4><strong>Only Admins</strong> can post events to this Group Feed</h4>
+                {% else %}
+                <h4><strong>All members</strong> can post events to this Group Feed</h4>
+                {% endif %}
+                
+
+
+                <br><br>
+                <br><br>
+                
+                {% if is_member %}
+                    <a class="btn btn-default popup" href="/ajax/friends/?group_pk={{ group.pk }}">Add friends to {{ group }}</a>
+                    <br>
+
+                {% else %}
+                    <div class="group_request_section" id="group_request_section-{{ group.pk }}">
+                        {% if group_requested_by_member %}
+                            <span class="btn btn-default">{{ group }} requested</span>
+                            <a id="cancel-request-{{ group.pk }}" class="btn btn-warning cancel_request_membership_in_group" href = "#">Cancel request</a>
+                        {% elif member_requested_by_group %}
+                            <a id="addition-{{ group.pk }}" class="btn btn-success accept_invitation_from_group" href = "#">Join {{ group }}</a>
+                            <a id="rejection-{{ group.pk }}" class="btn btn-danger reject_invitation_from_group" href = "#" alt='{{ request.user.profile.pk }}'>Decline joining {{ group }}</a>
+                        {% else %}
+                            <a id="request-add-button-{{ group.pk }}" class="btn btn-primary request_membership_in_group" href = "#">Request to join {{ group }}</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+
+                <br>
+
+            </div>
+                
+            </div>
+            <div class="col-md-7">    
+                <br>
+                {% if is_admin %}
+                    <a class="btn btn-success" href="{% url 'group_update_view' group.pk %}">Edit {{ group }}</a>
+                    <a class="btn btn-danger delete-button" id="{{ group }}" href="{% url 'group_delete_view' group.pk %}">Delete {{ group }}...</a>
+                    <div>
+                {% else %}
+                    {% if is_member %}
+                        <div id="membership">
+                        {% if request.user.profile.pk not in group.followers|values_list:'pk' %}
+                            <a class="btn btn-warning" href="{% url 'subscribe_group' group.pk %}"><i class='fa fa-star'></i>&nbsp;&nbsp;Favorite {{ group.name }}</a>
+                        {% else %}
+                            <a class="btn btn-warning" href="{% url 'subscribe_group' group.pk %}"><i class='fa fa-star-o'></i>&nbsp;&nbsp;Unfavorite {{ group.name }}</a>
+                        {% endif %}
+                    {% else %}
+                        <div>
+                    {% endif %}
+                {% endif %}
+                    {% if is_member %}
+                        {% if not is_admin %}
+                            <a id="{{ group.name }}" class="btn btn-danger leave_group" href = "#">Leave {{ group }}</a>
+                        {% endif %}
+                    {% endif %}
+                    </div>
+                <br>
+                <div class="text-right">   
+                    <a class="btn btn-success">EVENTS</a>
+                    <a class="btn btn-default" href="{% url 'group_member_view' group.pk %}">Members</a>
+                </div>
+                 <h3 class="text-center bold">Events for this Group Feed</h3>
+                <div class="row">
+                    <a class="btn" href = "{% url 'event_create_view' %}?group_pk={{group.pk}}" %}><i class='fa fa-plus-circle'></i> Create a new event in this group</a><br>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="text-left"><strong>Current date: </strong><span id="current-date">{{ today |date:"c"}}</span></h5>
+                    </div>
+                    <div class="col-md-3 text-right" >
+                        <a href="{% url 'group_event_list' group.pk %}?order=date_posted" class="btn btn-default {% if order %}active{% endif %}">Order by date posted</a>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="{% url 'group_event_list' group.pk %}" class="btn btn-default {% if not order %}active{% endif %}">Order by event date</a>
+                    </div>
+                </div>
                     <hr style="margin-bottom: 0">
                  
 
@@ -28,7 +128,11 @@
                     <div class="event-detail" id="event-detail-{{ event.pk }}">
                         {% if request.user.profile in event.host.all %}
                             <br>
-                            <a href="{% url 'profile_detail_view' event.host.first.pk %}"><img style="max-height: 40px; max-width: 40px; border-radius: 20px; float:left" src="{{event.host.first.picture.url}}"></a>
+                            <a href="{% url 'profile_detail_view' event.host.first.pk %}">
+                            {% thumbnail  event.host.first.picture "200x200" crop="center" as im %}
+                                <img src="{{ im.url }}" alt="port-1" class="port-item" width="40" height="40" style="border-radius: 20px; float:left">
+                            {% endthumbnail %}
+                            </a>
                             <h4 style="float: left;"><strong class='black'>&nbsp;{% for host in event.host.all %}{% if host == request.user.profile %}You{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>{% if event.groups.all %} in {% for group in event.groups.all %}<a href="{% url 'group_event_list' group.pk %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</h4>
                             <h5 class="darkgrey" style="float: right;">Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</span></h5> 
                             <div class="row" style="clear:both;">
@@ -50,7 +154,11 @@
                         {% else %}
                         {% if request.user.profile in event.people_coming.all %}
                             <br>
-                            <a href="{% url 'profile_detail_view' event.host.first.pk %}"><img style="max-height: 40px; max-width: 40px; border-radius: 20px; float:left" src="{{event.host.first.picture.url}}"></a>
+                            <a href="{% url 'profile_detail_view' event.host.first.pk %}">
+                            {% thumbnail  event.host.first.picture "200x200" crop="center" as im %}
+                                <img src="{{ im.url }}" alt="port-1" class="port-item" width="40" height="40" style="border-radius: 20px; float:left">
+                            {% endthumbnail %}
+                            </a>
                             <h4 style="float: left;"><strong class='black'>&nbsp;{% for host in event.host.all %}{% if host == request.user.profile %}You{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>{% if event.groups.all %} in {% for group in event.groups.all %}<a href="{% url 'group_event_list' group.pk %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</h4>
                             <h5 class="darkgrey" style="float: right;">Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</h5> 
                             <br style="clear:both;">
@@ -79,7 +187,11 @@
                             <br><br>
                         {% elif request.user.profile in event.people_not_coming.all %}
                             <br>
-                            <a href="{% url 'profile_detail_view' event.host.first.pk %}"><img style="max-height: 40px; max-width: 40px; border-radius: 20px; float:left" src="{{event.host.first.picture.url}}"></a>
+                            <a href="{% url 'profile_detail_view' event.host.first.pk %}">
+                            {% thumbnail  event.host.first.picture "200x200" crop="center" as im %}
+                                <img src="{{ im.url }}" alt="port-1" class="port-item" width="40" height="40" style="border-radius: 20px; float:left">
+                            {% endthumbnail %}
+                            </a>
                             <h4 style="float: left;" class='darkgray'><strong>&nbsp;{% for host in event.host.all %}{{host.first_name}}{% if not forloop.last %}, {% endif %}{% endfor %}</strong></h4>
                             <div class="text-right" style="float:right">
                                 <span class="red stan"><i class="fa fa-times-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;You're not going...</span><br><br>
@@ -95,7 +207,11 @@
                             {% endif %}
                             {% else %}
                                 <br>
-                                <a href="{% url 'profile_detail_view' event.host.first.pk %}"><img style="max-height: 40px; max-width: 40px; border-radius: 20px; float:left" src="{{event.host.first.picture.url}}"></a>
+                                <a href="{% url 'profile_detail_view' event.host.first.pk %}">
+                            {% thumbnail  event.host.first.picture "200x200" crop="center" as im %}
+                                <img src="{{ im.url }}" alt="port-1" class="port-item" width="40" height="40" style="border-radius: 20px; float:left">
+                            {% endthumbnail %}
+                            </a>
                                 <h4 style="float: left;"><strong class='black'>&nbsp;{% for host in event.host.all %}{% if host == request.user.profile %}You{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>{% if event.groups.all %} in {% for group in event.groups.all %}<a href="{% url 'group_event_list' group.pk %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</h4>
                                 <h5 class="darkgrey" style="float: right;">Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</h5> 
                                 <div class="row" style="clear:both;">
@@ -131,90 +247,11 @@
                     <h2 class="text-center" style="color: lightgray;"><i class='fa fa-arrow-down'></i></h2>
                     </div>
                 {% else %}
-                    <h3>You have no events in your feed yet! Add some new friends or follow some groups to see some. If it's your first time here, be sure to check out the <a href="{% url 'about_view' %}">about page</a> for more about WAYD.</h3>
+                    <h3>You have no events in this Group Feed yet... Add some more friends or post an event to this group now!</h3>
                     <br>
-                    <h4 class="text-center"><a class="btn btn-primary form-control popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;Find your Facebook friends on WAYD</a></h4>
                     
-                    <h4><a class="btn btn-primary form-control" href="{% url 'search_profiles' %}">Search for friends</a></h4>
                     </div>
                 {% endif %}
-                <div id="group-detail">
-            <div class="col-md-4 affix-group" id="sidebar">
-                <a class="btn" href = "{% url 'event_create_view' %}?group_pk={{group.pk}}" %}><i class='fa fa-plus-circle'></i> Create a new event in {{group}}</a>
-                <h3>Members:</h3>
-                {% for member in group.members.all %}
-                    <a class="tooltipped" href="{% url 'profile_detail_view' member.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ member }}">
-                        <img class="tiny-thumb" src="{{ member.picture.url }}" alt="{{ member }}">
-                    </a>
-                {% endfor %}
-
-                <br><br>
-                
-                    {% if is_member %}
-                        <div id="membership">
-                        {% if not is_admin %}
-                            <h3>You're a member of {{ group }}!</h3>
-                        {% endif %}
-                        <br>
-                        <br>
-                        <a class="btn btn-default popup" href="/ajax/friends/?group_pk={{ group.pk }}">Add friends to {{ group }}</a>
-
-                        {% if not is_admin or group.admin_already_members.count != 1 %}
-                        <br><br>
-                        <a id="{{ group.name }}" class="btn btn-danger leave_group" href = "#">Leave {{ group }}</a></div>
-                        {% endif %}
-                        <br><br>
-                        {% if group.invited_people.exists %}
-                            <h4>People invited to join {{ group }}:</h4>
-                            {% for potential in group.invited_people.all %}
-                                <a href="{% url 'profile_detail_view' potential.pk %}">{{ potential }}</a>{% if not forloop.last %}, {% endif %}
-                            {% endfor %}
-                        {% endif %}
-
-                    {% else %}
-                        <div class="group_request_section" id="group_request_section-{{ group.pk }}">
-                            {% if group_requested_by_member %}
-                                <span class="btn btn-default">{{ group }} requested</span>
-                                <a id="cancel-request-{{ group.pk }}" class="btn btn-warning cancel_request_membership_in_group" href = "#">Cancel request</a>
-                            {% elif member_requested_by_group %}
-                                <a id="addition-{{ group.pk }}" class="btn btn-success accept_invitation_from_group" href = "#">Join {{ group }}</a>
-                                <a id="rejection-{{ group.pk }}" class="btn btn-danger reject_invitation_from_group" href = "#" alt='{{ request.user.profile.pk }}'>Decline joining {{ group }}</a>
-                            {% else %}
-                                <a id="request-add-button-{{ group.pk }}" class="btn btn-primary request_membership_in_group" href = "#">Request to join {{ group }}</a>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-
-
-                <br>
-                {% if is_admin %}
-                <div id="adminship" style='width: 100%;'>
-                <br>
-                <h4>You're an admin of {{ group }}!</h4>
-                <a class="btn btn-success" href="{% url 'group_update_view' group.pk %}">Edit {{ group }}</a><br>
-                <a class="btn btn-danger delete-button" id="{{ group }}" href="{% url 'group_delete_view' group.pk %}">Delete {{ group }}...</a>
-                <br>
-                <br>
-                {% if group.member_requests.exists %}
-                    <h4>People requesting to join</h4>
-                    <div class="overflow">
-                    {% for potential in group.member_requests.all %}
-                        <p style="margin-left: 10px;">{{ potential }}</p>
-                        <div id="accept-request-{{potential.pk}}" style="margin-left: 10px; width: 100%;">
-                            <a id="addition-{{ potential.pk }}" class="btn btn-success btn-xs accept_request_from_user" href = "#" alt='{{ potential.pk }}'>Accept {{ potential.first_name }}</a>&nbsp;
-                            <a id="rejection-{{ potential.pk }}" class="btn btn-danger btn-xs reject_request_from_user" href = "#" alt='{{ potential.pk }}'>Reject {{ potential.first_name }}</a>
-                        </div>
-                    {% endfor %}
-                    </div>
-                {% else %}
-                    <p>No one has requested to join {{ group }} right now!</p>
-                {% endif %}
-                </div>
-            {% endif %}
-
-            </div>
-                
-            </div>
         </div>
         </div>
     </div>
@@ -233,7 +270,12 @@
             if (distance > 300) {
                 distance = 300;
             } else if (distance < 10) {
-                distance = 10;
+                distance = (window.innerWidth-1200)
+                if (distance > 300) {
+                    distance = 300;
+                } else if (distance < 10) {
+                    distance = 10;
+                }
             }
         $('#sidebar').css({'right': distance+'px'});
         } 

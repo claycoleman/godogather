@@ -30,6 +30,11 @@ class EventModelCreateForm(forms.ModelForm):
         self.fields["groups"].widget = forms.CheckboxSelectMultiple()
         self.fields["test_location"].widget = LocationPickerWidget()
         self.fields["location"].required = True
+        self.fields["name"].required = True
+        self.fields["date_happening"].required = True
+        self.fields["time_starting"].required = True
+        self.fields["time_ending"].required = True
+        self.fields["description"].widget = forms.Textarea(attrs={'rows': '4'})
 
 
 class EventModelUpdateForm(forms.ModelForm):  
@@ -48,6 +53,12 @@ class EventModelUpdateForm(forms.ModelForm):
         self.fields["groups"].widget = forms.CheckboxSelectMultiple()
         self.fields["test_location"].widget = LocationPickerWidget()
         self.fields["location"].required = True
+        self.fields["name"].required = True
+        self.fields["date_happening"].required = True
+        self.fields["time_starting"].required = True
+        self.fields["time_ending"].required = True
+        self.fields["description"].widget = forms.Textarea(attrs={'rows': '4'})
+
 
 
 
@@ -55,12 +66,15 @@ class EventModelUpdateForm(forms.ModelForm):
 class GroupModelCreateForm(forms.ModelForm):  
     class Meta:
         model = Group
-        exclude = ['members']
+        exclude = ['members', 'member_requests']
 
     def __init__(self, *args, **kwargs):
         super(GroupModelCreateForm, self).__init__(*args, **kwargs)
-        self.fields["member_requests"].widget = forms.CheckboxSelectMultiple()
-        self.fields["admin"].widget = forms.CheckboxSelectMultiple()
+        self.fields["admin"].widget = forms.CheckboxSelectMultiple()        
+        self.fields["name"].required = True
+        self.fields["description"].required = True
+        self.fields["description"].widget = forms.Textarea(attrs={'rows': '4'})
+
 
 
 class GroupModelUpdateForm(forms.ModelForm):  
@@ -70,7 +84,10 @@ class GroupModelUpdateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(GroupModelUpdateForm, self).__init__(*args, **kwargs)
-        self.fields["members"].widget = forms.CheckboxSelectMultiple()
+        self.fields["members"].widget = forms.CheckboxSelectMultiple()       
+        self.fields["name"].required = True
+        self.fields["description"].required = True
+        self.fields["description"].widget = forms.Textarea(attrs={'rows': '4'})
 
 
 

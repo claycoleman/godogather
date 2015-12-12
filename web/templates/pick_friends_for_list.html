@@ -1,15 +1,16 @@
 
 <div class="container">
     <div class="row">
-                <h2>Choose friends for your Friend List -- <i>{{friend_list}}</i></h2>
+                <h2>Choose friends for your Friend List</h2>
+                <h2><i>{{friend_list}}</i></h2>
         <div class="col-md-7" id="pick-friend-list" alt="{{ friend_list.pk }}">
         {% if friends.exists %}
             {% for friend in friends %}
                 <div class="row">
-                    <div class="col-md-10">
+                    <div class="col-md-9">
                         <h4>{{ friend }}&nbsp;&nbsp;</h4>
                     </div>
-                    <div class="col-md-2" >
+                    <div class="col-md-3" >
                         <a style="margin-top: -3px;" class="btn btn-success add-friend-to-list" href="#" id="{{ friend.pk }}">Add</a>
                     </div>
                 </div>

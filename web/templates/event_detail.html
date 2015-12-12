@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load thumbnail %}
 
 {% block refresh %}<meta http-equiv="refresh" content="120"><link rel="stylesheet" type="text/css" href="{% static 'css/popup.css' %}">{% endblock %}
 
@@ -15,7 +16,12 @@
         <div class="row">
             <div class="col-md-5 col-md-offset-1">
             <br>
-                    <a href="{% url 'profile_detail_view' event.host.first.pk %}"><img style="max-height: 80px; max-width: 80px; border-radius: 40px; -webkit-border-radius: 40px; -moz-border-radius: 40px; float:left; margin-top: 6px; margin-right: 6px;" src="{{event.host.first.picture.url}}"></a><h1><b>{{ event.name|upper}}</b></h1>
+                    <a href="{% url 'profile_detail_view' event.host.first.pk %}">
+
+                    {% thumbnail  event.host.first.picture "200x200" crop="center" as im %}
+                        <img src="{{ im.url }}" alt="port-1" class="port-item" width="80" height="80" style="border-radius: 40px; float:left; margin-top: 6px; margin-right: 6px;">
+                    {% endthumbnail %}
+                    </a><h1><b>{{ event.name|upper}}</b></h1>
                     <h5 class="georgia" style="margin-left: 10px;">Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong class='black'>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h5>
                     <br>
                     <h4 class="georgia">{{ event.description }}</h4>
@@ -70,32 +76,44 @@
                     <h2>WHO'S COMING: </h2>
                     {% if event.people_coming.count > 0 %}
                         {% for person in event.people_coming.all %}
-                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}">
-                            <img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}">
-                            </a>
+                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="top" data-toggle="tooltip" title="{{ person }}">
+                            {% thumbnail  person.picture "200x200" crop="center" as im %}
+                                <img src="{{ im.url }}" class="port-item" width="60" height="60" style="border-radius: 30px;" alt="{{ person }}">
+                            {% endthumbnail %}
+                            </a>&nbsp;
                         {% endfor %}
+                    <br>
                     {% else %}
                         <h5>No one has confirmed yet!</h5>
                     {% endif %}
                     <h2>CAN'T MAKE IT: </h2>
                     {% if event.people_not_coming.count > 0 %}
                         {% for person in event.people_not_coming.all %}
-                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}">
-                            <img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}">
-                            </a>
+                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="top" data-toggle="tooltip" title="{{ person }}">
+                            {% thumbnail  person.picture "200x200" crop="center" as im %}
+                                <img src="{{ im.url }}" class="port-item" width="60" height="60" style="border-radius: 30px;" alt="{{ person }}">
+                            {% endthumbnail %}
+                            </a>&nbsp;
                         {% endfor %}
+                    <br>
+                    <br>
                     {% else %}
                         <h5>No one has turned us down yet!</h5>
                     {% endif %}
                     <h2>INVITED: </h2>
                     {% if invitees.count > 0 %}
                         {% for person in invitees|slice:"0:4" %}
-                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ person }}">
-                            <img class="tiny-thumb" src="{{ person.picture.url }}" alt="{{ person }}">
-                            </a>
+                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="top-right" data-toggle="tooltip" title="{{ person }}">
+                            {% thumbnail  person.picture "200x200" crop="center" as im %}
+                                <img src="{{ im.url }}" class="port-item" width="60" height="60" style="border-radius: 30px;" alt="{{ person }}">
+                            {% endthumbnail %}
+                            </a>&nbsp;
                         {% endfor %}
                     {% endif %}
-                        <a class="black popup tooltipped" href="{% url 'invite_friends_to_event_view' event.pk %}"><i class="fa fa-plus-circle fa-4x" alt="{{ person }}" style="min-width: 60px"></i></a>
+                        &nbsp;
+                        <a class="black popup tooltipped" href="{% url 'invite_friends_to_event_view' event.pk %}" data-placement="top" data-toggle="tooltip" title="Invite more friends!">
+                        <img class="tiny-thumb" src="{% static 'img/add-icon.svg' %}">
+                        </a>
                     <br>
                     <br>
                     

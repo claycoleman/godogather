@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load values_list %}
+{% load thumbnail %}
+                            
 
 {% block refresh %}<meta http-equiv="refresh" content="120">{% endblock %}
 
@@ -8,92 +10,104 @@
 
 
 {% block body %}
-<div class="container">
+<div class="container main">
     <div class="row">
-            <h1 class="text-center bold">{{ profile }}</h1>
-        <div class="col-md-8">
-            <br> 
-            {% if profile.picture %}
-                <img src="{{ profile.picture.url }}">
-                <br>
+        <div class="col-md-7">
+        <br>
+            <div class="row">
+                <div class="col-xs-4">
+                    
+                    {% if profile.picture %}
+
+                        {% thumbnail  profile.picture "200x200" crop="center" as im %}
+                            <img src="{{ im.url }}" alt="port-1" class="port-item" width="150" height="150" style="border-radius: 100px;">
+                        {% endthumbnail %}
+                        <br>
+                    {% else %}
+                        <h3>No prof pic</h3>
+                    {% endif %}
+                </div>
+                <div class="col-xs-6">
+                    <h2 class="bold">{{ profile }}</h2>
+                    {% if not not_friends %}
+                        <h5 class="green"><i class="fa fa-check"></i>&nbsp;You are friends with {{ profile.first_name }}!</h5>
+                    {% endif %}
+                </div>
+            </div>
+            <h4>{% if profile.bio %}{{profile.bio}}{% endif %}</h4><br>
+            <h4><strong>{{profile.first_name}}'s Search Username</strong>: {{ profile.username }}</h4>
+            <br>
+            <h3 style="margin-left: 100px">{{profile.first_name|upper}}'S RECENT EVENTS</h3>
+           <div style="width: 500px; margin-left: 50px;">
+           <hr>
+            {% if profile.events_posted.all %}
+            <div class="main-feed"> 
+
+                {% for event in profile.events_posted.all %}
+                    <h5>{{ event }}</h5>
+                    <h6 style="color: darkgrey;" class="date-starting">{{ event.date_happening|date:"c" }}T{{ event.time_starting|time:"H:i" }}:00.000000+00:00</h6>
+                    <h6 style="color: darkgrey">Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h6>
+                    <a class="btn btn-default" href="{% url 'event_detail_view' event.pk %}">More details...</a>
+                    </br>
+                    {% if not forloop.last %}
+                        <hr>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
             {% else %}
-                <h3>No prof pic</h3>
+                <br>
+                <br>
+                <h4>{{profile.first_name}} has no upcoming events!</h4>
             {% endif %}
-
+            </div>
+            <br>
+        </div>
+        <div class="col-md-5">
+        <br>
+        <br>
+        <div class="friend_request_section" id="friend_request_section-{{ profile.pk }}">
+            {% if friend_requested_by_you %}
+                <a class="btn btn-default" alt='{{ profile.pk }}'>{{ profile.first_name }} requested as friend</a>
+                <a id="cancel-request-{{ profile.pk }}" class="btn btn-warning cancel-request" href = "#" alt='{{ profile.pk }}'>Cancel request</a>
+            {% elif friend_requested_by_them %}
+                <a id="addition-{{ profile.pk }}" class="btn btn-success detail-add-button" href = "#" alt='{{ profile.pk }}'>Accept {{ profile.first_name }} as a friend</a>
+                <a id="rejection-{{ profile.pk }}" class="btn btn-danger detail-reject-button" href = "#" alt='{{ profile.pk }}'>Reject {{ profile.first_name }} as a friend</a>
+            {% elif not_friends %}
+                <a id="request-add-button-{{ profile.pk }}" class="btn btn-primary request-add-button" href = "#" alt='{{ profile.pk }}'>Add {{ profile.first_name }} as a friend</a>
+            {% else %}
+                {% if request.user.profile.pk not in profile.followers|values_list:'pk' %}
+                    <a class="btn btn-warning" href="{% url 'subscribe' profile.pk %}"><i class='fa fa-star'></i>&nbsp;&nbsp;Favorite {{ profile.first_name }}</a>
+                {% else %}
+                    <a class="btn btn-warning" href="{% url 'subscribe' profile.pk %}"><i class='fa fa-star-o'></i>&nbsp;&nbsp;Unfavorite {{ profile.first_name }}</a>
+                {% endif %}
+                <a id="delete-friend-button-{{ profile.pk }}" class="btn btn-danger delete-friend-button" href = "#" alt='{{ profile.pk }}' placeholder="{{ profile.first_name }}">Delete {{ profile.first_name }} as a friend</a>
+            {% endif %}
+            <hr>
+            
             <h3>{{ profile.first_name }}'s friends</h3>
-
-            {% for friend in profile.friends.all %}
-                <a href="{% url 'profile_detail_view' friend.pk %}">{{ friend }}</a>{% if not forloop.last %},{% endif %}
+            <div class="row" style="margin-left: 5px">
+            {% for friend in profile.friends.all|slice:"0:18" %}
+                    <a class="tooltipped" href="{% url 'profile_detail_view' friend.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ friend }}">
+                     {% thumbnail  friend.picture "200x200" crop="center" as im %}
+                        <img src="{{ im.url }}" alt="port-1" class="port-item" width="60" height="60" style="border-radius: 100px;">
+                    {% endthumbnail %}
+                    </a>
+                {% if forloop.counter|divisibleby:6 %}
+                    </div><div class="row" style="margin-left: 5px">
+                {% endif %}
+                {% if forloop.counter == 18 %}
+                    </div><a href="#friend-lists">See all friends</a><div>
+                {% endif %}
             {% endfor %}
-
-            <h3>{{ profile.first_name }}'s groups</h3>
+                </div>
+            <h3>{{ profile.first_name }}'s Group Feeds</h3>
 
             {% for group in profile.groups_in.all %}
                 <a href="{% url 'group_event_list' group.pk %}">{{ group }}</a>{% if not forloop.last %},{% endif %}
             {% endfor %}
     
-            <br>
-            <br>
-            <br>
-            {% if logged_in %}
-                {% ifequal request.user.profile profile %}
-                    <a class="btn btn-default" href="{% url 'profile_update_view' profile.pk %}" %}>Update your profile</a>
-                {% else %}
-                    <div class="friend_request_section" id="friend_request_section-{{ profile.pk }}">
-                        {% if friend_requested_by_you %}
-                            <a class="btn btn-default" alt='{{ profile.pk }}'>{{ profile.first_name }} requested</a>
-                            <a id="cancel-request-{{ profile.pk }}" class="btn btn-warning cancel-request" href = "#" alt='{{ profile.pk }}'>Cancel request</a>
-                        {% elif friend_requested_by_them %}
-                            <a id="addition-{{ profile.pk }}" class="btn btn-success detail-add-button" href = "#" alt='{{ profile.pk }}'>Accept {{ profile.first_name }} as a friend</a>
-                            <a id="rejection-{{ profile.pk }}" class="btn btn-danger detail-reject-button" href = "#" alt='{{ profile.pk }}'>Reject {{ profile.first_name }} as a friend</a>
-                        {% elif not_friends %}
-                            <a id="request-add-button-{{ profile.pk }}" class="btn btn-primary request-add-button" href = "#" alt='{{ profile.pk }}'>Add {{ profile.first_name }} as a friend</a>
-                        {% else %}
-                            <h4>You are friends with {{ profile.first_name }}!</h4>
-                            <a id="delete-friend-button-{{ profile.pk }}" class="btn btn-danger delete-friend-button" href = "#" alt='{{ profile.pk }}' placeholder="{{ profile.first_name }}">Delete {{ profile.first_name }} as a friend</a>
-
-                        {% endif %}
-                    </div>
-                {% endifequal %}
-            {% else %}
-                <h4 class="btn btn-danger">Log in to add {{ profile.first_name }}!</h4>
-            {% endif %}
-            <br>
-            <br>
-        </div>
-        <div class="col-md-4">
-        <br>
-
-            {% if not not_friends and request.user.profile != profile %}
-                {% if request.user.profile.pk not in profile.followers|values_list:'pk' %}
-                    <a class="btn btn-warning" href="{% url 'subscribe' profile.pk %}"><i class='fa fa-star'></i>&nbsp;&nbsp;Favorite {{ profile.first_name }}</a><br>
-                    <small>(receive notifications whenever {{ profile.first_name }} posts an event)</small>
-                {% else %}
-                    <a class="btn btn-danger" href="{% url 'subscribe' profile.pk %}"><i class='fa fa-star-o'></i>&nbsp;&nbsp;Unfavorite {{ profile.first_name }}</a><br>
-                    <small>(stop receiving notifications whenever {{ profile.first_name }} posts an event)</small>
-                {% endif %}
-                
-            {% endif %}
-            <h5 class="bio">bio: {{profile.bio}}</h5><br>
-            <h4><strong>{% ifequal request.user.profile profile  %}Your{% else %}{{profile.first_name}}'s{% endifequal %} Search Username</strong>:</h4><h4>{{ profile.username }}</h4>
-            <h3>Events {% ifequal request.user.profile profile  %}You've{% else %}{{profile.first_name}} Has{% endifequal %} Posted</h3>
-            {% if profile.events_posted.all %}
-            <div class="main-feed">
-                {% for event in profile.events_posted.all %}
-                    <hr>
-                    <h5>{{ event }}</h5>
-                    <h6 style="color: darkgrey">Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h6>
-                    <a class="btn btn-default" href="{% url 'event_detail_view' event.pk %}">More details...</a></br>
-                {% endfor %}
-            </div>
-            {% else %}
-                <br>
-                <br>
-                <h4>{% ifequal request.user.profile profile  %}You have{% else %}{{profile.first_name}} has{% endifequal %} no upcoming events!</h4>
-            {% endif %}
-
         </div>
     </div>
 </div>
-
 {% endblock %}  

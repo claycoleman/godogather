@@ -11,7 +11,9 @@
                 {% if friends %}
                     {% for profile in friends %}
                          <div class="event-detail">
-                            <img class="thumb" src="{{profile.picture.url}}">
+                            {% thumbnail  profile.picture "200x200" crop="center" as im %}
+                                <img src="{{ im.url }}" class="port-item" width="150" height="150" style="border-radius: 80px; float:left" alt="{{ person }}">
+                            {% endthumbnail %}
                             <a href="{% url 'profile_detail_view' profile.pk %}">{{ profile }}</a></br>
                             <hr>
                         </div>
@@ -30,3 +32,6 @@
 </div>
 
 {% endblock %}
+
+
+    

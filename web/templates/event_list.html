@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load values_list %}
+{% load thumbnail %}
     
 {% block refresh %}<meta http-equiv="refresh" content="120"><link rel="stylesheet" type="text/css" href="{% static 'css/popup.css' %}">{% endblock %}
 
@@ -11,7 +12,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-9">
-                <h1 class="text-center bold">Event Feed</h1>
+                <h1 class="text-center bold">What Are You Doing?</h1>
                 <h5 style="float: left;" class="text-left"><strong>Current date: </strong><span id="current-date">{{ today |date:"c"}}</span></h5>
                 <a style="float: right;" href="{% url 'event_list_view' %}" class="btn btn-default {% if not order %}active{% endif %}">Order by event date</a><a style="float: right;" href="{% url 'event_list_view' %}?order=date_posted" class="btn btn-default {% if order %}active{% endif %}">Order by date posted</a>&nbsp;&nbsp;<br>
                     <br style="clear:both;"/>
@@ -24,7 +25,11 @@
                     <div class="event-detail" id="event-detail-{{ event.pk }}">
                         {% if request.user.profile in event.host.all %}
                             <br>
-                            <a href="{% url 'profile_detail_view' event.host.first.pk %}"><img style="max-height: 40px; max-width: 40px; border-radius: 20px; float:left" src="{{event.host.first.picture.url}}"></a>
+                            <a href="{% url 'profile_detail_view' event.host.first.pk %}">
+                            {% thumbnail  event.host.first.picture "200x200" crop="center" as im %}
+                                <img src="{{ im.url }}" alt="port-1" class="port-item" width="40" height="40" style="border-radius: 20px; float:left">
+                            {% endthumbnail %}
+                            </a>
                             <h4 style="float: left;"><strong class='black'>&nbsp;{% for host in event.host.all %}{% if host == request.user.profile %}You{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>{% if event.groups.all %} in {% for group in event.groups.all %}<a href="{% url 'group_event_list' group.pk %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</h4>
                             <h5 class="darkgrey" style="float: right;">Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</span></h5> 
                             <div class="row" style="clear:both;">
@@ -46,7 +51,11 @@
                         {% else %}
                         {% if request.user.profile in event.people_coming.all %}
                             <br>
-                            <a href="{% url 'profile_detail_view' event.host.first.pk %}"><img style="max-height: 40px; max-width: 40px; border-radius: 20px; float:left" src="{{event.host.first.picture.url}}"></a>
+                            <a href="{% url 'profile_detail_view' event.host.first.pk %}">
+                            {% thumbnail  event.host.first.picture "200x200" crop="center" as im %}
+                                <img src="{{ im.url }}" alt="port-1" class="port-item" width="40" height="40" style="border-radius: 20px; float:left">
+                            {% endthumbnail %}
+                            </a>
                             <h4 style="float: left;"><strong class='black'>&nbsp;{% for host in event.host.all %}{% if host == request.user.profile %}You{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>{% if event.groups.all %} in {% for group in event.groups.all %}<a href="{% url 'group_event_list' group.pk %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</h4>
                             <h5 class="darkgrey" style="float: right;">Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</h5> 
                             <br style="clear:both;">
@@ -79,7 +88,11 @@
                             <br><br>
                         {% elif request.user.profile in event.people_not_coming.all %}
                             <br>
-                            <a href="{% url 'profile_detail_view' event.host.first.pk %}"><img style="max-height: 40px; max-width: 40px; border-radius: 20px; float:left" src="{{event.host.first.picture.url}}"></a>
+                            <a href="{% url 'profile_detail_view' event.host.first.pk %}">
+                            {% thumbnail  event.host.first.picture "200x200" crop="center" as im %}
+                                <img src="{{ im.url }}" alt="port-1" class="port-item" width="40" height="40" style="border-radius: 20px; float:left">
+                            {% endthumbnail %}
+                            </a>
                             <h4 style="float: left;" class='darkgray'><strong>&nbsp;{% for host in event.host.all %}{{host.first_name}}{% if not forloop.last %}, {% endif %}{% endfor %}</strong></h4>
                             <div class="text-right" style="float:right">
                                 <span class="red stan"><i class="fa fa-times-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;You're not going...</span><br><br>
@@ -99,7 +112,11 @@
                             {% endif %}
                             {% else %}
                                 <br>
-                                <a href="{% url 'profile_detail_view' event.host.first.pk %}"><img style="max-height: 40px; max-width: 40px; border-radius: 20px; float:left" src="{{event.host.first.picture.url}}"></a>
+                                <a href="{% url 'profile_detail_view' event.host.first.pk %}">
+                            {% thumbnail  event.host.first.picture "200x200" crop="center" as im %}
+                                <img src="{{ im.url }}" alt="port-1" class="port-item" width="40" height="40" style="border-radius: 20px; float:left">
+                            {% endthumbnail %}
+                            </a>
                                 <h4 style="float: left;"><strong class='black'>&nbsp;{% for host in event.host.all %}{% if host == request.user.profile %}You{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>{% if event.groups.all %} in {% for group in event.groups.all %}<a href="{% url 'group_event_list' group.pk %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</h4>
                                 <h5 class="darkgrey" style="float: right;">Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</h5> 
                                 <div class="row" style="clear:both;">

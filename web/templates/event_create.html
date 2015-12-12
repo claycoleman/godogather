@@ -8,31 +8,39 @@
 <div class="container">
         <form action="{% url 'event_create_view' %}" enctype="multipart/form-data" method="POST" >
     <div class="row">
+            <h2 class="text-center">CREATE A NEW EVENT</h2>
             {% csrf_token %}    
-            <div class="col-md-7">
-                <h2>Create an event</h2>
+            <div class="col-md-5 col-md-offset-1">
                     Name: {{ form.name|addcss:"form-control" }}
-                    Description: {{ form.description|addcss:"form-control" }}
-                    Location: <small>(please include street address, city and zip)</small> {{ form.location|addcss:"form-control" }}
+                    <hr>
+                    <i class="fa fa-calendar-o"></i>
+                    Date: {{form.date_happening|addcss:"form-control datepicker"}}
+                    <i class="fa fa-clock-o"></i>
+                    Time Starting: {{form.time_starting|addcss:"form-control timepicker"}}
+                    <i class="fa fa-clock-o"></i>
+                    Time Ending: {{form.time_ending|addcss:"form-control timepicker"}}
+                    <hr>
+                    <i class="fa fa-map-marker"></i>
+                    Location: {{ form.location|addcss:"form-control" }}
                     {{ form.test_location|addcss:"form-control"}}
-                    
+                    <input name="event_pk" class="hidden" value="{{ event_pk }}">
             </div>
-            <div class="col-md-5">
-                <h2>&nbsp;</h2>
-                Host: <small>(besides yourself, of course)</small><div class="overflow form-control">{{form.host}}
-                </div>
-                <hr>
-                Date: {{form.date_happening|addcss:"form-control datepicker"}}
-                Time Starting: {{form.time_starting|addcss:"form-control timepicker"}}
-                Time Ending: {{form.time_ending|addcss:"form-control timepicker"}}
-                <hr>
-                <p class="red">Choose a group, or check public below!</p>
-                Groups:<br>
+            <div class="col-md-4 col-md-offset-1">
+                Description: {{ form.description|addcss:"form-control" }}
+                <hr style="margin-bottom: 5px; margin-top: 10px;">
+                <strong class="bigger">Allow sharing?</strong>{{ form.shareable }}<br style="margin-top: 100px">
+                Allow others to repost this event and invite their friends<br><br>
+                <strong class="bigger">Make Public?</strong>{{ form.public }}<br>
+                Post this event to all your friends' event feeds.<br>If an event is not public, you should invite people or tag a specific Group Feed!
+                
+                <!--Host: <small>(besides yourself, of course)</small><div class="overflow form-control">{{form.host}}
+                </div>-->
+                <hr style="margin-bottom: 5px; margin-top: 10px;">
+                <div class="text-center"><a href="{% url 'invite_friends_to_event_view' event_pk %}" class="btn btn-primary popup">&nbsp;&nbsp;&nbsp;&nbsp;Invite friends to this event&nbsp;&nbsp;&nbsp;&nbsp;</a></div>
+                <br><br>
+                <strong>Group Feeds</strong><br>
                 <div class="overflow form-control">{{form.groups}}
                 </div>
-                {{ form.public }}&nbsp;&nbsp;Public event (all your friends can view this)<br>
-                    {{ form.shareable }}&nbsp;&nbsp;Allow sharing (your friends can repost this event)
-                <br>
             </div>
         </div>
         {% if errors %}
@@ -57,11 +65,25 @@
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="{% static 'css/jquery.timepicker.css' %}">
     <link rel="stylesheet" href="{% static 'location_picker/location_picker.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/popup.css' %}">
     
 {% endblock links %}
 
 {% block scripts %}
     <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
     <script type="text/javascript" src="{% static 'js/jstz-1.0.4.min.js' %}"></script>
+
+    <script src="{% static 'js/jquery.popup.min.js' %}"></script>
+    <script src="{% static 'js/switch-boxes.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/switch-boxes.css' %}">
+    <script type="text/javascript">
+        $(document).ready(function() {
+          $(':checkbox').iphoneStyle({
+              checkedLabel: 'YES',
+              uncheckedLabel: 'NO'
+            });
+        });
+  </script>
 {% endblock scripts %}
 

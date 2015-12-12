@@ -177,29 +177,18 @@ def event_list_view(request):
 def event_create_view(request):
     context = {} 
 
-    group_pk = request.GET.get('group_pk', '')
-
     friends = request.user.profile.friends.all()
     groups = request.user.profile.groups_in.all()
 
-    if group_pk != '':
-        form = EventModelCreateForm()
-        form.fields['groups'].queryset = groups
-        form.fields['groups'].initial = [Group.objects.get(pk=group_pk), ]
-
-    else:
-        form = EventModelCreateForm()
-        form.fields['groups'].queryset = groups
-
-
-    form.fields['host'].queryset = friends
-
-    context['form'] = form
     if request.method == 'POST':
-        form = EventModelCreateForm(request.POST, request.FILES)
+        pk = request.POST.get('event_pk')
+        context['event_pk'] = pk
+        event_saved = Event.objects.get(pk=pk)
+        form = EventModelCreateForm(request.POST, instance=event_saved)
         if form.is_valid():
             should_save = True
             new_event = form.save(commit=False)
+            print "New event: %s" % new_event.pk
             event = datetime.combine(new_event.date_happening, new_event.time_starting)
             event_ending = datetime.combine(new_event.date_happening, new_event.time_ending)
 
@@ -221,14 +210,6 @@ def event_create_view(request):
                 form.fields['host'].queryset = friends
                 context['form'] = form
 
-            elif not new_event.public and len(form.cleaned_data['groups']) is 0:
-                should_save = False
-                context['errors'] = "An event must either be public, or have at least one group to be displayed in."
-                form = EventModelCreateForm(initial=return_dict(form.data))
-                form.fields['host'].queryset = friends
-                form.fields['groups'].queryset = groups
-                context['form'] = form
-
             if should_save:
                 new_event.date_happening = event.date()
                 new_event.time_starting = event.time()
@@ -245,6 +226,13 @@ def event_create_view(request):
                         new_notif.message = "%s posted a new event, \"%s\"." % (host.first_name, new_event.name)
                         new_notif.sender_pk = new_event.pk
                         new_notif.save()
+                for invitee in new_event.invitees.all():
+                    if not invitee.notifications.filter(read=False, sender_pk=event.pk, notification_type__istartswith='Invited to event').exists():
+                        new_notif = Notification.objects.create(user=invitee)
+                        new_notif.notification_type = "Invited to event"
+                        new_notif.message = "%s invited you to come to the event \"%s\"!" % (first_name, event.name)
+                        new_notif.sender_pk = event.pk
+                        new_notif.save()
                 new_event.create_apple_ics()
                 return redirect('event_detail_view', new_event.pk)
         else:
@@ -254,6 +242,34 @@ def event_create_view(request):
             form.fields['groups'].queryset = groups
             form.fields['host'].queryset = friends
             context['form'] = form
+    else:
+        for event in Event.objects.filter(name=None, host=request.user.profile):
+            event.delete()
+        pk = Event.objects.order_by('id').last().pk + 1
+        event_created = Event.objects.create(public=True, pk=pk)
+        event_created.host.add(request.user.profile)
+        form = EventModelCreateForm(instance=event_created)
+        form.fields['date_happening'].initial = timezone.now().isoformat('T')
+        form.fields['time_starting'].initial = timezone.now().isoformat('T')
+        form.fields['time_ending'].initial = timezone.now().isoformat('T')
+        context['event_pk'] = event_created.pk
+
+        group_pk = request.GET.get('group_pk', '')
+
+        
+        if group_pk != '':
+            form.fields['groups'].queryset = groups
+            form.fields['groups'].initial = [Group.objects.get(pk=group_pk), ]
+
+        else:
+            form.fields['groups'].queryset = groups
+
+
+        form.fields['host'].queryset = friends
+
+        context['form'] = form
+        
+
     return render_to_response('event_create.html', context, context_instance=RequestContext(request))
 
 def return_dict(dictionary):
@@ -411,11 +427,7 @@ def group_list_view(request):
 
 
 @login_required
-def group_event_list(request, pk):
-    if not request.user.is_authenticated():
-        return redirect('new_user')
-
-    
+def group_member_view(request, pk):
     context = {}
 
     group = Group.objects.get(pk=pk)
@@ -426,6 +438,30 @@ def group_event_list(request, pk):
     context['is_admin'] = is_member and request.user.profile in group.admin.all()
     context['group_requested_by_member'] = request.user.profile in group.member_requests.all()
     context['member_requested_by_group'] = group in request.user.profile.group_requests.all()
+
+    context['members'] = [e for e in group.members.all()]
+    context['admin'] = [e for e in group.admin.all()]
+    context['member_requests'] = [e for e in group.member_requests.all()]
+
+
+
+    return render_to_response('group_member_view.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def group_event_list(request, pk):
+    context = {}
+
+    group = Group.objects.get(pk=pk)
+    context['group'] = group
+
+    is_member = request.user.profile in group.members.all()
+    context['is_member'] = is_member
+    context['is_admin'] = is_member and request.user.profile in group.admin.all()
+    context['group_requested_by_member'] = request.user.profile in group.member_requests.all()
+    context['member_requested_by_group'] = group in request.user.profile.group_requests.all()
+
+    context['admin_already_members'] = group.admin.filter(pk__in=group.members.values_list('pk', flat=True))
 
     group_events = Event.objects.filter(groups=group)
     my_events = request.user.profile.events_hosted.filter(groups=group)
@@ -487,7 +523,7 @@ def group_create_view(request):
             new_group.admin.add(request.user.profile)
             new_group.members.add(request.user.profile)
                 
-            return redirect('group_event_list', group.pk)
+            return redirect('group_member_view', new_group.pk)
         else:
             context['errors'] = form.errors
     return render_to_response('group_create.html', context, context_instance=RequestContext(request))
@@ -504,22 +540,21 @@ def group_update_view(request, pk):
     context['group'] = group
 
     form = GroupModelUpdateForm(request.POST or None, instance=group)
-    group_members = group.members.exclude(pk=request.user.profile.pk)
+    group_members = group.members.exclude(pk__in=group.admin.values_list('pk', flat=True))
 
     form.fields['members'].queryset = group_members
     context['form'] = form
 
     if request.method == 'POST':
-        form = GroupModelUpdateForm(request.POST, request.FILES, instance=group)
         if form.is_valid():
             updated_group = form.save(commit=False)
             form.save_m2m()
             updated_group.members.add(request.user.profile)
 
             context['saved'] = '%s saved!' % updated_group.name
-
+            updated_group.save()
             if request.POST.get('_finish'):
-                return redirect('group_event_list', updated_group.pk)
+                return redirect('group_member_view', updated_group.pk)
         else:
             context['errors'] = form.errors
 
@@ -549,7 +584,8 @@ def profile_detail_view(request, pk):
         context['friend_requested_by_you'] = request.user.profile in profile.friend_requests.all()
         context['friend_requested_by_them'] = profile in request.user.profile.friend_requests.all()
 
-
+    if str(pk) == str(request.user.profile.pk):
+        return render_to_response('your_profile_detail.html', context, context_instance=RequestContext(request))
     return render_to_response('profile_detail.html', context, context_instance=RequestContext(request))
 
 
@@ -796,6 +832,10 @@ def invite_friends_to_event_view(request, pk):
 
     context['friends'] = friends
 
+    friend_lists = request.user.profile.lists.all()
+
+    context['friend_lists'] = friend_lists
+
     return render_to_response('invite_friends_to_event.html', context, context_instance=RequestContext(request))
 
 
@@ -897,7 +937,9 @@ def delete_friendship(request):
     prof = Profile.objects.get(pk=pk)
     print prof
     prof.friends.remove(request.user.profile)
+    prof.followers.remove(request.user.profile)
     request.user.profile.friends.remove(prof)
+    request.user.profile.followers.remove(prof)
     prof_list = []
 
     prof_list.append(prof.user.first_name)
@@ -1050,6 +1092,8 @@ def leave_group(request):
     group = Group.objects.get(pk=pk)
     print group
     group.members.remove(request.user.profile)
+    group.admin.remove(request.user.profile)
+    group.followers.remove(request.user.profile)
 
     group_list = []
     group_list.append(group.name)
@@ -1225,6 +1269,18 @@ def subscribe(request, pk):
 
 
 @login_required
+def subscribe_group(request, pk):
+    group = Group.objects.get(pk=pk)
+    
+    if request.user.profile.pk not in group.followers.values_list('pk', flat=True):
+        group.followers.add(request.user.profile)
+    else:
+        group.followers.remove(request.user.profile)
+
+    return redirect('group_event_list', pk)
+
+
+@login_required
 def add_friend_to_friend_list(request):
     friend_pk = request.GET.get('friend_pk')
     list_pk = request.GET.get('list_pk')
@@ -1267,12 +1323,13 @@ def extend_event_invite(first_name, friend_pk, event):
 
     event.invitees.add(friend)
 
-    if not friend.notifications.filter(read=False, sender_pk=event.pk, notification_type__istartswith='Invited to event').exists():
-        new_notif = Notification.objects.create(user=friend)
-        new_notif.notification_type = "Invited to event"
-        new_notif.message = "%s invited you to come to the event \"%s\"!" % (first_name, event.name)
-        new_notif.sender_pk = event.pk
-        new_notif.save()
+    if event.name:
+        if not friend.notifications.filter(read=False, sender_pk=event.pk, notification_type__istartswith='Invited to event').exists():
+            new_notif = Notification.objects.create(user=friend)
+            new_notif.notification_type = "Invited to event"
+            new_notif.message = "%s invited you to come to the event \"%s\"!" % (first_name, event.name)
+            new_notif.sender_pk = event.pk
+            new_notif.save()
 
 
 def share_buttons(request, pk):

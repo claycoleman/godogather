@@ -6,7 +6,7 @@ class EventAdmin(admin.ModelAdmin):
     '''
         Admin View for Event
     '''
-    list_display = ('name', 'date_happening',)
+    list_display = ('name', 'date_happening', 'pk')
     list_filter = ('name', 'date_posted',)
     search_fields = ['']
 

@@ -1,24 +1,53 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 {% load addcss %}
+
+{% block title %}CREATE GROUP FEED{% endblock title %}
 
 {% block body %}
 <div class="container">
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
-            <h2>Create a new group</h2>
+            <h2>CREATE A NEW GROUP FEED</h2>
             <form action="{% url 'group_create_view' %}" enctype="multipart/form-data" method="POST" >
                 {% csrf_token %}    
                 Name:
                 {{ form.name|addcss:"form-control" }}
-                Admins of your new group! <small>(besides yourself, of course)</small>:
+                Description
+                {{ form.description|addcss:"form-control" }}
+                Admins of your new Group Feed! <small>(besides yourself, of course)</small>:
                 <div class="overflow form-control">{{ form.admin }}</div>
+                <br>
+
+                <strong class="bigger">Allow searching?</strong>{{ form.searchable }}<br style="margin-top: 100px">
+                Allow others to find this Group Feed via searching<br><br>
+                <strong class="bigger">Make Open?</strong>{{ form.open_group }}<br>
+                Allow new members to join without being approved<br><br>
+                <strong class="bigger">Only Admins Can Post?</strong>{{ form.admin_only }}<br>
+                Ensure only Group Feed Admins can post events.<br>If you're making a Group Feed for an organization, leave this yes!
                 <br>
                 <div class="red text-center"><p>{{ errors }}</p></div>    
                 <input class="form-control" type="submit" value="Create group" />
-
             </form>
         </div>
     </div>
+    <br>
 </div>
 
 {% endblock %}
+
+
+{% block scripts %}
+    <script src="{% static 'js/switch-boxes.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/switch-boxes.css' %}">
+    <script type="text/javascript">
+        $(document).ready(function() {
+          $(':checkbox').iphoneStyle({
+              checkedLabel: 'YES',
+              uncheckedLabel: 'NO'
+            });
+        });
+  </script>
+{% endblock scripts %}
+
+
