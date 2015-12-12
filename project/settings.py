@@ -15,7 +15,7 @@ TIME_INPUT_FORMATS = (
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
-LOGIN_URL = '/home/'
+LOGIN_URL = '/'
 
 
 # Application definition
