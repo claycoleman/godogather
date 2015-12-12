@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load values_list %}
+{% load thumbnail %}
+                            
+
+{% block refresh %}<meta http-equiv="refresh" content="120">{% endblock %}
+
+{% block title %}{{ profile }}{% endblock title %}
+
+
+{% block body %}
+<div class="container main">
+    <div class="row">
+        <div class="col-md-7">
+        <br>
+            <div class="row">
+                <div class="col-xs-4">
+                    
+                    {% if profile.picture %}
+
+                        {% thumbnail  profile.picture "200x200" crop="center" as im %}
+                            <img src="{{ im.url }}" alt="port-1" class="port-item" width="150" height="150" style="border-radius: 100px;">
+                        {% endthumbnail %}
+                        <br>
+                    {% else %}
+                        <h3>No prof pic</h3>
+                    {% endif %}
+                </div>
+                <div class="col-xs-6">
+                    <h2 class="bold">{{ profile }}</h2>
+                </div>
+            </div>
+            <h4><strong>Bio</strong>: {% if profile.bio %}{{profile.bio}}{% else %}You don't have a bio! Update your profile and add one.{% endif %}</h4><br>
+            <h4><strong>Your Search Username</strong>: {{ profile.username }}</h4>
+            <br>
+
+            <h3 style="margin-left: 100px;">YOUR RECENT EVENTS</h3>
+           <div style="width: 500px; margin-left: 50px;">
+           <hr>
+            {% if profile.events_posted.all %}
+            <div class="main-feed"> 
+
+                {% for event in profile.events_posted.all %}
+                    <h5>{{ event }}</h5>
+                    <h6 style="color: darkgrey;" class="date-starting">{{ event.date_happening|date:"c" }}T{{ event.time_starting|time:"H:i" }}:00.000000+00:00</h6>
+                    <h6 style="color: darkgrey">Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h6>
+                    <a class="btn btn-default" href="{% url 'event_detail_view' event.pk %}">More details...</a>
+                    </br>
+                    {% if not forloop.last %}
+                        <hr>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {% else %}
+                <br>
+                <br>
+                <h4>You have no upcoming events!</h4>
+            {% endif %}
+            </div>
+            <br>
+            <br>
+        </div>
+        <div class="col-md-5">
+        <br>
+        <br>
+        <div class="friend_request_section" id="friend_request_section-{{ profile.pk }}">
+            <a class="btn btn-warning" href="{% url 'profile_update_view' profile.pk %}" %}>Update your profile</a>
+            <hr>
+            
+            <h3>Your friends</h3>
+            <div class="row" style="margin-left: 5px">
+            {% for friend in profile.friends.all|slice:"0:18" %}
+                    <a class="tooltipped" href="{% url 'profile_detail_view' friend.pk %}" data-placement="bottom" data-toggle="tooltip" title="{{ friend }}">
+                     {% thumbnail  friend.picture "200x200" crop="center" as im %}
+                        <img src="{{ im.url }}" alt="port-1" class="port-item" width="60" height="60" style="border-radius: 100px;">
+                    {% endthumbnail %}
+                    </a>
+                {% if forloop.counter|divisibleby:6 %}
+                    </div><div class="row" style="margin-left: 5px">
+                {% endif %}
+                {% if forloop.counter == 18 %}
+                    </div><a href="#friend-lists">See all friends</a><div>
+                {% endif %}
+            {% endfor %}
+                </div>
+            <h3>Your Group Feeds</h3>
+
+            {% for group in profile.groups_in.all %}
+                <a href="{% url 'group_event_list' group.pk %}">{{ group }}</a>{% if not forloop.last %},{% endif %}
+            {% endfor %}
+    
+        </div>
+    </div>
+</div>
+
+{% endblock %}  

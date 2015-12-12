@@ -1,0 +1,83 @@
+.iPhoneCheckContainer {
+  -webkit-transform:translate3d(0,0,0);
+  position: relative;
+  height: 27px;
+  cursor: pointer;
+  overflow: hidden; }
+  .iPhoneCheckContainer input {
+    position: absolute;
+    top: 5px;
+    left: 30px;
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+    opacity: 0; }
+  .iPhoneCheckContainer label {
+    white-space: nowrap;
+    font-size: 17px;
+    line-height: 17px;
+    font-weight: bold;
+    font-family: "Lato", Arial, Helvetica, sans-serif;
+    cursor: pointer;
+    display: block;
+    height: 27px;
+    position: absolute;
+    width: auto;
+    top: 0;
+    padding-top: 5px;
+    overflow: hidden; }
+  .iPhoneCheckContainer, .iPhoneCheckContainer label {
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none; 
+    margin-bottom: -15px;
+}
+
+.iPhoneCheckDisabled {
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  opacity: 0.5; }
+
+label.iPhoneCheckLabelOn {
+  color: white;
+  background: rgb(39, 163, 156);
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.6);
+  left: 0;
+  padding-top: 5px; }
+  label.iPhoneCheckLabelOn span {
+    padding-left: 8px; }
+label.iPhoneCheckLabelOff {
+  color: white;
+  background: rgb(170, 0, 8);
+  border-radius: 20px;
+  text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.6);
+  text-align: right;
+  right: -1; 
+}
+  label.iPhoneCheckLabelOff span {
+    padding-right: 8px; }
+
+.iPhoneCheckHandle {
+  display: block;
+  height: 27px;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  background: #EEE;
+  border-radius: 5px;
+  padding-left: 3px; 
+  border: 1px solid rgba(0, 0, 0, 0.6);}
+
+.iPhoneCheckHandleRight {
+  height: 100%;
+  padding-right: 3px;
+  background: #EEE;
+  border-radius: 5px; 
+}
+
+.iPhoneCheckHandleCenter {
+  height: 100%;
+  width: 100%;
+  background: #EEE;
+  border-radius: 5px;}
