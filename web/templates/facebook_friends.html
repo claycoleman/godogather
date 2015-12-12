@@ -6,10 +6,10 @@
     {% for friend in friends %}
         <div class="event-detail" style="border-bottom: 1px solid #EEE; min-height: 40px;">
             {% thumbnail  friend.picture "200x200" crop="center" as im %}
-                <img src="{{ im.url }}" class="port-item" width="60" height="60" style="border-radius: 30px; float:left" alt="{{ person }}">
+                <img src="{{ im.url }}" class="port-item" width="60" height="60" style="border-radius: 30px;" alt="{{ person }}">
             {% endthumbnail %}
             <a href="{% url 'profile_detail_view' friend.pk %}" >{{ friend }}</a>
-            <strong id='div-invite-friend-{{friend.pk}}'>
+            <strong id='div-invite-friend-{{friend.pk}}'>&nbsp;
             {% if friend in request.user.profile.friend_requests.all %}     
                 <a id='reject-friend-{{friend.pk}}' class="btn btn-sm btn-danger reject-friend" style="float: right; margin-top: 5px;" href="#invite-to-group" alt='{{friend.pk}}'>Reject...</a>     
                 <a id='accept-friend-{{friend.pk}}' class="btn btn-sm btn-success accept-friend" style="float: right; margin-top: 5px;" href="#invite-to-group" alt='{{friend.pk}}'>Accept!</a>&nbsp;  
