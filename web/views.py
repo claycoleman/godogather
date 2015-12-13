@@ -244,12 +244,11 @@ def event_create_view(request):
                         new_notif.sender_pk = new_event.pk
                         new_notif.save()
                 for invitee in new_event.invitees.all():
-                    if not invitee.notifications.filter(read=False, sender_pk=event.pk, notification_type__istartswith='Invited to event').exists():
-                        new_notif = Notification.objects.create(user=invitee)
-                        new_notif.notification_type = "Invited to event"
-                        new_notif.message = "%s invited you to come to the event \"%s\"!" % (first_name, event.name)
-                        new_notif.sender_pk = event.pk
-                        new_notif.save()
+                    new_notif = Notification.objects.create(user=invitee)
+                    new_notif.notification_type = "Invited to event"
+                    new_notif.message = "%s invited you to come to the event \"%s\"!" % (first_name, event.name)
+                    new_notif.sender_pk = event.pk
+                    new_notif.save()
                 new_event.create_apple_ics()
                 return redirect('event_detail_view', new_event.pk)
         else:
@@ -1370,15 +1369,15 @@ def invite_friend_list_to_event(request):
 def extend_event_invite(first_name, friend_pk, event):
     friend = Profile.objects.get(pk=friend_pk)
 
-    event.invitees.add(friend)
-
     if event.name:
-        if not friend.notifications.filter(read=False, sender_pk=event.pk, notification_type__istartswith='Invited to event').exists():
+        if friend not in event.invitees.all():
             new_notif = Notification.objects.create(user=friend)
             new_notif.notification_type = "Invited to event"
             new_notif.message = "%s invited you to come to the event \"%s\"!" % (first_name, event.name)
             new_notif.sender_pk = event.pk
             new_notif.save()
+
+    event.invitees.add(friend)
 
 @login_required
 def share_buttons(request, pk):

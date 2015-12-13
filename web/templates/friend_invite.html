@@ -29,7 +29,7 @@
                     {% thumbnail  friend.picture "200x200" crop="center" as im %}
                         <img src="{{ im.url }}" class="port-item" width="60" height="60" style="border-radius: 30px;" alt="{{ friend }}">
                     {% endthumbnail %}
-                    <a href="{% url 'profile_detail_view' friend.pk %}" >{{ friend }}</a>
+                    {{ friend }}
                     <strong id='div-invite-friend-{{friend.pk}}'>
                     {% if group not in friend.group_requests.all %}                
                         <a id='{{friend.pk}}' class="btn btn-sm btn-success invite-friend" style="float: right; margin-top: 12px;" href="#invite-to-group" alt='{{friend.pk}}'>Invite</a>

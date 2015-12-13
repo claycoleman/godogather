@@ -22,37 +22,67 @@
                 <h4>{{ group.description }}</h4>
                 <br>
 
-                <h3>THIS GROUP FEED'S SETTINGS</h3>
+                <h3 style="padding: 10px; border: 1px solid #DDD; display:inline; border-radius: 10px;" id="settings-text">THIS GROUP FEED'S SETTINGS</h3>
                 <br>
-                {% if group.searchable %}
-                <h4>This Group Feed is <strong>searchable</strong></h4>
-                <h5>Allows this group feed to show in searches</h5>
-                {% else %}
-                <h4>This Group Feed is <strong>not searchable</strong></h4>
-                <h5>Prevents this group feed from showing up in searches. Only members or invitees can see this page</h5>
-                {% endif %}
                 <br>
-                {% if group.open_group %}
-                <h4>This is an <strong>open</strong> Group Feed</h4>
-                <h5>Anyone can join this Group Feed without approval from the admins</h5>
-                {% else %}
-                <h4>This is a <strong>closed</strong> Group Feed</h4>
-                <h5>New members must be approved by an administrator to view events</h5>
-                {% endif %}
+                <div id="settings" class="hidden" style="border-radius: 15px; padding: 10px 10px 10px 10px ; background: #EEE">
+                    {% if group.searchable %}
+                    <h4>This Group Feed is <strong>searchable</strong></h4>
+                    <h5>Allows this group feed to show in searches</h5>
+                    {% else %}
+                    <h4>This Group Feed is <strong>not searchable</strong></h4>
+                    <h5>Prevents this group feed from showing up in searches. Only members or invitees can see this page</h5>
+                    {% endif %}
+                    <br>
+                    {% if group.open_group %}
+                    <h4>This is an <strong>open</strong> Group Feed</h4>
+                    <h5>Anyone can join this Group Feed without approval from the admins</h5>
+                    {% else %}
+                    <h4>This is a <strong>closed</strong> Group Feed</h4>
+                    <h5>New members must be approved by an administrator to view events</h5>
+                    {% endif %}
+                    <br>
+                    {% if group.admin_only %}
+                    <h4><strong>Only Admins</strong> can post events to this Group Feed</h4>
+                    {% else %}
+                    <h4><strong>All members</strong> can post events to this Group Feed</h4>
+                    {% endif %}
+                </div>
+
                 <br>
-                {% if group.admin_only %}
-                <h4><strong>Only Admins</strong> can post events to this Group Feed</h4>
+                <br>
+                {% if is_admin %}
+                    <a class="btn btn-success" href="{% url 'group_update_view' group.pk %}">EDIT THIS GROUP</a>
+                    <a class="btn btn-danger delete-button" id="{{ group }}" href="{% url 'group_delete_view' group.pk %}">DELETE THIS GROUP...</a>
+                    <div>
                 {% else %}
-                <h4><strong>All members</strong> can post events to this Group Feed</h4>
+                    {% if is_member %}
+                        <div id="membership">
+                        {% if request.user.profile.pk not in group.followers|values_list:'pk' %}
+                            <a class="btn btn-warning" href="{% url 'subscribe_group' group.pk %}"><i class='fa fa-star'></i>&nbsp;&nbsp;FAVORITE {{ group.name }}</a>
+                        {% else %}
+                            <a class="btn btn-warning" href="{% url 'subscribe_group' group.pk %}"><i class='fa fa-star-o'></i>&nbsp;&nbsp;UNFAVORITE {{ group.name }}</a>
+                        {% endif %}
+                    {% else %}
+                    <div>
+                    {% endif %}
                 {% endif %}
-                
+                    {% if is_member %}
+                    {% if is_admin %}
+                    <br>
+                    {% endif %}
+                        {% if not is_admin and admin_already_members.count > 1 %}
+                            <a id="{{ group.name }}" class="btn btn-danger leave_group" href = "#">LEAVE THIS GROUP</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
                 
 
                 <br><br>
                 <br><br>
                 
                 {% if is_member %}
-                    <a class="btn btn-default popup" href="/ajax/friends/?group_pk={{ group.pk }}">Add friends to {{ group }}</a>
+                    <a class="btn btn-default popup" href="/ajax/friends/?group_pk={{ group.pk }}">ADD FRIENDS TO THIS GROUP</a>
                     <br>
 
                 {% else %}
@@ -76,32 +106,6 @@
             </div>
             <div class="col-md-7">    
                 <br>
-
-                {% if is_admin %}
-                    <a class="btn btn-success" href="{% url 'group_update_view' group.pk %}">Edit {{ group }}</a>
-                    <a class="btn btn-danger delete-button" id="{{ group }}" href="{% url 'group_delete_view' group.pk %}">Delete {{ group }}...</a>
-                    <div>
-                {% else %}
-                    {% if is_member %}
-                        <div id="membership">
-                        {% if request.user.profile.pk not in group.followers|values_list:'pk' %}
-                            <a class="btn btn-warning" href="{% url 'subscribe_group' group.pk %}"><i class='fa fa-star'></i>&nbsp;&nbsp;Favorite {{ group.name }}</a>
-                        {% else %}
-                            <a class="btn btn-warning" href="{% url 'subscribe_group' group.pk %}"><i class='fa fa-star-o'></i>&nbsp;&nbsp;Unfavorite {{ group.name }}</a>
-                        {% endif %}
-                    {% else %}
-                    <div>
-                    {% endif %}
-                {% endif %}
-                    {% if is_member %}
-                    {% if is_admin %}
-                    <br>
-                    {% endif %}
-                        {% if not is_admin or admin_already_members.count != 1 %}
-                            <a id="{{ group.name }}" class="btn btn-danger leave_group" href = "#">Leave {{ group }}</a>
-                        {% endif %}
-                    {% endif %}
-                    </div>
                 <br>
                 <div class="text-right">   
                     <a class="btn btn-default" href="{% url 'group_event_list' group.pk %}">Events</a>
@@ -168,26 +172,36 @@
 {% endblock %}
 
 {% block scripts %}
-    <script type="text/javascript">
-        if (window.innerWidth>991) {
-        var distance = (window.innerWidth-1400)
-            if (distance > 300) {
-                distance = 300;
-            } else if (distance < 10) {
-                distance = (window.innerWidth-1200)
-                if (distance > 300) {
-                    distance = 300;
-                } else if (distance < 10) {
-                    distance = 10;
-                }
-            }
-        $('#sidebar').css({'right': distance+'px'});
-        } 
-        var height = 632
-        if (window.innerHeight - 900 < 0) {
-            $('#sidebar').css({'overflow': 'auto', 'max-height': window.innerHeight -275});
+     <script type="text/javascript">
+    //     if (window.innerWidth>991) {
+    //     var distance = (window.innerWidth-1400)
+    //         if (distance > 300) {
+    //             distance = 300;
+    //         } else if (distance < 10) {
+    //             distance = (window.innerWidth-1200)
+    //             if (distance > 300) {
+    //                 distance = 300;
+    //             } else if (distance < 10) {
+    //                 distance = 10;
+    //             }
+    //         }
+    //     $('#sidebar').css({'right': distance+'px'});
+    //     } 
+    //     var height = 632
+    //     if (window.innerHeight - 900 < 0) {
+    //         $('#sidebar').css({'overflow': 'auto', 'max-height': window.innerHeight -275});
 
-        }
+    //     }
+    </script>
+
+    <script type="text/javascript">
+        $("#settings").hide();
+        $("#settings").removeClass('hidden');
+        $("#settings-text").mouseover(function() {
+            $("#settings").show(150);
+        }).mouseout(function() {
+            $("#settings").hide(150);
+        });
     </script>
     <script src="{% static 'js/jquery.popup.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/jstz-1.0.4.min.js' %}"></script>
