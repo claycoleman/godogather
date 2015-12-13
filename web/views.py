@@ -188,8 +188,11 @@ def event_create_view(request):
     context = {} 
 
     friends = request.user.profile.friends.all()
-    groups = request.user.profile.groups_in.all()
-
+    groups = request.user.profile.groups_in.filter(admin_only=False)
+    admin_groups = request.user.profile.groups_in.filter(admin_only=True, admin=request.user.profile)
+    
+    groups = groups | admin_groups    
+    
     if request.method == 'POST':
         pk = request.POST.get('event_pk')
         context['event_pk'] = pk
@@ -312,7 +315,10 @@ def event_update_view(request, pk):
 
 
     friends = request.user.profile.friends.all()
-    groups = request.user.profile.groups_in.all()
+    groups = request.user.profile.groups_in.filter(admin_only=False)
+    admin_groups = request.user.profile.groups_in.filter(admin_only=True, admin=request.user.profile)
+    
+    groups = groups | admin_groups    
 
     form.fields['host'].queryset = friends
     form.fields['groups'].queryset = groups
@@ -469,6 +475,9 @@ def group_event_list(request, pk):
     context = {}
 
     group = Group.objects.get(pk=pk)
+    if request.user.profile.pk not in group.members.values_list('pk', flat=True):
+        return redirect('group_member_view', pk)
+
     context['group'] = group
 
     is_member = request.user.profile in group.members.all()

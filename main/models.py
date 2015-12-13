@@ -101,7 +101,7 @@ class Group(models.Model):
     admin = models.ManyToManyField('Profile', blank=True, related_name="groups_admined")
     searchable = models.BooleanField(default=False)
     open_group = models.BooleanField(default=True)
-    admin_only = models.BooleanField(default=True)
+    admin_only = models.BooleanField(default=False)
     followers = models.ManyToManyField('Profile', blank=True, related_name="groups_you_follow")
 
     class Meta:

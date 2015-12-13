@@ -59,9 +59,9 @@
                     {% if is_member %}
                         <div id="membership">
                         {% if request.user.profile.pk not in group.followers|values_list:'pk' %}
-                            <a class="btn btn-warning" href="{% url 'subscribe_group' group.pk %}"><i class='fa fa-star'></i>&nbsp;&nbsp;FAVORITE {{ group.name }}</a>
+                            <a class="btn btn-warning" href="{% url 'subscribe_group' group.pk %}"><i class='fa fa-star'></i>&nbsp;&nbsp;FAVORITE</a>
                         {% else %}
-                            <a class="btn btn-warning" href="{% url 'subscribe_group' group.pk %}"><i class='fa fa-star-o'></i>&nbsp;&nbsp;UNFAVORITE {{ group.name }}</a>
+                            <a class="btn btn-warning" href="{% url 'subscribe_group' group.pk %}"><i class='fa fa-star-o'></i>&nbsp;&nbsp;UNFAVORITE</a>
                         {% endif %}
                     {% else %}
                     <div>
@@ -71,7 +71,7 @@
                     {% if is_admin %}
                     <br>
                     {% endif %}
-                        {% if not is_admin and admin_already_members.count > 1 %}
+                        {% if not is_admin or is_admin and admin_already_members.count > 1 %}
                             <a id="{{ group.name }}" class="btn btn-danger leave_group" href = "#">LEAVE THIS GROUP</a>
                         {% endif %}
                     {% endif %}
@@ -264,7 +264,7 @@
     </div>
 </div>
 
-
+ 
 <input class="hidden" id="user_pk" alt="{{ request.user.profile.pk }}">
 <input class="hidden" id="group_pk" alt="{{ group.pk }}">
 
@@ -298,7 +298,7 @@
         $("#settings-text").mouseover(function() {
             $("#settings").show(150);
         }).mouseout(function() {
-            $("#settings").hide(150);
+            $("#settings").hide(200);
         });
     </script>
     <script src="{% static 'js/jquery.popup.min.js' %}"></script>
