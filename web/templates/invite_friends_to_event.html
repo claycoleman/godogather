@@ -13,7 +13,7 @@
                         <h4>{{ friend_list }}&nbsp;&nbsp;</h4>
                     </div>
                     <div class="col-md-3" >
-                        <a style="margin-top: -3px;" class="btn btn-success invite_friend_list_to_event" href="#" id="fl-{{ friend_list.pk }}">Invite</a>
+                        <a style="margin-top: -3px;" class="btn btn-success invite_friend_list_to_event" href="#" id="fl-{{ friend_list.pk }}">INVITE</a>
                     </div>
                 </div>
                 
@@ -35,10 +35,10 @@
                     {{ friend }}
                     <strong id='div-invite-friend-{{friend.pk}}'>
                     {% if friend not in event.invitees.all %}                
-                        <a id="{{ friend.pk }}" class="btn btn-sm btn-success invite_friend_to_event" style="float: right; margin-top: 15px; margin-right: 50px;" href="#invite-to-group">Invite</a>
+                        <a id="{{ friend.pk }}" class="btn btn-sm btn-success invite_friend_to_event" style="float: right; margin-top: 15px; margin-right: 50px;" href="#invite-to-group">INVITE</a>
                         <span id="replace-{{friend.pk}}"/>
                     {% else %}
-                        <h5 style="float: right; margin-top: 22px; margin-right: 50px;" class="green">Invited!</h5>
+                        <h5 style="float: right; margin-top: 22px; margin-right: 50px;" class="green">INVITED!</h5>
                     {% endif %}
                     </strong>
                 </div>
@@ -65,7 +65,7 @@ $('#pick-friend-list').on('click', '.invite_friend_to_event', function(e){
         },
         success: function(data) {
             $('#'+friend_pk).remove();
-            $('#replace-'+friend_pk).html('<h5 style="float: right; margin-top: 22px; margin-right: 50px;" class="green">Invited!</h5>');
+            $('#replace-'+friend_pk).html('<h5 style="float: right; margin-top: 22px; margin-right: 50px;" class="green">INVITED!</h5>');
         }
     });
 });
@@ -87,7 +87,7 @@ $('#pick-friend-lists').on('click', '.invite_friend_list_to_event', function(e){
             $('#fl-'+friend_list_pk).removeClass('btn-success');
             $('#fl-'+friend_list_pk).addClass('btn-default');
             $('#fl-'+friend_list_pk).addClass('green');
-            $('#fl-'+friend_list_pk).text('Invited!');
+            $('#fl-'+friend_list_pk).text('INVITED!');
             $('#fl-'+friend_list_pk).attr('href', '');
 
         }
@@ -109,9 +109,9 @@ $('#pick-friend-lists').on('click', '.invite_friend_list_to_event', function(e){
         {{ name }}
         <strong id='div-invite-friend-{{pk}}'>
         {{#if invited}}        
-            <h5 style="float: right; margin-top: 22px; margin-right: 50px;" class="green">Invited!</h5>    
+            <h5 style="float: right; margin-top: 22px; margin-right: 50px;" class="green">INVITE!</h5>    
         {{else}}
-            <a id="{{ pk }}" class="btn btn-sm btn-success invite_friend_to_event" style="float: right; margin-top: 15px; margin-right: 50px;" href="#invite-to-group">Invite</a>
+            <a id="{{ pk }}" class="btn btn-sm btn-success invite_friend_to_event" style="float: right; margin-top: 15px; margin-right: 50px;" href="#invite-to-group">INVITE</a>
             <span id="replace-{{pk}}"/>
         {{/if}}
         </strong>
@@ -131,7 +131,7 @@ $('#pick-friend-lists').on('click', '.invite_friend_list_to_event', function(e){
             <h4>{{ name }}&nbsp;&nbsp;</h4>
         </div>
         <div class="col-md-3" >
-            <a style="margin-top: -3px;" class="btn btn-success invite_friend_list_to_event" href="#" id="{{ pk }}">Invite</a>
+            <a style="margin-top: -3px;" class="btn btn-success invite_friend_list_to_event" href="#" id="{{ pk }}">INVITE</a>
         </div>
     </div>
      {{/each}}

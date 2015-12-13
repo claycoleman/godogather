@@ -646,19 +646,6 @@ def search_profiles(request):
 
 
 @login_required
-def profile_list_view(request):
-
-    profiles = Profile.objects.all()
-    if request.user.is_authenticated():
-        profiles = profiles.exclude(user=request.user)
-
-    context = {}
-    context['profiles'] = profiles
-
-    return render_to_response('profile_list.html', context, context_instance=RequestContext(request))
-
-
-@login_required
 def profile_create_view(request):
     new_profile, mih = Profile.objects.get_or_create(user=request.user)
     new_profile.username = new_profile.user.username

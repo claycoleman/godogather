@@ -1,12 +1,12 @@
 {% load staticfiles %}
-<a class="btn btn-primary" target="_blank" href='{{share_url}}'>Share to Facebook</a>
+<a class="btn btn-primary" target="_blank" href='{{share_url}}'>SHARE TO FACEBOOK</a>
 <br>
 <div id="sharing" style="margin-top: 10px">
     {% if event.shareable and request.user.profile not in event.host.all %}
         {% if event not in request.user.profile.events_posted.all %}
-            <a class="btn btn-success" href="#" alt='{{event.pk}}' id='share-event'>Share this event to your feed!</a>
+            <a class="btn btn-success" href="#" alt='{{event.pk}}' id='share-event'>SAHRE THIS EVENT TO YOUR FEED</a>
         {% else %}
-            <h4 class="green">You have already shared this event to your feed.&nbsp;&nbsp;&nbsp;<a class="btn btn-danger" href="#" alt="{{ event.pk }}" id="share-event">Unshare</a></h4>
+            <h4 class="green">You have already shared this event to your feed.&nbsp;&nbsp;&nbsp;<a class="btn btn-danger" href="#" alt="{{ event.pk }}" id="share-event">UNSHARE</a></h4>
         {% endif %}
     {% endif %}
 </div>  
@@ -25,9 +25,9 @@
             },
             success: function(data) {
                 if (data[1]) {
-                    $("#sharing").html('<h4 class="green">You shared ' + data[0] + ' to your feed.&nbsp;&nbsp;<a class="btn btn-danger" href="#" alt="' + prk + '" id="share-event">Undo</a></h4>');
+                    $("#sharing").html('<h4 class="green">You shared ' + data[0] + ' to your feed.&nbsp;&nbsp;<a class="btn btn-danger" href="#" alt="' + prk + '" id="share-event">UNDO</a></h4>');
                 } else {
-                    $("#sharing").html('<a class="btn btn-success" href="#" alt="' + prk + '" id="share-event">Share this event to your feed!</a>');
+                    $("#sharing").html('<a class="btn btn-success" href="#" alt="' + prk + '" id="share-event">SHARE THIS EVENT TO YOUR FEED</a>');
                 }
             }
         });

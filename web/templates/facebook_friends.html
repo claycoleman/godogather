@@ -11,12 +11,12 @@
             <a href="{% url 'profile_detail_view' friend.pk %}" >{{ friend }}</a>
             <strong id='div-invite-friend-{{friend.pk}}'>&nbsp;
             {% if friend in request.user.profile.friend_requests.all %}     
-                <a id='reject-friend-{{friend.pk}}' class="btn btn-sm btn-danger reject-friend" style="float: right; margin-top: 12px;" href="#invite-to-group" alt='{{friend.pk}}'>Reject...</a>     
-                <a id='accept-friend-{{friend.pk}}' class="btn btn-sm btn-success accept-friend" style="float: right; margin-top: 12px;" href="#invite-to-group" alt='{{friend.pk}}'>Accept!</a>&nbsp;  
+                <a id='reject-friend-{{friend.pk}}' class="btn btn-sm btn-danger reject-friend" style="float: right; margin-top: 12px;" href="#invite-to-group" alt='{{friend.pk}}'>REJECT</a>     
+                <a id='accept-friend-{{friend.pk}}' class="btn btn-sm btn-success accept-friend" style="float: right; margin-top: 12px;" href="#invite-to-group" alt='{{friend.pk}}'>ACCEPT</a>&nbsp;  
             {% elif request.user.profile not in friend.friend_requests.all %} 
-                <a id='invite-friend-{{friend.pk}}' class="btn btn-sm btn-success add-friend" style="float: right; margin-top: 12px;" href="#invite-to-group" alt='{{friend.pk}}'>Add!</a>
+                <a id='invite-friend-{{friend.pk}}' class="btn btn-sm btn-success add-friend" style="float: right; margin-top: 12px;" href="#invite-to-group" alt='{{friend.pk}}'>ADD</a>
             {% else %}
-                <h5 style="float: right; margin-top: 20px;" class="green">Added!</h5>
+                <h5 style="float: right; margin-top: 20px;" class="green">ADDED</h5>
             {% endif %}
             </strong>
         </div>
@@ -58,7 +58,7 @@ $('#friends').on('click', '.accept-friend', function(e) {
         },
         success: function(data) {
             $("#div-invite-friend-"+person_pk).html('');
-            $("#div-invite-friend-"+person_pk).html('<h5 style="float: right; margin-top: 20px;" class="green">Accepted!</h5>');
+            $("#div-invite-friend-"+person_pk).html('<h5 style="float: right; margin-top: 20px;" class="green">ACCEPTED!</h5>');
         }
     });
 });
@@ -76,7 +76,7 @@ $('#friends').on('click', '.reject-friend', function(e) {
         },
         success: function(data) {
             $("#div-invite-friend-"+person_pk).html('');
-            $("#div-invite-friend-"+person_pk).html('<h5 style="float: right;" class="red">Rejected...</h5>');
+            $("#div-invite-friend-"+person_pk).html('<h5 style="float: right;" class="red">REJECTED...</h5>');
         }
     });
 });

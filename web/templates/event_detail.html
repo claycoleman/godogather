@@ -51,7 +51,7 @@
                     
 
                     <span id="comment-section"/>
-                    <h3><a class="btn btn-primary popup-mini" href="{% url 'share_buttons' event.pk %}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Share&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>&nbsp;&nbsp;<a class="btn btn-danger popup-mini" href="{% url 'calendar_buttons' event.pk %}">Add to Calendar</a></h3>
+                    <h3><a class="btn btn-primary popup-mini" href="{% url 'share_buttons' event.pk %}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SHARE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>&nbsp;&nbsp;<a class="btn btn-danger popup-mini" href="{% url 'calendar_buttons' event.pk %}">ADD TO CALENDAR</a></h3>
             </div>
             <div class="col-md-5 col-md-offset-1">
                     <br>
@@ -59,7 +59,7 @@
                     <br>
                     {% if request.user.profile in event.host.all %}
                     <div style="float:left;">                    
-                        <a class="btn btn-primary" href="{% url 'event_update_view' event.pk %}">Edit your event</a>&nbsp;&nbsp;<a class="btn btn-danger delete-button" href="{% url 'event_delete_view' event.pk %}" id="{{ event }}">Delete your event</a>
+                        <a class="btn btn-primary" href="{% url 'event_update_view' event.pk %}">EDIT YOUR EVENT</a>&nbsp;&nbsp;<a class="btn btn-danger delete-button" href="{% url 'event_delete_view' event.pk %}" id="{{ event }}">DELETE YOUR EVENT</a>
                     </div>
                     {% else %}
                     <div class="event-detail-buttons">
@@ -131,7 +131,7 @@
                     <br>
                     <br>
                     {% if event.shareable or request.user.profile in event.host.all %}
-                        <a href="{% url 'invite_friends_to_event_view' event.pk %}" class="btn btn-success popup">Invite friends to {{event}}</a>
+                        <a href="{% url 'invite_friends_to_event_view' event.pk %}" class="btn btn-success popup">INVITE FRIENDS TO THIS EVENT</a>
                     {% endif %}
                     <br>
 

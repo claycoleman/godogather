@@ -45,7 +45,7 @@
                     <h5>{{ event }}</h5>
                     <h6 style="color: darkgrey;" class="date-starting">{{ event.date_happening|date:"c" }}T{{ event.time_starting|time:"H:i" }}:00.000000+00:00</h6>
                     <h6 style="color: darkgrey">Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h6>
-                    <a class="btn btn-default" href="{% url 'event_detail_view' event.pk %}">More details...</a>
+                    <a class="btn btn-default" href="{% url 'event_detail_view' event.pk %}">MORE DETAILS</a>
                     </br>
                     {% if not forloop.last %}
                         <hr>
@@ -66,7 +66,7 @@
         <br>
         <br>
         <div class="friend_request_section" id="friend_request_section-{{ profile.pk }}">
-            <a class="btn btn-warning" href="{% url 'profile_update_view' profile.pk %}" %}>Update your profile</a>
+            <a class="btn btn-warning" href="{% url 'profile_update_view' profile.pk %}" %}>UPDATE YOUR PROFILE</a>
             <hr>
             
             <h3>Your friends</h3>

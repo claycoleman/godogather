@@ -14,7 +14,7 @@
             <div class="col-md-9">
                 <h1 class="text-center bold">What Are You Doing?</h1>
                 <h5 style="float: left;" class="text-left"><strong>Current date: </strong><span id="current-date">{{ today |date:"c"}}</span></h5>
-                <a style="float: right;" href="{% url 'event_list_view' %}" class="btn btn-default {% if not order %}active{% endif %}">Order by event date</a><a style="float: right;" href="{% url 'event_list_view' %}?order=date_posted" class="btn btn-default {% if order %}active{% endif %}">Order by date posted</a>&nbsp;&nbsp;<br>
+                <a style="float: right;" href="{% url 'event_list_view' %}" class="btn btn-default {% if not order %}active{% endif %}">ORDER BY EVENT DATE</a><a style="float: right;" href="{% url 'event_list_view' %}?order=date_posted" class="btn btn-default {% if order %}active{% endif %}">ORDER BY DATE POSTED</a>&nbsp;&nbsp;<br>
                     <br style="clear:both;"/>
                     <hr style="margin-bottom: 0">
                  
@@ -80,7 +80,7 @@
                                     <h3>{{ event.description }}</h3>
                                 </div>
                             </div>
-                            <a class="btn btn-default" alt="{{event.pk}}"  href="{% url 'event_detail_view' event.pk %}">More details...</a>
+                            <a class="btn btn-default" alt="{{event.pk}}"  href="{% url 'event_detail_view' event.pk %}">MORE DETAILS</a>
                             <div class="text-right" style="float:right;">
                                 <span class="green stan"><i class="fa fa-check-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;You're going!</span>&nbsp;&nbsp;
                                 <a class="btn btn-danger cancel-decision" id="reject-button-{{event.pk}}" alt="{{event.pk}}"  href="#"><i class="fa fa-times-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;Back out...</a>
@@ -139,7 +139,7 @@
                                     <h5>{{ event.description }}</h5>
                                 </div>
                                 </div>
-                                <a class="btn btn-default" alt="{{ event.pk }}"  href="{% url 'event_detail_view' event.pk %}">More details...</a>
+                                <a class="btn btn-default" alt="{{ event.pk }}"  href="{% url 'event_detail_view' event.pk %}">MORE DETAILS</a>
                                 <div class="text-right" style="float:right;">
                                     <a class="btn btn-success confirm-can-come" alt="{{event.pk}}" id="confirm-button-{{event.pk}}" href="#"><i class="fa fa-check-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;Count me in!</a>&nbsp;
                                     <a class="btn btn-danger confirm-cannot-come" alt="{{event.pk}}" id="reject-button-{{event.pk}}" href="#"><i class="fa fa-times-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;Can't make it!</a>
@@ -158,9 +158,9 @@
                 {% else %}
                     <h3>You have no events in your feed yet! Add some new friends or follow some groups to see some. If it's your first time here, be sure to check out the <a href="{% url 'about_view' %}">about page</a> for more about WAYD.</h3>
                     <br>
-                    <h4 class="text-center"><a class="btn btn-primary form-control popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;Find your Facebook friends on WAYD</a></h4>
+                    <h4 class="text-center"><a class="btn btn-primary form-control popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;FIND YOUR FACEBOOK FRIENDS ON <strong>WAYD</strong></a></h4>
                     
-                    <h4><a class="btn btn-primary form-control" href="{% url 'search_profiles' %}">Search for friends</a></h4>
+                    <h4><a class="btn btn-primary form-control" href="{% url 'search_profiles' %}">SEARCH FOR FRIENDS</a></h4>
                     </div>
                 {% endif %}
             <div id="sidebar" class="col-md-3 affix-events">
@@ -168,7 +168,7 @@
                 <br>
                 <a class="btn btn-lg" href = "{% url 'event_create_view' %}" %}><i class='fa fa-plus-circle'></i> Create a new event</a>
                 <br>
-                <a class="btn btn-primary btn-sm popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;Find your Facebook friends on WAYD</a>
+                <a class="btn btn-primary btn-sm popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;FIND YOUR FACEBOOK FRIENDS ON <strong>WAYD</strong></a>
                 <br>
                 <h3>Events you're going to!</h3>
                 <div class="main-events-going-to">
@@ -176,7 +176,7 @@
                     <hr>
                     <h5>{{ event }}</h5>
                     <h6 style="color: darkgrey">Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h6>
-                    <a class="btn btn-default" href="{% url 'event_detail_view' event.pk %}">More details...</a></br>
+                    <a class="btn btn-default" href="{% url 'event_detail_view' event.pk %}">MORE DETAILS</a></br>
                 {% endfor %}
                 </div>
                 <p class="text-center"><i class='fa fa-arrow-down'></i></p>
@@ -188,7 +188,7 @@
                     <hr>
                     <h5>{{ group }}</h5>
                     <h6 style="color: darkgrey">Group Admins: {% for admin in group.admin.all %}{% if admin == request.user.profile %}<strong>You</strong>{% else %}{{admin}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h6>
-                    <a class="btn btn-default" href="{% url 'group_event_list' group.pk %}">More details...</a></br>
+                    <a class="btn btn-default" href="{% url 'group_event_list' group.pk %}">MORE DETAILS</a></br>
                 {% endfor %}
                 </div>                
                 <p class="text-center"><i class='fa fa-arrow-down'></i></p>

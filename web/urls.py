@@ -63,7 +63,6 @@ urlpatterns = [
 
     # userprofile urls
     url(r'^people/(?P<pk>\d+)/$', 'web.views.profile_detail_view', name='profile_detail_view'),
-    url(r'^people/$', 'web.views.profile_list_view', name='profile_list_view'),
     url(r'^friends/$', 'web.views.friend_list', name='friend_list'),
     url(r'^search/profiles/$', 'web.views.search_profiles', name='search_profiles'),
     url(r'^profile/(?P<pk>\d+)/update/$', 'web.views.profile_update_view', name='profile_update_view'),

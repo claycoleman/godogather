@@ -11,7 +11,7 @@
                         <h4>{{ friend }}&nbsp;&nbsp;</h4>
                     </div>
                     <div class="col-md-3" >
-                        <a style="margin-top: -3px;" class="btn btn-success add-friend-to-list" href="#" id="{{ friend.pk }}">Add</a>
+                        <a style="margin-top: -3px;" class="btn btn-success add-friend-to-list" href="#" id="{{ friend.pk }}">ADD</a>
                     </div>
                 </div>
                 
@@ -42,7 +42,7 @@ $('#pick-friend-list').on('click', '.add-friend-to-list', function(e){
             $('#'+friend_pk).removeClass('btn-success');
             $('#'+friend_pk).addClass('btn-default');
             $('#'+friend_pk).addClass('green');
-            $('#'+friend_pk).text('Added!');
+            $('#'+friend_pk).text('ADDED!');
 
         }
     });

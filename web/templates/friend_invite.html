@@ -10,7 +10,7 @@
                     <div class="event-detail" style="border-bottom: 1px solid #EEE; min-height: 40px;">
                             <strong id='div-invite-friend-{{friend_list.pk}}'>
                                 {{friend_list}}
-                                <a id='fl-{{friend_list.pk}}' class="btn btn-sm btn-success invite_friend_list_to_group" style="float: right; margin-top: 5px;" href="#invite-to-group" alt='{{friend_list.pk}}'>Invite</a>
+                                <a id='fl-{{friend_list.pk}}' class="btn btn-sm btn-success invite_friend_list_to_group" style="float: right; margin-top: 5px;" href="#invite-to-group" alt='{{friend_list.pk}}'>INVITE</a>
                             </strong>
                     </div>
                     
@@ -32,9 +32,9 @@
                     {{ friend }}
                     <strong id='div-invite-friend-{{friend.pk}}'>
                     {% if group not in friend.group_requests.all %}                
-                        <a id='{{friend.pk}}' class="btn btn-sm btn-success invite-friend" style="float: right; margin-top: 12px;" href="#invite-to-group" alt='{{friend.pk}}'>Invite</a>
+                        <a id='{{friend.pk}}' class="btn btn-sm btn-success invite-friend" style="float: right; margin-top: 12px;" href="#invite-to-group" alt='{{friend.pk}}'>INVITE</a>
                     {% else %}
-                        <h5 style="float: right; margin-top: 20px;" class="green">Invited!</h5>
+                        <h5 style="float: right; margin-top: 20px;" class="green">INVITED!</h5>
                     {% endif %}
                     </strong>
                 </div>
@@ -88,7 +88,7 @@ $('#pick-friend-lists').on('click', '.invite_friend_list_to_group', function(e){
             $('#fl-'+friend_list_pk).removeClass('btn-success');
             $('#fl-'+friend_list_pk).addClass('btn-default');
             $('#fl-'+friend_list_pk).addClass('green');
-            $('#fl-'+friend_list_pk).text('Invited!');
+            $('#fl-'+friend_list_pk).text('INVITED!');
             $('#fl-'+friend_list_pk).attr('href', '');
 
         }
@@ -109,9 +109,9 @@ $('#pick-friend-lists').on('click', '.invite_friend_list_to_group', function(e){
         {{ name }}
         <strong id='div-invite-friend-{{pk}}'>
         {{#if invited}}        
-            <h5 style="float: right; margin-top: 20px;" class="green">Invited!</h5>    
+            <h5 style="float: right; margin-top: 20px;" class="green">INVITED!</h5>    
         {{else}}
-            <a id='{{pk}}' class="btn btn-sm btn-success invite-friend" style="float: right; margin-top: 12px;" href="#invite-to-group" alt='{{friend.pk}}'>Invite</a>
+            <a id='{{pk}}' class="btn btn-sm btn-success invite-friend" style="float: right; margin-top: 12px;" href="#invite-to-group" alt='{{friend.pk}}'>INVITE</a>
         {{/if}}
         </strong>
     </div>
@@ -130,7 +130,7 @@ $('#pick-friend-lists').on('click', '.invite_friend_list_to_group', function(e){
             <h4>{{ name }}&nbsp;&nbsp;</h4>
         </div>
         <div class="col-md-3" >
-            <a style="margin-top: -3px;" class="btn btn-success invite_friend_list_to_event" href="#" id="{{ pk }}">Invite</a>
+            <a style="margin-top: -3px;" class="btn btn-success invite_friend_list_to_event" href="#" id="{{ pk }}">INVITE</a>
         </div>
     </div>
      {{/each}}

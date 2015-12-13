@@ -47,7 +47,7 @@
                     <h5>{{ event }}</h5>
                     <h6 style="color: darkgrey;" class="date-starting">{{ event.date_happening|date:"c" }}T{{ event.time_starting|time:"H:i" }}:00.000000+00:00</h6>
                     <h6 style="color: darkgrey">Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h6>
-                    <a class="btn btn-default" href="{% url 'event_detail_view' event.pk %}">More details...</a>
+                    <a class="btn btn-default" href="{% url 'event_detail_view' event.pk %}">MORE DETAILS</a>
                     </br>
                     {% if not forloop.last %}
                         <hr>
@@ -68,20 +68,20 @@
         <br>
         <div class="friend_request_section" id="friend_request_section-{{ profile.pk }}">
             {% if friend_requested_by_you %}
-                <a class="btn btn-default" alt='{{ profile.pk }}'>{{ profile.first_name }} requested as friend</a>
+                <a class="btn btn-default" alt='{{ profile.pk }}'>Requested as friend</a>
                 <a id="cancel-request-{{ profile.pk }}" class="btn btn-warning cancel-request" href = "#" alt='{{ profile.pk }}'>Cancel request</a>
             {% elif friend_requested_by_them %}
-                <a id="addition-{{ profile.pk }}" class="btn btn-success detail-add-button" href = "#" alt='{{ profile.pk }}'>Accept {{ profile.first_name }} as a friend</a>
-                <a id="rejection-{{ profile.pk }}" class="btn btn-danger detail-reject-button" href = "#" alt='{{ profile.pk }}'>Reject {{ profile.first_name }} as a friend</a>
+                <a id="addition-{{ profile.pk }}" class="btn btn-success detail-add-button" href = "#" alt='{{ profile.pk }}'>Accept as a friend</a>
+                <a id="rejection-{{ profile.pk }}" class="btn btn-danger detail-reject-button" href = "#" alt='{{ profile.pk }}'>Reject as a friend</a>
             {% elif not_friends %}
-                <a id="request-add-button-{{ profile.pk }}" class="btn btn-primary request-add-button" href = "#" alt='{{ profile.pk }}'>Add {{ profile.first_name }} as a friend</a>
+                <a id="request-add-button-{{ profile.pk }}" class="btn btn-primary request-add-button" href = "#" alt='{{ profile.pk }}'>Add as a friend</a>
             {% else %}
                 {% if request.user.profile.pk not in profile.followers|values_list:'pk' %}
-                    <a class="btn btn-warning" href="{% url 'subscribe' profile.pk %}"><i class='fa fa-star'></i>&nbsp;&nbsp;Favorite {{ profile.first_name }}</a>
+                    <a class="btn btn-warning" href="{% url 'subscribe' profile.pk %}"><i class='fa fa-star'></i>&nbsp;&nbsp;Favorite</a>
                 {% else %}
-                    <a class="btn btn-warning" href="{% url 'subscribe' profile.pk %}"><i class='fa fa-star-o'></i>&nbsp;&nbsp;Unfavorite {{ profile.first_name }}</a>
+                    <a class="btn btn-warning" href="{% url 'subscribe' profile.pk %}"><i class='fa fa-star-o'></i>&nbsp;&nbsp;Unfavorite</a>
                 {% endif %}
-                <a id="delete-friend-button-{{ profile.pk }}" class="btn btn-danger delete-friend-button" href = "#" alt='{{ profile.pk }}' placeholder="{{ profile.first_name }}">Delete {{ profile.first_name }} as a friend</a>
+                <a id="delete-friend-button-{{ profile.pk }}" class="btn btn-danger delete-friend-button" href = "#" alt='{{ profile.pk }}' placeholder="{{ profile.first_name }}">Delete as a friend</a>
             {% endif %}
             <hr>
             
@@ -97,7 +97,7 @@
                     </div><div class="row" style="margin-left: 5px">
                 {% endif %}
                 {% if forloop.counter == 18 %}
-                    </div><a href="#friend-lists">See all friends</a><div>
+                    </div><a href="{% url 'friend_list' %}">See all friends</a><div>
                 {% endif %}
             {% endfor %}
                 </div>
