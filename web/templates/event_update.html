@@ -26,6 +26,7 @@
                     Location: {{ form.location|addcss:"form-control" }}
                     {{ form.test_location|addcss:"form-control"}}
                     <input name="event_pk" class="hidden" value="{{ event_pk }}">
+                    <span id="update" class="hidden" value="update"/>
             </div>
             <div class="col-md-4 col-md-offset-1">
                 Description: {{ form.description|addcss:"form-control" }}

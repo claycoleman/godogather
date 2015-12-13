@@ -15,6 +15,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Q
 from project.local import FB_APP_ID
+from sorl.thumbnail import get_thumbnail
 
 
 from main.models import Event, Group, Profile, Comment, Notification, FriendList
@@ -25,8 +26,13 @@ from main.forms import SearchProfile, EventModelCreateForm, EventModelUpdateForm
 #  Event Views!
 
 @login_required
-def event_detail_view(request, pk):  
-    event = Event.objects.get(pk=pk)
+def event_detail_view(request, pk):
+    events = [e for e in Event.objects.filter(pk=pk)]
+    if events:
+        event = events[0]
+    else:
+        return redirect('{}?fail=eventremoved'.format(resolve_url('event_list_view')))
+
     comments = event.comment_set.all().order_by('-date_posted')
     context = {}
 
@@ -115,14 +121,18 @@ def event_detail_view(request, pk):
 @login_required
 def event_list_view(request):
 
-    if not request.user.is_authenticated():
-        return redirect('new_user')
-
     context = {}
     context['friends_pk'] = request.user.profile.friends.values_list('pk', flat=True)
     context['groups_in'] = request.user.profile.groups_in.values_list('pk', flat=True)
 
     order = request.GET.get('order', '')
+    fail = request.GET.get('fail', '')
+    if 'eventremoved' in fail:
+        context['fail'] = "Sorry, the event you're looking for has been deleted, or doesn't exist!"
+    elif 'groupremoved' in fail:
+        context['fail'] = "Sorry, the group you're looking for has been deleted, or doesn't exist!"
+    elif 'listremoved' in fail:
+        context['fail'] = "Sorry, the friend list you're looking for has been deleted, or doesn't exist!"
 
     friend_events = []
     for friend in request.user.profile.friends.all():
@@ -224,6 +234,13 @@ def event_create_view(request):
                         new_notif = Notification.objects.create(user=follower)
                         new_notif.notification_type = "Following posted event"
                         new_notif.message = "%s posted a new event, \"%s\"." % (host.first_name, new_event.name)
+                        new_notif.sender_pk = new_event.pk
+                        new_notif.save()
+                for group in new_event.groups.all():
+                    for follower in group.followers.all():
+                        new_notif = Notification.objects.create(user=follower)
+                        new_notif.notification_type = "Following group posted event"
+                        new_notif.message = "%s posted a new event, \"%s\"." % (group.first_name, new_event.name)
                         new_notif.sender_pk = new_event.pk
                         new_notif.save()
                 for invitee in new_event.invitees.all():
@@ -440,7 +457,7 @@ def group_member_view(request, pk):
     context['member_requested_by_group'] = group in request.user.profile.group_requests.all()
 
     context['members'] = [e for e in group.members.all()]
-    context['admin'] = [e for e in group.admin.all()]
+    context['admin'] = [e for e in group.admin.filter(pk__in=group.members.values_list('pk', flat=True))]
     context['member_requests'] = [e for e in group.member_requests.all()]
 
 
@@ -461,7 +478,7 @@ def group_event_list(request, pk):
     context['group_requested_by_member'] = request.user.profile in group.member_requests.all()
     context['member_requested_by_group'] = group in request.user.profile.group_requests.all()
 
-    context['admin_already_members'] = group.admin.filter(pk__in=group.members.values_list('pk', flat=True))
+    context['admin'] = [e for e in group.admin.filter(pk__in=group.members.values_list('pk', flat=True))]
 
     group_events = Event.objects.filter(groups=group)
     my_events = request.user.profile.events_hosted.filter(groups=group)
@@ -592,7 +609,11 @@ def profile_detail_view(request, pk):
 @login_required
 def friend_list(request):
     context = {}
-    context['friends'] = request.user.profile.friends.all()
+    friends = [friend for friend in request.user.profile.friends.all()]
+    context['friends'] = friends
+    friend_lists = [e for e in request.user.profile.lists.all()]
+
+    context['friend_lists'] = friend_lists
 
     return render_to_response('friend_list.html', context, context_instance=RequestContext(request))
 
@@ -708,27 +729,27 @@ def new_user(request):
     context['next'] = request.GET.get('next', None)
 
 
-    form = UserLogin(request.POST or None)
-    context['form'] = form
+    # form = UserLogin(request.POST or None)
+    # context['form'] = form
 
-    if request.method == "POST":
-        if form.is_valid():
+    # if request.method == "POST":
+    #     if form.is_valid():
 
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
+    #         username = form.cleaned_data['username']
+    #         password = form.cleaned_data['password']
 
-            auth_user = authenticate(username=username, password=password)
+    #         auth_user = authenticate(username=username, password=password)
 
-            if auth_user is not None:
-                if auth_user.is_active:
-                    login(request, auth_user)
-                    context['valid'] = "Login Successful"
+    #         if auth_user is not None:
+    #             if auth_user.is_active:
+    #                 login(request, auth_user)
+    #                 context['valid'] = "Login Successful"
 
-                    return redirect('event_list_view')
-                else:
-                    context['valid'] = "Invalid User"
-            else:
-                context['valid'] = "Login Failed! Try again"
+    #                 return redirect('event_list_view')
+    #             else:
+    #                 context['valid'] = "Invalid User"
+    #         else:
+    #             context['valid'] = "Login Failed! Try again"
     return render_to_response('new_user.html', context, context_instance=RequestContext(request))
 
 @login_required
@@ -743,6 +764,9 @@ def full_notifications(request):
 
 
 def about_view(request):
+    if request.user.is_authenticated():
+        request.user.profile.new_user = False
+        request.user.profile.save()
     return render(request, 'about.html')
 
 
@@ -775,26 +799,17 @@ def contact_view(request):
 # friendlist views
 
 @login_required
-def friend_list_detail_view(request, pk):
-    friend_list = FriendList.objects.get(pk=pk)
-    if request.user.profile != friend_list.owner:
-        return redirect('friend_list_list_view')
-
+def friend_list(request):
     context = {}
-    context['friend_list'] = friend_list
+    friends = [friend for friend in request.user.profile.friends.all()]
+    context['friends'] = friends
+    friend_lists = [e for e in request.user.profile.lists.all().order_by('name')]
 
-    return render_to_response('friend_list_detail.html', context, context_instance=RequestContext(request))
-
-
-@login_required
-def friend_list_list_view(request):
-
-    friend_lists = request.user.profile.lists.all()
-
-    context = {}
     context['friend_lists'] = friend_lists
+
     form = FriendListCreate(request.POST or None)
     context['form'] = form
+
     if request.method == "POST":
         if form.is_valid():
             name = form.cleaned_data['name'].strip()
@@ -803,9 +818,40 @@ def friend_list_list_view(request):
                 if created:
                     return redirect('friend_list_detail_view', new_friend_list.pk)
                 else:
-                    context['errors'] = "You already have a group named \"%s\"! Try creating a different group." % name
+                    context['errors'] = "You already have a friend list named \"%s\"! Try creating a different list." % name
 
-    return render_to_response('friend_list_list.html', context, context_instance=RequestContext(request))
+    return render_to_response('friend_list.html', context, context_instance=RequestContext(request))
+
+@login_required
+def friend_list_detail_view(request, pk):
+    friend_list = FriendList.objects.get(pk=pk)
+    if request.user.profile != friend_list.owner:
+        return redirect('friend_list_list_view')
+
+    context = {}
+
+    friends = [friend for friend in friend_list.people.all()]
+    context['friends'] = friends
+    friend_lists = [e for e in request.user.profile.lists.all().order_by('name')]
+
+    context['friend_lists'] = friend_lists
+    context['friend_list'] = friend_list
+
+
+    form = FriendListCreate(request.POST or None)
+    context['form'] = form
+
+    if request.method == "POST":
+        if form.is_valid():
+            name = form.cleaned_data['name'].strip()
+            if name != "" and name is not None:
+                new_friend_list, created = FriendList.objects.get_or_create(owner=request.user.profile, name=name)
+                if created:
+                    return redirect('friend_list_detail_view', new_friend_list.pk)
+                else:
+                    context['errors'] = "You already have a friend list named \"%s\"! Try creating a different list." % name
+
+    return render_to_response('friend_list_detail.html', context, context_instance=RequestContext(request))
 
 
 @login_required
@@ -858,7 +904,7 @@ def friend_list_delete_view(request, pk):
 
     FriendList.objects.get(pk=pk).delete()
 
-    return redirect('friend_list_list_view')
+    return redirect('friend_list')
 
 
 # ajax views
@@ -1202,6 +1248,9 @@ def ajax_friends(request):
     friends = request.user.profile.friends.exclude(pk__in=member_ids)
     context['friends'] = friends
 
+    friend_lists = request.user.profile.lists.all()
+    context['friend_lists'] = friend_lists
+
     return render_to_response('friend_invite.html', context, context_instance=RequestContext(request))
 
 
@@ -1331,7 +1380,7 @@ def extend_event_invite(first_name, friend_pk, event):
             new_notif.sender_pk = event.pk
             new_notif.save()
 
-
+@login_required
 def share_buttons(request, pk):
     context = {}
     event = Event.objects.get(pk=pk)
@@ -1343,6 +1392,7 @@ def share_buttons(request, pk):
     return render_to_response('share_buttons.html', context, context_instance=RequestContext(request))
 
 
+@login_required
 def calendar_buttons(request, pk):
     context = {}
 
@@ -1357,6 +1407,96 @@ def calendar_buttons(request, pk):
     context['apple_cal'] = "http://social.coleclayman.us%s" % event.ics.url
 
     return render_to_response('calendar_buttons.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def mark_non_new_user(request):
+    request.user.profile.new_user = False
+    request.user.profile.save()
+
+
+@login_required
+def search_invite_event_json(request, pk):
+    _dict = {}
+    search = request.GET.get('search')
+
+    friend_list = []
+    friendlist_list = []
+    _dict['friends'] = friend_list
+    _dict['friend_lists'] = friendlist_list
+
+    event = Event.objects.get(pk=pk)
+    if search.strip():
+        if " " in search:
+            first, space, last = search.partition(' ')
+            friends = request.user.profile.friends.exclude(events_going_to=event).filter(first_name__istartswith=first, last_name__icontains=last)
+        else:
+            friends = request.user.profile.friends.exclude(events_going_to=event).filter(Q(first_name__istartswith=search) | Q(last_name__istartswith=search) | Q(username__istartswith=search))
+        friend_lists = request.user.profile.lists.filter(name__istartswith=search)
+    else:
+        friends = request.user.profile.friends.exclude(events_going_to=event)
+        friend_lists = request.user.profile.lists.all()
+
+
+    for friend in friends:
+        im = get_thumbnail(friend.picture, '200x200', crop='center', quality=99)
+        friend_list.append({'name': '%s %s' % (friend.first_name, friend.last_name),
+                                'pk': friend.pk,
+                                'img_url': im.url,
+                                'invited': friend.pk in event.invitees.values_list('pk', flat=True)})
+    if len(friend_list) is 0:
+        _dict['no_friends'] = True
+
+    for friendlist in friend_lists:
+        friendlist_list.append({'name': friendlist.name,
+                                'pk': friendlist.pk})
+
+    if len(friendlist_list) is 0:
+        _dict['no_friend_lists'] = True
+
+    return JsonResponse(_dict)
+
+
+@login_required
+def search_invite_group_json(request, pk):
+    _dict = {}
+    search = request.GET.get('search')
+
+    friend_list = []
+    friendlist_list = []
+    _dict['friends'] = friend_list
+    _dict['friend_lists'] = friendlist_list
+
+    group = Group.objects.get(pk=pk)
+    if search.strip():
+        if " " in search:
+            first, space, last = search.partition(' ')
+            friends = request.user.profile.friends.exclude(groups_in=group).filter(first_name__istartswith=first, last_name__icontains=last)
+        else:
+            friends = request.user.profile.friends.exclude(groups_in=group).filter(Q(first_name__istartswith=search) | Q(last_name__istartswith=search) | Q(username__istartswith=search))
+        friend_lists = request.user.profile.lists.filter(name__istartswith=search)
+    else:
+        friends = request.user.profile.friends.exclude(groups_in=group)
+        friend_lists = request.user.profile.lists.all()
+
+
+    for friend in friends:
+        im = get_thumbnail(friend.picture, '200x200', crop='center', quality=99)
+        friend_list.append({'name': '%s %s' % (friend.first_name, friend.last_name),
+                                'pk': friend.pk,
+                                'img_url': im.url,
+                                'invited': friend.pk in group.invited_people.values_list('pk', flat=True)})
+    if len(friend_list) is 0:
+        _dict['no_friends'] = True
+
+    for friendlist in friend_lists:
+        friendlist_list.append({'name': friendlist.name,
+                                'pk': friendlist.pk})
+
+    if len(friendlist_list) is 0:
+        _dict['no_friend_lists'] = True
+
+    return JsonResponse(_dict)
 
 def slugify(string):
     return string.lower().replace(' ', '-')

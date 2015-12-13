@@ -103,7 +103,7 @@
                     <h2>INVITED: </h2>
                     {% if invitees.count > 0 %}
                         {% for person in invitees|slice:"0:4" %}
-                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="top-right" data-toggle="tooltip" title="{{ person }}">
+                            <a class="tooltipped" href="{% url 'profile_detail_view' person.pk %}" data-placement="top" data-toggle="tooltip" title="{{ person }}">
                             {% thumbnail  person.picture "200x200" crop="center" as im %}
                                 <img src="{{ im.url }}" class="port-item" width="60" height="60" style="border-radius: 30px;" alt="{{ person }}">
                             {% endthumbnail %}
@@ -132,7 +132,6 @@
                     <br>
                     {% if event.shareable or request.user.profile in event.host.all %}
                         <a href="{% url 'invite_friends_to_event_view' event.pk %}" class="btn btn-success popup">Invite friends to {{event}}</a>
-                        <a href="{% url 'invite_friend_lists_to_event_view' event.pk %}" class="btn btn-success popup">Invite Friend Lists to {{event}}</a>
                     {% endif %}
                     <br>
 

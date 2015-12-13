@@ -60,6 +60,7 @@ class Event(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User)
+    new_user = models.BooleanField(default=True)
     first_name = models.CharField(null=True, blank=True, max_length=255)
     last_name = models.CharField(null=True, blank=True, max_length=255)
     username = models.CharField(null=True, blank=True, max_length=255)

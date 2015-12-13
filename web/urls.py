@@ -27,6 +27,9 @@ urlpatterns = [
     url(r'^add_friend_to_friend_list/$', 'web.views.add_friend_to_friend_list'),
     url(r'^invite_friend_to_event/$', 'web.views.invite_friend_to_event'),
     url(r'^invite_friend_list_to_event/$', 'web.views.invite_friend_list_to_event'),
+    url(r'^mark_non_new_user/$', 'web.views.mark_non_new_user'),
+    url(r'^search_invite_event_json/(?P<pk>\d+)/$', 'web.views.search_invite_event_json'),
+    url(r'^search_invite_group_json/(?P<pk>\d+)/$', 'web.views.search_invite_group_json'),
 
     # event urls
     url(r'^events/(?P<pk>\d+)/$', 'web.views.event_detail_view', name='event_detail_view'),
@@ -53,7 +56,6 @@ urlpatterns = [
 
     # friendlist urls
     url(r'^friends/list/(?P<pk>\d+)/$', 'web.views.friend_list_detail_view', name='friend_list_detail_view'),
-    url(r'^friends/list/$', 'web.views.friend_list_list_view', name='friend_list_list_view'),
     url(r'^friend/list/(?P<pk>\d+)/delete/$', 'web.views.friend_list_delete_view', name='friend_list_delete_view'),
     url(r'^pick_friends_for_list/(?P<pk>\d+)/$', 'web.views.pick_friends_for_list', name='pick_friends_for_list'),
 

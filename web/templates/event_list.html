@@ -5,7 +5,7 @@
     
 {% block refresh %}<meta http-equiv="refresh" content="120"><link rel="stylesheet" type="text/css" href="{% static 'css/popup.css' %}">{% endblock %}
 
-{% block title %}Home – WAYD{% endblock title %}
+{% block title %}Home{% endblock title %}
 
 {% block body %}
 <div class="main">
@@ -218,9 +218,24 @@
     </script>
     <script src="{% static 'js/jquery.popup.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/jstz-1.0.4.min.js' %}"></script>
+
+    {% if request.user.profile.new_user %}
+    <script type="text/javascript">
+        if (window.confirm("Hey first timer! Welcome to WAYD. We're excited for you to be here and hope you enjoy! Hit okay below to head over to the about page and learn more about WAYD, or hit cancel to jump right into your home page. Get started by finding some friends Facebook and then begin posting what you're doing!")) {
+            window.location = '/about/'
+        } else {
+            $.ajax({
+                type: 'GET',
+                url: '/mark_non_new_user/'
+            });
+        }
+    </script>
+{% endif %}
+
+{% if fail %}
+    <script type="text/javascript">
+        window.alert("{{fail|safe}}");
+    </script>
+{% endif %}
+
 {% endblock scripts %}
-                                <h4 id="count-going-{{ event.pk }}">
-                                {% if event.people_coming.count == 0 %}
-                                Nobody's going yet!
-                                {% else %}
-                                {{ event.people_coming.count }}&nbsp;{% if event.people_coming.count != 1 %}People{% else %}Person{% endif %} Going{% endif %}</h4>

@@ -6,7 +6,7 @@
 {% block refresh %}<meta http-equiv="refresh" content="120">
 <link rel="stylesheet" type="text/css" href="{% static 'css/popup.css' %}">{% endblock %}
 
-{% block title %}{{ group }} Events{% endblock title %}
+{% block title %}{{ group }} Members{% endblock title %}
 
 {% block body %}
 <div class="main">
@@ -61,8 +61,8 @@
                             <span class="btn btn-default">{{ group }} requested</span>
                             <a id="cancel-request-{{ group.pk }}" class="btn btn-warning cancel_request_membership_in_group" href = "#">Cancel request</a>
                         {% elif member_requested_by_group %}
-                            <a id="addition-{{ group.pk }}" class="btn btn-success accept_invitation_from_group" href = "#">Join {{ group }}</a>
-                            <a id="rejection-{{ group.pk }}" class="btn btn-danger reject_invitation_from_group" href = "#" alt='{{ request.user.profile.pk }}'>Decline joining {{ group }}</a>
+                            <a id="addition-{{ group.pk }}" class="btn btn-success accept_invitation_from_group" href = "#">Join this group</a>
+                            <a id="rejection-{{ group.pk }}" class="btn btn-danger reject_invitation_from_group" href = "#" alt='{{ request.user.profile.pk }}'>Decline joining</a>
                         {% else %}
                             <a id="request-add-button-{{ group.pk }}" class="btn btn-primary request_membership_in_group" href = "#">Request to join {{ group }}</a>
                         {% endif %}

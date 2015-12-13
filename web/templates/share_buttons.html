@@ -6,7 +6,7 @@
         {% if event not in request.user.profile.events_posted.all %}
             <a class="btn btn-success" href="#" alt='{{event.pk}}' id='share-event'>Share this event to your feed!</a>
         {% else %}
-            <h4 class="green">You have shared {{ event.name }} to your feed.&nbsp;&nbsp;&nbsp;<a class="btn btn-danger" href="#" alt="{{ event.pk }}" id="share-event">Unshare</a></h4>
+            <h4 class="green">You have already shared this event to your feed.&nbsp;&nbsp;&nbsp;<a class="btn btn-danger" href="#" alt="{{ event.pk }}" id="share-event">Unshare</a></h4>
         {% endif %}
     {% endif %}
 </div>  

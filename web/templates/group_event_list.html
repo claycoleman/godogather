@@ -52,19 +52,19 @@
                 <br><br>
                 
                 {% if is_member %}
-                    <a class="btn btn-default popup" href="/ajax/friends/?group_pk={{ group.pk }}">Add friends to {{ group }}</a>
+                    <a class="btn btn-default popup" href="/ajax/friends/?group_pk={{ group.pk }}">Add friends to this group</a>
                     <br>
 
                 {% else %}
                     <div class="group_request_section" id="group_request_section-{{ group.pk }}">
                         {% if group_requested_by_member %}
-                            <span class="btn btn-default">{{ group }} requested</span>
+                            <span class="btn btn-default">Requested</span>
                             <a id="cancel-request-{{ group.pk }}" class="btn btn-warning cancel_request_membership_in_group" href = "#">Cancel request</a>
                         {% elif member_requested_by_group %}
-                            <a id="addition-{{ group.pk }}" class="btn btn-success accept_invitation_from_group" href = "#">Join {{ group }}</a>
-                            <a id="rejection-{{ group.pk }}" class="btn btn-danger reject_invitation_from_group" href = "#" alt='{{ request.user.profile.pk }}'>Decline joining {{ group }}</a>
+                            <a id="addition-{{ group.pk }}" class="btn btn-success accept_invitation_from_group" href = "#">Join this group</a>
+                            <a id="rejection-{{ group.pk }}" class="btn btn-danger reject_invitation_from_group" href = "#" alt='{{ request.user.profile.pk }}'>Decline joining</a>
                         {% else %}
-                            <a id="request-add-button-{{ group.pk }}" class="btn btn-primary request_membership_in_group" href = "#">Request to join {{ group }}</a>
+                            <a id="request-add-button-{{ group.pk }}" class="btn btn-primary request_membership_in_group" href = "#">Request to join this group</a>
                         {% endif %}
                     </div>
                 {% endif %}
@@ -78,16 +78,16 @@
             <div class="col-md-7">    
                 <br>
                 {% if is_admin %}
-                    <a class="btn btn-success" href="{% url 'group_update_view' group.pk %}">Edit {{ group }}</a>
-                    <a class="btn btn-danger delete-button" id="{{ group }}" href="{% url 'group_delete_view' group.pk %}">Delete {{ group }}...</a>
+                    <a class="btn btn-success" href="{% url 'group_update_view' group.pk %}">Edit this group</a>
+                    <a class="btn btn-danger delete-button" id="{{ group }}" href="{% url 'group_delete_view' group.pk %}">Delete this group</a>
                     <div>
                 {% else %}
                     {% if is_member %}
                         <div id="membership">
                         {% if request.user.profile.pk not in group.followers|values_list:'pk' %}
-                            <a class="btn btn-warning" href="{% url 'subscribe_group' group.pk %}"><i class='fa fa-star'></i>&nbsp;&nbsp;Favorite {{ group.name }}</a>
+                            <a class="btn btn-warning" href="{% url 'subscribe_group' group.pk %}"><i class='fa fa-star'></i>&nbsp;&nbsp;Favorite</a>
                         {% else %}
-                            <a class="btn btn-warning" href="{% url 'subscribe_group' group.pk %}"><i class='fa fa-star-o'></i>&nbsp;&nbsp;Unfavorite {{ group.name }}</a>
+                            <a class="btn btn-warning" href="{% url 'subscribe_group' group.pk %}"><i class='fa fa-star-o'></i>&nbsp;&nbsp;Unfavorite</a>
                         {% endif %}
                     {% else %}
                         <div>
@@ -95,7 +95,7 @@
                 {% endif %}
                     {% if is_member %}
                         {% if not is_admin %}
-                            <a id="{{ group.name }}" class="btn btn-danger leave_group" href = "#">Leave {{ group }}</a>
+                            <a id="{{ group.name }}" class="btn btn-danger leave_group" href = "#">Leave this group</a>
                         {% endif %}
                     {% endif %}
                     </div>

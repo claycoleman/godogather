@@ -45,6 +45,12 @@ $(function() {
         date_array[i].innerHTML = moment(date).fromNow();
     }
 
+    console.log($('.datepicker').val());
+    console.log($('#id_time_starting').val());
+    console.log($('#id_time_ending').val());
+    console.log('post');
+    var update = $('#update').val()
+
     if ($('.datepicker').val() != "") {
         var start = new Date($('.datepicker').val() + 'T' + $('#id_time_starting').val())
         var end = new Date($('.datepicker').val() + 'T' + $('#id_time_ending').val())
@@ -54,25 +60,29 @@ $(function() {
     }
     try {
         $('.datepicker').datepicker({ dateFormat: 'yy-mm-dd', changeMonth: true, changeYear: true, selectOtherMonths: true, showOtherMonths: true});
-        if ($('.datepicker').val().indexOf('-') != 4) {
+        if (update != null || $('.datepicker').val().indexOf('-') != 4) {
             $('.datepicker').val(moment(start).format('YYYY-MM-DD'))
         }
         $('.timepicker').timepicker({ 'timeFormat': 'h:i a', 'scrollDefault': 'now', 'step': 15  });
-        if ($('#id_time_starting').val().indexOf('am') <= -1 && $('#id_time_starting').val().indexOf('pm') <= -1) {
+        if (update != null || $('#id_time_starting').val().indexOf('am') <= -1 && $('#id_time_starting').val().indexOf('pm') <= -1) {
             $('#id_time_starting').val(moment(start).format('hh:mm a'))
         };
-        if ($('#id_time_ending').val().indexOf('am') <= -1 && $('#id_time_ending').val().indexOf('pm')  <= -1) {
+        if (update != null || $('#id_time_ending').val().indexOf('am') <= -1 && $('#id_time_ending').val().indexOf('pm')  <= -1) {
             $('#id_time_ending').val(moment(end).format('hh:mm a'))
         };
     }
     catch(err) {
     }
 
+    console.log($('.datepicker').val());
+    console.log($('#id_time_starting').val());
+    console.log($('#id_time_ending').val());
+
 
     var options = {'width': '625px', 'height': '300px', 'overflow-y': 'auto'};
     try {
         $('a.popup').popup(options);
-        $('a.popup-mini').popup({'width': '100px;', 'height': '75px', 'overflow': 'auto'});
+        $('a.popup-mini').popup({'width': '100px;', 'height': '80px', 'overflow': 'auto'});
     }
     catch(err) {
     }

@@ -1,37 +1,60 @@
 {% load thumbnail %}
-<h3>Your Friends</h3>
-<div id="friends">
-{% if friends.exists %}
-    {% for friend in friends %}
-        <div class="event-detail" style="border-bottom: 1px solid #EEE; min-height: 40px;">
-            {% thumbnail  friend.picture "200x200" crop="center" as im %}
-                <img src="{{ im.url }}" class="port-item" width="60" height="60" style="border-radius: 30px;" alt="{{ friend }}">
-            {% endthumbnail %}
-            <a href="{% url 'profile_detail_view' friend.pk %}" >{{ friend }}</a>
-            <strong id='div-invite-friend-{{friend.pk}}'>
-            {% if group not in friend.group_requests.all %}                
-                <a id='invite-friend-{{friend.pk}}' class="btn btn-sm btn-success invite-friend" style="float: right; margin-top: 5px;" href="#invite-to-group" alt='{{friend.pk}}'>Invite</a>
+
+<input id="search" placeholder="Search!" autocomplete="off">
+<div class="container">
+    <div class="row">
+        <h3>Invite friend lists to {{group}}</h3>
+        <div class="col-md-6" id="pick-friend-lists" style="margin-left: 5px;">
+            {% if friend_lists.exists %}
+                {% for friend_list in friend_lists %}
+                    <div class="event-detail" style="border-bottom: 1px solid #EEE; min-height: 40px;">
+                            <strong id='div-invite-friend-{{friend_list.pk}}'>
+                                {{friend_list}}
+                                <a id='fl-{{friend_list.pk}}' class="btn btn-sm btn-success invite_friend_list_to_group" style="float: right; margin-top: 5px;" href="#invite-to-group" alt='{{friend_list.pk}}'>Invite</a>
+                            </strong>
+                    </div>
+                    
+                {% endfor %}
             {% else %}
-                <h5 style="float: right;" class="green">Invited!</h5>
+                <h4>You have no friend lists to invite to this event!</h4>
             {% endif %}
-            </strong>
         </div>
-    {% endfor %}
-{% else %}
-    <h5>You have no friends to invite!</h5>
-{% endif %}
+    </div>
+    <div class="row">
+        <h3>Invite friends to {{group}}</h3>
+        <div id="friends" class="col-md-6" style="margin-left: 5px;">
+        {% if friends.exists %}
+            {% for friend in friends %}
+                <div class="event-detail" style="border-bottom: 1px solid #EEE; min-height: 40px;">
+                    {% thumbnail  friend.picture "200x200" crop="center" as im %}
+                        <img src="{{ im.url }}" class="port-item" width="60" height="60" style="border-radius: 30px;" alt="{{ friend }}">
+                    {% endthumbnail %}
+                    <a href="{% url 'profile_detail_view' friend.pk %}" >{{ friend }}</a>
+                    <strong id='div-invite-friend-{{friend.pk}}'>
+                    {% if group not in friend.group_requests.all %}                
+                        <a id='{{friend.pk}}' class="btn btn-sm btn-success invite-friend" style="float: right; margin-top: 12px;" href="#invite-to-group" alt='{{friend.pk}}'>Invite</a>
+                    {% else %}
+                        <h5 style="float: right; margin-top: 20px;" class="green">Invited!</h5>
+                    {% endif %}
+                    </strong>
+                </div>
+            {% endfor %}
+        {% else %}
+            <h5>You have no friends to invite!</h5>
+        {% endif %}
+        </div>
+    </div>
 </div>
+
+
+
 <span id='group-pk' class='hidden'>{{group.pk}}</span>
 
 <script type="text/javascript">
 $('#friends').on('click', '.invite-friend', function(e) {
     e.preventDefault();
-    console.log('group inviting friend');
-    console.log('#'+e.target.id)
     var group_pk = $('#group-pk').text();
-    var person_pk = $('#'+e.target.id).attr('alt');
-    console.log(group_pk);
-    console.log(person_pk);
+    var person_pk = e.target.id;
     $.ajax({
         type: 'GET',
         url: '/invite_friend_to_group/',
@@ -41,8 +64,104 @@ $('#friends').on('click', '.invite-friend', function(e) {
         },
         success: function(data) {
             $("#div-invite-friend-"+person_pk).html('');
-            $("#div-invite-friend-"+person_pk).html('<h5 style="float: right;" class="green">Invited!</h5>');
+            $("#div-invite-friend-"+person_pk).html('<h5 style="float: right;  margin-top: 20px;" class="green">Invited!</h5>');
         }
     });
 });
+</script>
+
+<script type="text/javascript">
+$('#pick-friend-lists').on('click', '.invite_friend_list_to_group', function(e){
+    e.preventDefault();
+    var group_pk = $('#group-pk').text();
+    var friend_list_pk = e.target.id.replace('fl-', '');
+    $.ajax({
+        type: 'GET',
+        url: '/invite_friend_list_to_group/',
+        data: {
+            friend_list_pk: friend_list_pk,
+            group_pk: group_pk,
+
+        },
+        success: function(data) {
+            $('#fl-'+friend_list_pk).removeClass('invite_friend_list_to_group');
+            $('#fl-'+friend_list_pk).removeClass('btn-success');
+            $('#fl-'+friend_list_pk).addClass('btn-default');
+            $('#fl-'+friend_list_pk).addClass('green');
+            $('#fl-'+friend_list_pk).text('Invited!');
+            $('#fl-'+friend_list_pk).attr('href', '');
+
+        }
+    });
+});
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js"></script>
+
+{% verbatim %}
+<script type="text/x-handlebars-template" id="friends_template">
+    {{#if no_friends }}
+    <h4>No friends match your search!</h4>
+    {{/if}}
+    {{#each friends}}
+    <div class="event-detail" style="border-bottom: 1px solid #EEE; border-top: 1px solid #EEE; min-height: 40px;">
+        <img src="{{ img_url }}" class="port-item" width="60" height="60" style="border-radius: 30px;" alt="{{ name }}">
+        {{ name }}
+        <strong id='div-invite-friend-{{pk}}'>
+        {{#if invited}}        
+            <h5 style="float: right; margin-top: 20px;" class="green">Invited!</h5>    
+        {{else}}
+            <a id='{{pk}}' class="btn btn-sm btn-success invite-friend" style="float: right; margin-top: 12px;" href="#invite-to-group" alt='{{friend.pk}}'>Invite</a>
+        {{/if}}
+        </strong>
+    </div>
+     {{/each}}
+</script>
+{% endverbatim %}
+
+{% verbatim %}
+<script type="text/x-handlebars-template" id="friend_lists_template">
+    {{#if no_friend_lists }}
+    <h4>No friend lists match your search!</h4>
+    {{/if}}
+    {{#each friend_lists}}
+    <div class="row">
+        <div class="col-md-9">
+            <h4>{{ name }}&nbsp;&nbsp;</h4>
+        </div>
+        <div class="col-md-3" >
+            <a style="margin-top: -3px;" class="btn btn-success invite_friend_list_to_event" href="#" id="{{ pk }}">Invite</a>
+        </div>
+    </div>
+     {{/each}}
+</script>
+{% endverbatim %}
+
+<script type="text/javascript">
+    $('#search').on('keyup', function(e){
+            var friendLists = $('#pick-friend-lists');
+            var friends = $('#friends');
+            var rawFriendLists = $('#friend_lists_template').html();
+            var rawFriends = $('#friends_template').html();
+            var friendsTemplate = Handlebars.compile(rawFriends);
+            var friendListsTemplate = Handlebars.compile(rawFriendLists);
+            
+
+            $.ajax({
+                type: 'GET',
+                url: '/search_invite_group_json/{{group.pk}}/',
+                data: {
+                  'search': $('#search').val(),
+                },
+                success: function(data) {
+                    console.log('success');
+
+                    friends_html = friendsTemplate(data);
+                    friends.html(friends_html);
+
+                    friend_list_html = friendListsTemplate(data);
+                    friendLists.html(friend_list_html);
+                }
+            });
+    });
 </script>

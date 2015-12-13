@@ -1,37 +1,113 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load thumbnail %}
+
+{% block title %}
+    {{friend_list.name}}
+{% endblock title %}
+
+{% block refresh %}<meta http-equiv="refresh" content="120">{% endblock %}
 
 {% block body %}
-
 <div class="container">
+<br>
     <div class="row">
-        <div class="col-md-10 col-md-offset-1">
-            
-            <h2>{{ friend_list.name }}</h2>
-            <hr>  
-            <a href="{% url 'pick_friends_for_list' friend_list.pk %}" class="btn btn-primary popup">Choose friends for this list</a>
-            {% if friend_list.people.exists %}
-                {% for friend in friend_list.people.all %}
-                    <h4><a href="{% url 'profile_detail_view' friend.pk %}">{{ friend }}</a></h4>
-                {% endfor %}
-            {% else %}
-                <h4>This list doesn't have any one in it yet! Choose some friends for {{friend_list.name}} above.</h4>
-            {% endif %}
+        <div class="col-md-8 col-md-offset-1">
+        
+        <div class="row">
+                <div class="col-xs-2">
+                    
+                    {% if request.user.profile.picture %}
 
+                        {% thumbnail  request.user.profile.picture "200x200" crop="center" as im %}
+                            <img src="{{ im.url }}" alt="port-1" class="port-item" width="100" height="100" style="border-radius: 100px;">
+                        {% endthumbnail %}
+                        <br>
+                    {% else %}
+                        <h3>No prof pic</h3>
+                    {% endif %}
+                </div>
+                <div class="col-xs-9" style="margin-top: 10px">
+                    <h2 class="bold">{{ request.user.profile }}</h2>
+                </div>
+            </div>
+        <h2>{{friend_list}}</h2>
+                {% if friends %}
+                    <div class="row">
+                    {% for profile in friends %}
+                         <div class="col-xs-2 text-center" style="margin-right: -15px; margin-top: 2px; margin-bottom: 2px;">
+                            <a class="no-underline" href="{% url 'profile_detail_view' profile.pk %}">
+                            {% thumbnail  profile.picture "200x200" crop="center" as im %}
+                                <img src="{{ im.url }}" class="port-item" width="80" height="80" style="border-radius: 40px" alt="{{ person }}">
+                            {% endthumbnail %}
+                        </br>
+                            {{ profile.first_name }}<br>{{ profile.last_name }}</a>
+                        </div>
+                        {% if forloop.counter|divisibleby:6 %}
+                            </div> <div class="row">
+                        {% endif %}
+                    {% endfor %}
+                         <div class="col-xs-2 text-center" style="margin-right: -15px; margin-top: 2px; margin-bottom: 2px;">
+                            <a class="no-underline popup" href="{% url 'pick_friends_for_list' friend_list.pk %}">
+                            <img width="80" height="80" style="border-radius: 40px; margin-left: 5px" src="{% static 'img/add-icon.svg' %}">
+                            </br>
+                            Add more<br>friends</a>
+                        </div>
+                    </div>
+                {% else %}
 
-            <br>
-            <br>
-            <a class="btn btn-danger delete-button" href="{% url 'friend_list_delete_view' friend_list.pk %}" id="{{ friend_list }}">Delete {{ friend_list }}</a><br>
-            <a href="{% url 'friend_list_list_view' %}">Back to all your Friend Lists</a>
-
+                    <br>    
+                    <h4>You have no friends in this list!</h4>
+                    <span class="col-xs-2 text-center" style="margin-right: -15px; margin-top: 2px; margin-bottom: 2px;">
+                            <a class="no-underline popup" href="{% url 'pick_friends_for_list' friend_list.pk %}">
+                            <img width="80" height="80" style="border-radius: 40px; margin-left: 5px" src="{% static 'img/add-icon.svg' %}">
+                            </br>
+                            Add more<br>friends</a>
+                        </span>
+                        <br><br><br>
+                        <br><br><br>
+                {% endif %}
+                <br>
+                <a class="btn btn-danger delete-button" href="{% url 'friend_list_delete_view' friend_list.pk %}" id="{{ friend_list }}">DELETE THIS LIST</a><br>
+                </div>
+                <div class="col-md-3">
+                    <br><br>
+                    <br>   
+                    <a href="{% url 'friend_list' %}" class="btn-lg">All your friends</a>
+            <h2>Your Friend Lists</h2>
+                {% if errors %}
+                    <p class="red">{{errors}}</p>
+                {% endif %}
+                <form id="new-friend-list" class="hidden" method="POST">
+                {% csrf_token %}
+                    Name of your new Friend List: 
+                    {{form.name}}<br>
+                    <input class="btn btn-success" type="submit" value="CREATE">
+                </form>
+                <a id="create" href="{% url 'friend_list' %}" class="btn btn-success">CREATE NEW FRIEND LIST</a>
+                <br><br>
+            {% for FL in friend_lists %}
+                {% if forloop.first and FL.pk != friend_list.pk %}
+                    <span style="margin-bottom: 40px"/>
+                {% endif %}
+                <a {% if FL.pk == friend_list.pk %}class="btn btn-default green"{% else %} style='margin-left: 13px;'{% endif %} href="{% url 'friend_list_detail_view' FL.pk %}">{{FL}}</a><br>
+            {% endfor %}
         </div>
     </div>
 </div>
 
-{% endblock %}  
+
+{% endblock %}
 
 {% block links %}<link rel="stylesheet" type="text/css" href="{% static 'css/popup.css' %}">{% endblock links %}
 
 {% block scripts %}
-        <script src="{% static 'js/jquery.popup.min.js' %}"></script>
+    <script src="{% static 'js/jquery.popup.min.js' %}"></script>
+    <script type="text/javascript">
+        $('#create').on('click', function(e) {
+            e.preventDefault();
+            $('#' + e.target.id).remove()
+            $('#new-friend-list').removeClass('hidden');
+        });
+    </script>
 {% endblock scripts %}
