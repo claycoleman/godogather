@@ -7,33 +7,34 @@
 {% block body %}
 <div class="container">
     <div class="row">
-        <div class="col-md-10 col-md-offset-1">
-            <h1 class="bold">Your Groups</h1>
+        <div class="col-md-8 col-md-offset-1">
+            <h2 class="bold">Your Groups</h2><br>
             {% if groups %}
+                <div class="row">
                 {% for group in groups %}
-                    <a href="{% url 'group_event_list' group.pk %}">{{ group }}</a></br>
+                    <div class="col-xs-4 text-center">
+                        <h4><a href="{% url 'group_event_list' group.pk %}">{{ group }}<span class="clickable-div"></span></a></h4>
+                    </div>
                 {% endfor %}
+                </div>
                 <br><br>
             {% else %}   
                 <h3>You're not in any groups! Create a new one?</h3>
             {% endif %}
             {% if requested_groups %}
-                <strong><h4>Groups you've requested to join:</h4></strong>
+                <h3 class="bold">Groups you've requested to join:</h3>
                 {% for group in requested_groups %}
-                    {{ group }}<br>
+                    <h4><a href="{% url 'group_event_list' group.pk %}">{{ group }}</a></h4>
                 {% endfor %}
                 <br>
                 <br>
             {% endif %}
-            
-            {% if group_requests %}
-                <strong><h4>Groups that've added you to join:</h4></strong>
-                {% for group in group_requests %}
-                    {{ group }}<br>
-                {% endfor %}
-                <br><br>
-            {% endif %}
-                <a class="green" href = "{% url 'group_create_view' %}" %}><i class='fa fa-plus-circle'></i> Create a new group</a>
+        </div>
+        <div class="col-md-2 text-left" style="margin-left: 10px">
+        <br>
+        <br>
+        <br>
+        <h4><a class="green" href = "{% url 'group_create_view' %}" %}><i class='fa fa-plus-circle'></i> Create a new group</a></h4>
         </div>
     </div>
 </div>

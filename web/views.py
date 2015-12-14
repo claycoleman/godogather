@@ -394,7 +394,8 @@ def event_update_view(request, pk):
 
                 if request.POST.get('_finish'):
                     return redirect('event_detail_view', pk)
-
+                else:
+                    context['saved'] = "%s saved!" % updated_event
         else:
             print form.errors
             context['errors'] = form.errors
@@ -624,6 +625,36 @@ def friend_list(request):
     context['friend_lists'] = friend_lists
 
     return render_to_response('friend_list.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def other_friend_list(request, pk):
+    context = {}
+    if pk is request.user.profile.pk:
+        return redirect('friend_list')
+    profile = Profile.objects.get(pk=pk)
+    context['profile'] = profile
+
+    friends = [friend for friend in profile.friends.all()]
+    context['friends'] = friends
+
+    return render_to_response('other_friend_list.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def other_mutual_list(request, pk):
+    context = {}
+    if pk is request.user.profile.pk:
+        return redirect('friend_list')
+    profile = Profile.objects.get(pk=pk)
+    context['profile'] = profile
+
+    friends = [friend for friend in profile.friends.all()]
+    mutual = set(friends) & set(request.user.profile.friends.all())
+    context['mutual'] = mutual
+
+
+    return render_to_response('other_mutual_list.html', context, context_instance=RequestContext(request))
 
 
 @login_required

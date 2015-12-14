@@ -64,6 +64,8 @@ urlpatterns = [
     # userprofile urls
     url(r'^people/(?P<pk>\d+)/$', 'web.views.profile_detail_view', name='profile_detail_view'),
     url(r'^friends/$', 'web.views.friend_list', name='friend_list'),
+    url(r'^friends/(?P<pk>\d+)/$', 'web.views.other_friend_list', name='other_friend_list'),
+    url(r'^friends/(?P<pk>\d+)/mutual/$', 'web.views.other_mutual_list', name='other_mutual_list'),
     url(r'^search/profiles/$', 'web.views.search_profiles', name='search_profiles'),
     url(r'^profile/(?P<pk>\d+)/update/$', 'web.views.profile_update_view', name='profile_update_view'),
     url(r'^profile/create/$', 'web.views.profile_create_view', name='profile_create_view'),

@@ -1,6 +1,6 @@
 $(function() {
     console.log(window.innerWidth);
-    
+    $('#google-map').click();
     if (window.innerWidth<768) {
         $('#notification-nav-icon').remove();
         $('#mobile-notification-text').html('Notifications<span class="caret"></span>');
@@ -45,39 +45,54 @@ $(function() {
         date_array[i].innerHTML = moment(date).fromNow();
     }
 
-    console.log($('.datepicker').val());
-    console.log($('#id_time_starting').val());
-    console.log($('#id_time_ending').val());
-    console.log('post');
-    var update = $('#update').val()
+    var update = $('#update').text()
 
-    if ($('.datepicker').val() != "") {
+    console.log(update)
+    console.log($('.datepicker').val())
+    console.log($('#id_time_starting').val())
+    console.log($('#id_time_ending').val())
+
+    if (update != "") {
         var start = new Date($('.datepicker').val() + 'T' + $('#id_time_starting').val())
         var end = new Date($('.datepicker').val() + 'T' + $('#id_time_ending').val())
+    } else if ($('.datepicker').val() != "") {
+        var start = new Date($('.datepicker').val() + ' ' + $('#id_time_starting').val())
+        var end = new Date($('.datepicker').val() + ' ' + $('#id_time_ending').val())
     } else {
         var start = d
         var end = d
     }
     try {
-        $('.datepicker').datepicker({ dateFormat: 'yy-mm-dd', changeMonth: true, changeYear: true, selectOtherMonths: true, showOtherMonths: true});
-        if (update != null || $('.datepicker').val().indexOf('-') != 4) {
+        $('.datepicker').datepicker({ dateFormat: 'yy-mm-dd', changeMonth: true, changeYear: true, selectOtherMonths: true, showOtherMonths: true, minDate: start});
+        
+        if ($('#saved').text() == "") {
             $('.datepicker').val(moment(start).format('YYYY-MM-DD'))
         }
-        $('.timepicker').timepicker({ 'timeFormat': 'h:i a', 'scrollDefault': 'now', 'step': 15  });
-        if (update != null || $('#id_time_starting').val().indexOf('am') <= -1 && $('#id_time_starting').val().indexOf('pm') <= -1) {
-            $('#id_time_starting').val(moment(start).format('hh:mm a'))
+
+        var coeff = 1000 * 60 * 15;
+        var rounded = new Date(Math.round(d.getTime() / coeff) * coeff + coeff) 
+        // $('.timepicker').timepicker({ 'timeFormat': 'h:i a', 'scrollDefault': 'now', 'step': 15  , 'minTime': rounded, 'forceRoundTime': true});
+        $('.timepicker').timeEntry({ampmPrefix: ' '});
+        // $('#id_time_starting').val(d.getTime())
+        // $('#id_time_starting').val(d.getTime())$('#')
+
+        if (update != "" || $('#form-errors').text()) {
+            if ($('#saved').text() == "") {
+                $('#id_time_starting').val(moment(start).format('hh:mm A'))
+            }
+        } else {
+            $('#id_time_starting').val(moment(rounded).format('hh:mm A'))
         };
-        if (update != null || $('#id_time_ending').val().indexOf('am') <= -1 && $('#id_time_ending').val().indexOf('pm')  <= -1) {
-            $('#id_time_ending').val(moment(end).format('hh:mm a'))
+        if (update != "" || $('#form-errors').text()) {
+            if ($('#saved').text() == "") {
+                $('#id_time_ending').val(moment(end).format('hh:mm A'))
+            }
+        } else {
+            $('#id_time_ending').val(moment(new Date(rounded.getTime() + 1000*60*60)).format('hh:mm A'))
         };
     }
     catch(err) {
     }
-
-    console.log($('.datepicker').val());
-    console.log($('#id_time_starting').val());
-    console.log($('#id_time_ending').val());
-
 
     var options = {'width': '625px', 'height': '300px', 'overflow-y': 'auto'};
     try {
@@ -189,7 +204,7 @@ $('.event-detail').on('click', '.confirm-cannot-come', function(e) {
         },
         success: function(data) {
             $("#event-detail-"+prk).html('<br><img style="max-height: 40px; max-width: 40px; float:left" src="' + data[4] +'"><h4 style="float: left;"><strong style="color: darkgray">&nbsp;' + data[1] + '</strong></h4><div class="text-right" style="float:right"><span class="red stan"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;You\'re not going...</span><br><br><a class="btn btn-sm btn-success cancel-decision" id="confirm-button-' + prk + '" alt="' + prk + '"  href="#"><i class="fa fa-check-circle" alt="' + prk + '" id="' + prk + '"></i>&nbsp;&nbsp;Cancel</a></div><h2 class="text-center darkgray"><a style="color: #424242" href="/events/' + prk +'">' + data[0] + '</a></h2><h5 style="color: darkgray" class="text-left date-starting">' + data[2] + '</h5><br>');
-            standardizeDatesPosted("#event-detail-"+prk);
+            // standardizeDatesPosted("#event-detail-"+prk);
             standardizeDatesStartingWithLocation("#event-detail-"+prk);
         }
     });

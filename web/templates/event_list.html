@@ -31,23 +31,26 @@
                             {% endthumbnail %}
                             </a>
                             <h4 style="float: left;"><strong class='black'>&nbsp;{% for host in event.host.all %}{% if host == request.user.profile %}You{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>{% if event.groups.all %} in {% for group in event.groups.all %}<a href="{% url 'group_event_list' group.pk %}">{{ group }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</h4>
-                            <h5 class="darkgrey" style="float: right;">Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</span></h5> 
-                            <div class="row" style="clear:both;">
-                            
-                                <h2 class="text-center"><a href="{% url 'event_detail_view' event.pk %}">{{ event.name }}</a></h2>
-                                <div class="col-md-7">
+                            <h5 class="darkgrey" style="float: right;">Posted <span class='date-posted'>{{ event.date_posted|date:"c" }}</h5> 
+                            <br style="clear:both;">
+                            <h2 class="text-center"><a href="{% url 'event_detail_view' event.pk %}">{{ event.name }}</a></h2>
+                            <div class="row">
+                                <div class="col-md-4">
                                     <h4 class="date-starting">{{ event.date_happening|date:"c" }}T{{ event.time_starting|time:"H:i" }}:00.000000+00:00</h4>
+                                    <h5>People coming: {{ event.people_coming.count}}</h5>
+                                    <h5>People not coming: {{ event.people_not_coming.count}}</h5>
                                 </div>
-                                <div class="col-md-5 text-right">
-                                    <br>
-                                    <h5>{{ event.description }}</h5>
+                                <div class="col-md-8 text-right">
+                                    <h3>{{ event.description }}</h3>
                                 </div>
                             </div>
-                            <div class="text-center green">
-                                <h4>This is your event!</h4>
+                            <div style="float: right;" class="text-center green">
+                                <h4 class="bold">This is your event!</h4>
                             </div>
+                            <a style="float: left;" class="btn btn-default" alt="{{event.pk}}"  href="{% url 'event_detail_view' event.pk %}">MORE DETAILS</a>
+                            <br style="clear:both;">
                             <br>
-                            </div>
+                        </div>
                         {% else %}
                         {% if request.user.profile in event.people_coming.all %}
                             <br>
@@ -85,7 +88,7 @@
                                 <span class="green stan"><i class="fa fa-check-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;You're going!</span>&nbsp;&nbsp;
                                 <a class="btn btn-danger cancel-decision" id="reject-button-{{event.pk}}" alt="{{event.pk}}"  href="#"><i class="fa fa-times-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;Back out...</a>
                             </div>
-                            <br><br>
+                            <br>
                         {% elif request.user.profile in event.people_not_coming.all %}
                             <br>
                             <a href="{% url 'profile_detail_view' event.host.first.pk %}">
@@ -144,7 +147,7 @@
                                     <a class="btn btn-success confirm-can-come" alt="{{event.pk}}" id="confirm-button-{{event.pk}}" href="#"><i class="fa fa-check-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;Count me in!</a>&nbsp;
                                     <a class="btn btn-danger confirm-cannot-come" alt="{{event.pk}}" id="reject-button-{{event.pk}}" href="#"><i class="fa fa-times-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;Can't make it!</a>
                                 </div>
-                            <br><br>
+                            <br>
 
                             {% endif %}
                         <br>
@@ -158,7 +161,7 @@
                 {% else %}
                     <h3>You have no events in your feed yet! Add some new friends or follow some groups to see some. If it's your first time here, be sure to check out the <a href="{% url 'about_view' %}">about page</a> for more about WAYD.</h3>
                     <br>
-                    <h4 class="text-center"><a class="btn btn-primary form-control popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;FIND YOUR FACEBOOK FRIENDS ON <strong>WAYD</strong></a></h4>
+                    <h4 class="text-center"><a class="btn btn-primary form-control popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;YOUR FACEBOOK FRIENDS ON <strong>WAYD</strong></a></h4>
                     
                     <h4><a class="btn btn-primary form-control" href="{% url 'search_profiles' %}">SEARCH FOR FRIENDS</a></h4>
                     </div>
@@ -168,7 +171,7 @@
                 <br>
                 <a class="btn btn-lg" href = "{% url 'event_create_view' %}" %}><i class='fa fa-plus-circle'></i> Create a new event</a>
                 <br>
-                <a class="btn btn-primary btn-sm popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;FIND YOUR FACEBOOK FRIENDS ON <strong>WAYD</strong></a>
+                <a class="btn btn-primary btn-sm popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;YOUR FACEBOOK FRIENDS ON <strong>WAYD</strong></a>
                 <br>
                 <h3>Events you're going to!</h3>
                 <div class="main-events-going-to">

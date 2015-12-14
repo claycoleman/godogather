@@ -6,27 +6,32 @@
 
 {% block body %}
 <div class="container">
-        <form action="{% url 'event_create_view' %}" enctype="multipart/form-data" method="POST" >
+        <form action="{% url 'event_create_view' %}" enctype="multipart/form-data" method="POST" id='create-form'>
     <div class="row">
             <h2 class="text-center">CREATE A NEW EVENT</h2>
             {% csrf_token %}    
             <div class="col-md-5 col-md-offset-1">
                     Name: {{ form.name|addcss:"form-control" }}
+                    <span class='red' id='name-errors'></span>
                     <hr>
                     <i class="fa fa-calendar-o"></i>
                     Date: {{form.date_happening|addcss:"form-control datepicker"}}
                     <i class="fa fa-clock-o"></i>
                     Time Starting: {{form.time_starting|addcss:"form-control timepicker"}}
+                    <span class='red' id='start-time-errors'></span>
                     <i class="fa fa-clock-o"></i>
                     Time Ending: {{form.time_ending|addcss:"form-control timepicker"}}
+                    <span class='red' id='end-time-errors'></span>
                     <hr>
                     <i class="fa fa-map-marker"></i>
                     Location: {{ form.location|addcss:"form-control" }}
+                    <span class='red' id='location-errors'></span>
                     {{ form.test_location|addcss:"form-control"}}
                     <input name="event_pk" class="hidden" value="{{ event_pk }}">
             </div>
             <div class="col-md-4 col-md-offset-1">
                 Description: {{ form.description|addcss:"form-control" }}
+                <span class='red' id='description-errors'></span>
                 <hr style="margin-bottom: 5px; margin-top: 10px;">
                 <strong class="bigger">Allow sharing?</strong>{{ form.shareable }}<br style="margin-top: 100px">
                 Allow others to repost this event and invite their friends<br><br>
@@ -44,13 +49,13 @@
             </div>
         </div>
         {% if errors %}
-            <div class="red text-center errors">Uh oh! {{ errors|safe }}</div>   
+            <div class="red text-center errors" id="form-errors">Uh oh! {{ errors|safe }}</div>   
         {% else %}
             <br>
         {% endif %}
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
-<input class="form-control btn-default" type="submit" value="CREATE EVENT" />
+<input class="form-control btn-default" id="submit-button" type="submit" value="CREATE EVENT" />
                     <br>
                     <br>
             </div>
@@ -63,7 +68,7 @@
 
 {% block links %}
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet" href="{% static 'css/jquery.timepicker.css' %}">
+    <link rel="stylesheet" href="{% static 'css/jquery.timeentry.css' %}">
     <link rel="stylesheet" href="{% static 'location_picker/location_picker.css' %}">
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/popup.css' %}">
@@ -73,6 +78,8 @@
 {% block scripts %}
     <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
     <script type="text/javascript" src="{% static 'js/jstz-1.0.4.min.js' %}"></script>
+    <script src="{% static 'js/jquery.plugin.min.js' %}"></script>
+    <script src="{% static 'js/jquery.timeentry.min.js' %}"></script>
 
     <script src="{% static 'js/jquery.popup.min.js' %}"></script>
     <script src="{% static 'js/switch-boxes.js' %}"></script>
@@ -84,6 +91,70 @@
               uncheckedLabel: 'NO'
             });
         });
+  </script>
+  <script type="text/javascript">
+      $('#submit-button').on('click', function(e) {
+            e.preventDefault();
+            var now = new Date()
+            console.log(now)
+            console.log(date)
+            var from = $(".datepicker").val().split("-");
+
+            var date = new Date(from[0], from[1] - 1, from[2]);
+            var dateString = date.toDateString().split(" 00")[0] + " "
+            var start = new Date(dateString + $('#id_time_starting').val())
+            var end = new Date(dateString + $('#id_time_ending').val())
+
+            var timeComp = new Date("1 Jan 2000 " + now.toTimeString())
+            var lateDate = new Date("1 Jan 2000 9:30 PM")
+            var earlyDate = new Date("2 Jan 2000 5:00 AM")
+            
+
+            var startComp = new Date("1 Jan 2000 " + $('#id_time_starting').val())
+            var endComp = new Date("2 Jan 2000 " + $('#id_time_ending').val())
+
+            var shouldSubmit = true
+            if (end > start || (startComp > lateDate && endComp < earlyDate)) {
+                ;
+            } else {
+                $('#id_time_ending').css('border', '1px solid red');
+                $('#end-time-errors').text('The end time cannot be before the start time.')
+                shouldSubmit = false;
+            };
+            if (startComp > timeComp ) { 
+                ;
+            } else {
+                $('#id_time_starting').css('border', '1px solid red');
+                $('#id_date_happening').css('border', '1px solid red');
+                $('#start-time-errors').html('The start time cannot be in the past.<br>')
+                shouldSubmit = false;
+            }
+            if ($('#id_name').val()) { 
+                ;
+            } else {
+                $('#id_name').css('border', '1px solid red');
+                $('#name-errors').text('An event name is required!')
+                shouldSubmit = false;
+            }
+            if ($('#id_location').val()) { 
+                ;
+            } else {
+                $('#id_location').css('border', '1px solid red');
+                $('#location-errors').text('An event location is required!')
+                shouldSubmit = false;
+            }
+            if ($('#id_description').val()) { 
+                ;
+            } else {
+                $('#id_description').css('border', '1px solid red');
+                $('#description-errors').text('An event description is required!')
+                shouldSubmit = false;
+            }
+
+            if (shouldSubmit) {
+                $('#create-form').submit()
+            }
+      });
   </script>
 {% endblock scripts %}
 

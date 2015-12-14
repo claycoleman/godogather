@@ -14,8 +14,8 @@ valid_time_formats = ['%I:%M %p', '%P', '%H:%M%A', '%H:%M %A', '%H:%M%a', '%H:%M
 
 class EventModelCreateForm(forms.ModelForm):
     date_happening = forms.DateField(initial=datetime.datetime.now())
-    time_starting = forms.TimeField(input_formats=valid_time_formats, initial=datetime.datetime.now())
-    time_ending = forms.TimeField(input_formats=valid_time_formats, initial=datetime.datetime.now()+datetime.timedelta(hours=1))
+    time_starting = forms.TimeField(input_formats=valid_time_formats)
+    time_ending = forms.TimeField(input_formats=valid_time_formats)
 
 
 
@@ -34,6 +34,7 @@ class EventModelCreateForm(forms.ModelForm):
         self.fields["date_happening"].required = True
         self.fields["time_starting"].required = True
         self.fields["time_ending"].required = True
+        self.fields["description"].required = True
         self.fields["description"].widget = forms.Textarea(attrs={'rows': '4'})
 
 

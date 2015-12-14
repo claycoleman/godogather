@@ -86,10 +86,17 @@
             {% endfor %}
                 </div>
             <h3>Your Group Feeds</h3>
+            {% if profile.groups_in.exists %}
+                {% for group in profile.groups_in.all %}
+                    <a href="{% url 'group_event_list' group.pk %}">{{ group }}</a>{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            {% else %}
+                <h3>You're not in any Group Feeds yet!</h3>
+            {% endif %}
 
-            {% for group in profile.groups_in.all %}
-                <a href="{% url 'group_event_list' group.pk %}">{{ group }}</a>{% if not forloop.last %},{% endif %}
-            {% endfor %}
+            <br>
+            <br>
+            <a style="min-width: 144px;" class="btn btn-default" href="{% url 'friend_list' %}">ALL FRIENDS</a>
     
         </div>
     </div>

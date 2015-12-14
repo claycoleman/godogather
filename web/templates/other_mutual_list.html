@@ -11,15 +11,15 @@
 <div class="container">
 <br>
     <div class="row">
-        <div class="col-md-8 col-md-offset-1">
+        <div class="col-md-10 col-md-offset-1">
         
         <div class="row">
                 <div class="col-xs-2">
                     
-                    {% if request.user.profile.picture %}
+                    {% if profile.picture %}
 
-                        <a class="no-underline" href="{% url 'profile_detail_view' request.user.profile.pk %}">
-                        {% thumbnail  request.user.profile.picture "200x200" crop="center" as im %}
+                        <a class="no-underline" href="{% url 'profile_detail_view' profile.pk %}">
+                        {% thumbnail  profile.picture "200x200" crop="center" as im %}
                             <img src="{{ im.url }}" alt="port-1" class="port-item" width="100" height="100" style="border-radius: 100px;">
                         {% endthumbnail %}
                         </a>
@@ -28,14 +28,18 @@
                         <h3>No prof pic</h3>
                     {% endif %}
                 </div>
-                <div class="col-xs-9" style="margin-top: 10px">
-                    <h2 class="bold">{{ request.user.profile }}</h2>
+                <div class="col-xs-8" style="margin-top: 10px">
+                    <h2 class="bold">{{ profile }}</h2>
+                </div>
+                <div class="col-xs-1">
+                    <a style="min-width: 144px;" href="{% url 'other_friend_list' profile.pk %}" class="btn btn-default">All friends</a>
+                    <a class="btn btn-success">MUTUAL FRIENDS</a>
                 </div>
             </div>
-        <h2>All your friends</h2>
-                {% if friends %}
+        <h2> Your mutual friends with {{ profile.first_name }}</h2>
+                {% if mutual %}
                     <div class="row">
-                    {% for profile in friends %}
+                    {% for profile in mutual %}
                          <div class="col-xs-2 text-center" style="margin-right: -15px; margin-top: 2px; margin-bottom: 2px;">
                          <a class="no-underline" href="{% url 'profile_detail_view' profile.pk %}">
                             {% thumbnail  profile.picture "200x200" crop="center" as im %}
@@ -53,26 +57,8 @@
                     </div>
                 {% else %}
                     <br>    
-                    <h4>You have no friends yet...</h4>
+                    <h4>You have no mutual friends yet!</h4>
                 {% endif %}
-        </div>
-        <div class="col-md-3">
-            <br><br><br><br><br>
-            <h2>Your Friend Lists</h2>
-                {% if errors %}
-                    <p class="red">{{errors}}</p>
-                {% endif %}
-                <form id="new-friend-list" class="hidden" method="POST">
-                {% csrf_token %}
-                    Name of your new Friend List: 
-                    {{form.name}}<br>
-                    <input class="btn btn-success" type="submit" value="CREATE">
-                </form>
-                <a id="create" href="{% url 'friend_list' %}" class="btn btn-success">CREATE NEW FRIEND LIST</a>
-                <br><br>
-            {% for friend_list in friend_lists %}
-                <a class="" href="{% url 'friend_list_detail_view' friend_list.pk %}">{{friend_list}}</a><br>
-            {% endfor %}
         </div>
     </div>
 </div>
