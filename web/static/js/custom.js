@@ -492,6 +492,7 @@ $('.group-add-menu').on('click', '.reject-button', function(e) {
 
 
 $('.notification-menu').on('click', '.clear-button', function(e) {
+    e.preventDefault()
     var prk = $("#"+e.target.id).attr('alt')
     console.log(prk);
     $.ajax({
@@ -512,8 +513,11 @@ $('.notification-menu').on('click', '.clear-button', function(e) {
                 $("#notification_request_count").text(data[0]);
             }
         }
-
     });
+    var href = e.target.href
+    if (href) {
+       window.location = e.target.href
+    }
 });
 
 

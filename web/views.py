@@ -30,6 +30,8 @@ def event_detail_view(request, pk):
     events = [e for e in Event.objects.filter(pk=pk)]
     if events:
         event = events[0]
+        if event.host.count() == 0:
+            return redirect('{}?fail=eventremoved'.format(resolve_url('event_list_view')))
     else:
         return redirect('{}?fail=eventremoved'.format(resolve_url('event_list_view')))
 
