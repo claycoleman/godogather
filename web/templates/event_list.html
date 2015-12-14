@@ -161,7 +161,9 @@
                 {% else %}
                     <h3>You have no events in your feed yet! Add some new friends or follow some groups to see some. If it's your first time here, be sure to check out the <a href="{% url 'about_view' %}">about page</a> for more about WAYD.</h3>
                     <br>
-                    <h4 class="text-center"><a class="btn btn-primary form-control popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;YOUR FACEBOOK FRIENDS ON <strong>WAYD</strong></a></h4>
+                    {% if request.user.social_auth.exists %}<h4 class="text-center"><a class="btn btn-primary form-control popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;YOUR FACEBOOK FRIENDS ON <strong>WAYD</strong></a></h4>
+                        
+                    {% endif %}
                     
                     <h4><a class="btn btn-primary form-control" href="{% url 'search_profiles' %}">SEARCH FOR FRIENDS</a></h4>
                     </div>
@@ -171,7 +173,7 @@
                 <br>
                 <a class="btn btn-lg" href = "{% url 'event_create_view' %}" %}><i class='fa fa-plus-circle'></i> Create a new event</a>
                 <br>
-                <a class="btn btn-primary btn-sm popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;YOUR FACEBOOK FRIENDS ON <strong>WAYD</strong></a>
+                {% if request.user.social_auth.exists %}<a class="btn btn-primary btn-sm popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;YOUR FACEBOOK FRIENDS ON <strong>WAYD</strong></a>{% endif %}
                 <br>
                 <h3>Events you're going to!</h3>
                 <div class="main-events-going-to">

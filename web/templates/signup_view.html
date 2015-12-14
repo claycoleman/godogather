@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% load addcss %}
+
+{% block title %}
+    Sign Up
+{% endblock title %}
+
+{% block body %}
+<style type="text/css">
+    .form-control {
+        width: 95%;
+        display: inline
+    }
+
+    .password {
+        width: 70%;
+        display: inline
+    }
+</style>
+<div class="container">
+    <div class="row">
+        <h2 style="margin-left: 50px;">Sign Up for WAYD!</h2>
+            <form method="POST" id="create-form" enctype='multipart/form-data'>
+            <div class="col-md-5 col-md-offset-1">
+                {% csrf_token %}
+                Username:
+                <br>
+                {{ form.username|addcss:"form-control" }}<br>
+                <span class='red' id='username-errors'></span>
+                <br>
+                Verify that you're human:
+                <br>
+                {{ form.verification |addcss:"form-control"}}<span id='verification-errors' style='margin-left: 8px'></span>
+            </div>
+            <div class="col-md-6">
+                Password:<br>
+                <small id='pw-instructions' class="red">(8 characters or longer, with at least one digit, lower case and upper case letter)</small>
+                <br>
+                {{ form.password1|addcss:"form-control password" }}<span id='check-pass-errors' class="red" style='margin-left: 8px'></span><br>
+                Confirm password:
+                <br>
+                {{ form.password2|addcss:"form-control password" }}<span id='pass-equal-errors' style='margin-left: 8px'></span>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-5 col-md-offset-1">
+                
+                First Name:
+                <br>
+                {{ form.first_name|addcss:"form-control" }}
+                <span class='red' id='first-name-errors'></span>
+                <br>
+                Last Name:
+                <br>
+                {{ form.last_name|addcss:"form-control" }}
+                <span class='red' id='last-name-errors'></span><br>
+                Picture:
+                <br>
+                {{ form.picture }}                
+                <span class='red' id='picture-errors'></span>
+
+                <br>
+            </div>
+            <div class="col-md-5">
+                
+                Bio:
+                <br>
+                {{ form.bio|addcss:"form-control" }}<br>
+                <span class='red' id='bio-errors'></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8 div col-md-offset-2">
+                {% if valid %}
+                    <p class="red">{{ valid }}</p>
+                {% endif %}
+                <input type="submit" id='submit-button' class="form-control" value="Sign Up!">  
+            </div>
+        </div>
+        <a class="btn btn-primary" href="{% url 'login_view' %}">BACK TO LOGIN</a>
+        </form>
+        <br>
+    </div>
+</div>
+    
+
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript">
+    console.log($('#id_picture').val())
+
+    $('#id_verification').on('keyup', function(e) {
+        verifyHuman();
+    });
+
+    function verifyHuman() {
+        if ($('#id_verification').val() == 6) {
+            $('#id_verification').css('border', '1px solid green')
+            $('#verification-errors').html('<i class="green fa fa-check"></i>')
+            return true;
+        } else {
+            $('#id_verification').css('border', '1px solid red')
+            $('#verification-errors').html('<i class="red fa fa-times"></i>')
+            return false;
+        }
+    }
+
+    $('#id_password1').on('keyup', function(e) {
+        checkPassword();
+    });
+
+    function checkPassword() {
+        var pw = $('#id_password1').val()
+        var patt = /\d+/g
+        var hasNumber = patt.test(pw)
+        patt = /[a-z]/
+        var hasLower = patt.test(pw)
+        patt = /[A-Z]/
+        var hasUpper = patt.test(pw)
+        var has8Char = pw.length >= 8
+
+        if (has8Char && hasNumber && hasLower && hasUpper) {
+            $('#id_password1').css('border', '1px solid green')
+            $('#check-pass-errors').html('<i class="green fa fa-check"></i>')
+            $('#pw-instructions').removeClass('red')
+            $('#pw-instructions').addClass('green')
+            return true;
+        } else {
+            $('#pw-instructions').addClass('red')
+            $('#pw-instructions').removeClass('green')
+            $('#check-pass-errors').html('<i class="red fa fa-times"></i>&nbsp;')
+            if (!hasNumber) {
+                $('#check-pass-errors').html($('#check-pass-errors').html() + '&nbsp;#&nbsp;')
+            }
+            if (!hasLower) {
+                $('#check-pass-errors').html($('#check-pass-errors').html() + '&nbsp;a&nbsp;')
+            }
+            if (!hasUpper) {
+                $('#check-pass-errors').html($('#check-pass-errors').html() + '&nbsp;A&nbsp;')
+            }
+            if (!has8Char) {
+                $('#check-pass-errors').html($('#check-pass-errors').html() + '&nbsp;8 char')
+            }
+            $('#id_password1').css('border', '1px solid red')
+            return false;
+        }
+    }
+
+    $('#id_password2').on('keyup', function(e) {
+        comparePasswords();
+    });
+
+    function comparePasswords() {
+        if ($('#id_password1').val() == $('#id_password2').val()) {
+            $('#id_password2').css('border', '1px solid green')
+            $('#pass-equal-errors').html('<i class="green fa fa-check"></i>')
+            return true;
+        } else {
+            $('#id_password2').css('border', '1px solid red')
+            $('#pass-equal-errors').html('<i class="red fa fa-times">&nbsp;Passwords don\'t match</i>')
+            return false;
+        }
+    }
+
+      $('#submit-button').on('click', function(e) {
+            e.preventDefault();
+
+            var shouldSubmit = true
+            if (!verifyHuman()) {
+                shouldSubmit = false;
+                console.log('verify')
+            }
+            if (!checkPassword()) {
+                shouldSubmit = false;
+                console.log('check')
+            }
+            if (!comparePasswords()) {
+                shouldSubmit = false;
+                console.log('compare')
+            }
+            if ($('#id_username').val()) { 
+                $('#id_username').css('border', '1px solid green');
+                $('#username-errors').text('')
+            } else {
+                $('#id_username').css('border', '1px solid red');
+                $('#username-errors').text('A username is required!')
+                console.log('username')
+                shouldSubmit = false;
+            }
+            if ($('#id_first_name').val()) {
+                $('#id_first_name').css('border', '1px solid green');
+                $('#first-name-errors').text('')
+            } else {
+                $('#id_first_name').css('border', '1px solid red');
+                $('#first-name-errors').text('Your first name is required!')
+                console.log('first')
+                shouldSubmit = false;
+            }
+            if ($('#id_last_name').val()) { 
+                $('#id_last_name').css('border', '1px solid green');
+                $('#last-name-errors').text('')
+            } else {
+                $('#id_last_name').css('border', '1px solid red');
+                $('#last-name-errors').text('Your last name is required!')
+                console.log('last')
+                shouldSubmit = false;
+            }
+            if ($('#id_bio').val()) { 
+                $('#id_bio').css('border', '1px solid green');
+                $('#bio-errors').text('')
+            } else {
+                $('#id_bio').css('border', '1px solid red');
+                $('#bio-errors').text('Your last name is required!')
+                console.log('bio')
+                shouldSubmit = false;
+            }
+            if ($('#id_picture').val()) { 
+                $('#id_picture').css('border', '1px solid green');
+                $('#picture-errors').text('')
+            } else {
+                $('#id_picture').css('border', '1px solid red');
+                $('#picture-errors').text('A short picture is required!')
+                console.log('picture')
+                shouldSubmit = false;
+            }
+            console.log(shouldSubmit)
+            if (shouldSubmit) {
+                console.log('submitting')
+
+                $('#create-form').submit()
+            }
+      });
+  </script>
+{% endblock scripts %}

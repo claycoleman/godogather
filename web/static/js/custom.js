@@ -18,8 +18,8 @@ $(function() {
         });
     }
     // $(".main-event-feed").css({'max-height': (window.innerHeight-370)+'px', 'overflow': 'auto'});
-    $(".main-events-going-to").css({'max-height': (window.innerHeight-480)*2/3+'px', 'overflow': 'auto'});
-    $(".main-group-list").css({'max-height': (window.innerHeight-480)/4+'px', 'overflow': 'auto'});
+    $(".main-events-going-to").css({'max-height': (window.innerHeight-480)*3/4+'px', 'overflow': 'auto'});
+    $(".main-group-list").css({'max-height': (window.innerHeight-480)/3+'px', 'overflow': 'auto'});
     $(".main-feed").css({'max-height': (window.innerHeight/3 + 40)+'px', 'overflow': 'auto'});
     $("div.main").css({'min-height': (window.innerHeight-165)+'px'});
     $("div.wrapper").css({'min-height': (window.innerHeight-165)+'px'});
@@ -47,11 +47,6 @@ $(function() {
     }
 
     var update = $('#update').text()
-
-    console.log(update)
-    console.log($('.datepicker').val())
-    console.log($('#id_time_starting').val())
-    console.log($('#id_time_ending').val())
 
     if (update != "") {
         var start = new Date($('.datepicker').val() + 'T' + $('#id_time_starting').val())
@@ -303,7 +298,7 @@ $('.friend_request_section').on('click', '.request-add-button', function(e) {
         },
         success: function(data) {
             $("#friend_request_section-"+prk).html('');
-            $("#friend_request_section-"+prk).html('<a class="btn btn-default">' + data[0] + ' requested as a friend</a>&nbsp;<a id="cancel-request-' + prk + '" class="btn btn-warning cancel-request" href = "#" alt=' + prk + '>Cancel request</a>');
+            $("#friend_request_section-"+prk).html('<a class="btn btn-default">Requested as a friend</a>&nbsp;<a id="cancel-request-' + prk + '" class="btn btn-warning cancel-request" href = "#" alt=' + prk + '>Cancel request</a>');
         }
 
     });
@@ -321,7 +316,7 @@ $('.friend_request_section').on('click', '.cancel-request', function(e) {
         },
         success: function(data) {
             $("#friend_request_section-"+prk).html('');
-            $("#friend_request_section-"+prk).html('<a id="request-add-button-'+ prk +'" class="btn btn-primary request-add-button" href = "#" alt='+ prk +'>Add '+data[0]+' as a friend</a>');
+            $("#friend_request_section-"+prk).html('<a id="request-add-button-'+ prk +'" class="btn btn-primary request-add-button" href = "#" alt='+ prk +'>Add as a friend</a>');
         }
 
     });

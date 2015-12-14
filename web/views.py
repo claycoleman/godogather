@@ -14,10 +14,12 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Q
+from django.db import IntegrityError
+from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
+
 from project.local import FB_APP_ID
 from sorl.thumbnail import get_thumbnail
-
-
 from main.models import Event, Group, Profile, Comment, Notification, FriendList
 from main.forms import SearchProfile, EventModelCreateForm, EventModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, UserLogin, ProfileModelCreateForm, ProfileModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, ContactForm, CommentForm, FriendListCreate
 
@@ -597,6 +599,26 @@ def group_delete_view(request, pk):
     return redirect('group_list_view')
 
 
+@login_required
+def search_groups(request):
+    groups = []
+
+    context = {}
+    form = SearchProfile(request.POST or None)
+    context['get'] = request.method == 'GET'
+    if request.method == 'POST':
+        if form.is_valid():
+            search = form.cleaned_data.get('search', '').strip(' ')
+            if search != '':
+                groups = Group.objects.filter(name__istartswith=search, searchable=True)
+
+    context['groups'] = groups
+    context['form'] = form
+
+    return render_to_response('search_groups.html', context, context_instance=RequestContext(request))
+
+
+
 
 # User / Profile Views!
 @login_required
@@ -685,6 +707,78 @@ def search_profiles(request):
     context['form'] = form
 
     return render_to_response('search_profiles.html', context, context_instance=RequestContext(request))
+
+
+def signup(request):
+
+    context = {}
+
+    form = ProfileModelCreateForm()
+    context['form'] = form
+
+    if request.method == 'POST':
+        form = ProfileModelCreateForm(request.POST, request.FILES)
+        if form.is_valid():
+            new_profile = form.save(commit=False)
+            password = form.cleaned_data['password1']
+            try:
+                new_user = User.objects.create_user(username=form.data['username'], password=password)
+                
+                new_profile.user = new_user
+                new_profile.save()
+
+                context['valid'] = "Thank You For Signing Up!"
+
+                auth_user = authenticate(username=new_profile.username, password=password)
+                login(request, auth_user)
+
+                return redirect('event_list_view')
+
+            except IntegrityError, e:
+                context['valid'] = "A user with that username already exists! Try again!"
+           
+
+        else:
+            context['valid'] = form.errors
+
+    if request.method == 'GET':
+        context['valid'] = "Please Sign Up!"
+
+    return render_to_response('signup_view.html', context, context_instance=RequestContext(request))
+
+
+
+def login_view(request):
+
+    if request.user.is_authenticated():
+        return redirect('event_list_view')
+
+    context = {}
+
+    context['form'] = UserLogin()
+
+    if request.method == "POST":
+        form = UserLogin(request.POST)
+        if form.is_valid():
+
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+
+            auth_user = authenticate(username=username, password=password)
+
+            if auth_user is not None:
+                if auth_user.is_active:
+                    login(request, auth_user)
+                    context['valid'] = "Login Successful"
+
+                    return redirect('event_list_view')
+                else:
+                    context['valid'] = "Invalid User"
+            else:
+                context['valid'] = "Login Failed! Try again"
+
+
+    return render_to_response('login_view.html', context, context_instance=RequestContext(request))
 
 
 @login_required

@@ -8,7 +8,7 @@
 <div class="container">
     <div class="row">
         <div class="col-md-8 col-md-offset-1">
-            <h2 class="bold">Your Groups</h2><br>
+            <h2 class="bold">Your Group Feeds</h2><br>
             {% if groups %}
                 <div class="row">
                 {% for group in groups %}
@@ -19,7 +19,7 @@
                 </div>
                 <br><br>
             {% else %}   
-                <h3>You're not in any groups! Create a new one?</h3>
+                <h3>You're not in any group feeds! Create a new one?</h3>
             {% endif %}
             {% if requested_groups %}
                 <h3 class="bold">Groups you've requested to join:</h3>
@@ -32,9 +32,8 @@
         </div>
         <div class="col-md-2 text-left" style="margin-left: 10px">
         <br>
-        <br>
-        <br>
-        <h4><a class="green" href = "{% url 'group_create_view' %}" %}><i class='fa fa-plus-circle'></i> Create a new group</a></h4>
+        <h4><a style="min-width: 204px" class="btn btn-success" href = "{% url 'group_create_view' %}" %}><i class='fa fa-plus-circle'></i>&nbsp;Create a new group feed</a></h4>
+        <h4><a class="btn btn-success" href = "{% url 'search_groups' %}" %}><i class='fa fa-search'></i>&nbsp;Search for new group feeds</a></h4>
         </div>
     </div>
 </div>

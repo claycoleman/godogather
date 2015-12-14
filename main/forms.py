@@ -125,10 +125,14 @@ class UserModelUpdateForm(UserChangeForm):
         exclude = ['name']
 
 
-class ProfileModelCreateForm(forms.ModelForm):  
+class ProfileModelCreateForm(forms.ModelForm):
+    password1 = forms.CharField(widget=forms.PasswordInput())
+    password2 = forms.CharField(widget=forms.PasswordInput())
+    verification = forms.CharField(widget=forms.TextInput(attrs={'placeholder': "What is 2+4?"}))
+    bio = forms.CharField(widget=forms.Textarea(attrs={'rows': '5'}))
     class Meta:
         model = Profile
-        exclude = ['user']
+        exclude = ['user', 'new_user', 'friends', 'events_posted', 'shared_events', 'group_requests', 'friend_requests', 'past_events', 'followers']
 
 
 class ProfileModelUpdateForm(forms.ModelForm):  

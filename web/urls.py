@@ -51,6 +51,7 @@ urlpatterns = [
     url(r'^groups/(?P<pk>\d+)/delete/$', 'web.views.group_delete_view', name='group_delete_view'),
     url(r'^groups/(?P<pk>\d+)/update/$', 'web.views.group_update_view', name='group_update_view'),
     url(r'^groups/create/$', 'web.views.group_create_view', name='group_create_view'),
+    url(r'^groups/search/$', 'web.views.search_groups', name='search_groups'),
     # url(r'^search/groups/$', 'web.views.search_groups', name='search_groups'),
 
 
@@ -70,6 +71,8 @@ urlpatterns = [
     url(r'^profile/(?P<pk>\d+)/update/$', 'web.views.profile_update_view', name='profile_update_view'),
     url(r'^profile/create/$', 'web.views.profile_create_view', name='profile_create_view'),
     url(r'^notifications/$', 'web.views.full_notifications', name='full_notifications'),
+    url(r'^signup/$', 'web.views.signup', name='signup_view'),
+    url(r'^login_view/$', 'web.views.login_view', name='login_view'),
 
     # permission urls
     url(r'^logout_view/$', 'web.views.logout_view', name='logout_view'),

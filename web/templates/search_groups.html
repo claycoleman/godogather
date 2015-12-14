@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+
+{% block refresh %}<meta http-equiv="refresh" content="120">{% endblock %}
+
+
+{% block title %}Search for Groups{% endblock title %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <h2>Group Feed Search</h2>
+            <form action="{% url 'search_groups' %}" enctype="form-data" method="POST" >
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input class="form-control btn-default" type="submit" value="SEARCH" />
+            </form>
+        </div>
+    </div>
+    <hr>
+    <div class="search-results">
+    {% if groups %}
+        <div class="row">
+        {% for group in groups %}
+            <div class="col-xs-4 text-center">
+                <h4><a href="{% url 'group_event_list' group.pk %}">{{ group }}<span class="clickable-div"></span></a></h4>
+            </div>
+        {% endfor %}
+        </div>
+        <br><br>
+    {% else %}   
+        <div class="col-md-8">
+            {% if get %}
+            <h3>&nbsp;&nbsp;&nbsp;Search for groups feeds!</h3>
+            {% else %}
+            <h3>&nbsp;&nbsp;&nbsp;No search results!</h3>
+            {% endif %}
+        </div>
+    {% endif %}
+        <br>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $('#search').attr('placeholder', 'Search for group feeds!')
+</script> 
+
+{% endblock %}

@@ -58,7 +58,6 @@
                     {% endif %}
                     <li role="separator" class="divider"></li>
                     <li><a href="{% url 'friend_list' %}">Your Friends</a></li>
-                    <li role="separator" class="divider"></li>
                     <li><a href="{% url 'search_profiles' %}">Search for people</a></li>
                      
               </ul>
@@ -67,7 +66,7 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span id='mobile-group-text'></span><i  id='group-request-nav-icon' class="fa fa-users fa-lg"></i><div id="group_request_bubble">{% if request.user.profile.group_requests.exists %} <div id='group_request_noti' class="noti_bubble">{{ request.user.profile.group_requests.all | length}}</div>{% endif %}</div></a>
               <ul class="dropdown-menu group-add-menu">
                 <div class="non-mobile">
-                  <li><a><b>Groups</b></a></li>
+                  <li><a><b>Group Feeds</b></a></li>
                   <li role="separator" class="divider"></li>
                 </div>
                 {% if request.user.profile.group_requests.exists %} 
@@ -82,7 +81,8 @@
                     <li><a>No group requests!</a></li>
                   {% endif %}
                 <li role="separator" class="divider"></li>
-                <li><a href="{% url 'group_list_view' %}">See all of your groups</a></li>
+                <li><a href="{% url 'group_list_view' %}">Your Group Feeds</a></li>
+                <li><a href="{% url 'search_groups' %}">Search for group feedss</a></li>
                 <!--<li role="separator" class="divider"></li>
                 <li><a href="#">Separated link</a></li>-->
               </ul>
@@ -99,13 +99,13 @@
                         {% for notification in request.user.profile.unread_notifications %}
                             <li class="hz" id='notif-{{ notification.pk }}' alt="{{notification.pk}}">
                               {% if notification.notification_type == 'Friend Request' %}
-                              <a class="clear-button" id="clear-link-{{notification.pk}}" href="{% url 'profile_detail_view' notification.sender_pk %}" alt="{{ notification.pk }}">{{ notification.message }}</a>
+                              <a class="clear-button" id="clear-link-{{notification.pk}}" href="{% url 'profile_detail_view' notification.sender_pk %}" alt="{{ notification.pk }}">{{ notification.message | safe }}</a>
                               <a class="clear-button" id="fun" alt="{{ notification.pk }}"><i class="fa fa-check green" id="clear-check-{{notification.pk}}" alt="{{ notification.pk }}" alt="{{ notification.pk }}"></i></a>
                               {% elif 'Group' in notification.notification_type %}
-                              <a class="clear-button" id="clear-link-{{notification.pk}}" href="{% url 'group_member_view' notification.sender_pk %}" alt="{{ notification.pk }}">{{ notification.message }}</a>
+                              <a class="clear-button" id="clear-link-{{notification.pk}}" href="{% url 'group_member_view' notification.sender_pk %}" alt="{{ notification.pk }}">{{ notification.message | safe }}</a>
                               <a class="clear-button" id="fun" alt="{{ notification.pk }}"><i class="fa fa-check green" id="clear-check-{{notification.pk}}" alt="{{ notification.pk }}" alt="{{ notification.pk }}"></i></a>
                               {% elif 'event' in notification.notification_type|lower %}
-                              <a id="clear-link-{{notification.pk}}" {% if 'Cancelled' not in notification.notification_type %}class="clear-button" href="{% url 'event_detail_view' notification.sender_pk %}{% if 'comment' in notification.notification_type|lower %}#comment-section{% endif %}"{% endif %} alt="{{ notification.pk }}">{{ notification.message }}</a>
+                              <a id="clear-link-{{notification.pk}}" {% if 'Cancelled' not in notification.notification_type %}class="clear-button" href="{% url 'event_detail_view' notification.sender_pk %}{% if 'comment' in notification.notification_type|lower %}#comment-section{% endif %}"{% endif %} alt="{{ notification.pk }}">{{ notification.message | safe }}</a>
                               <a class="clear-button" id="fun" alt="{{ notification.pk }}"><i class="fa fa-check green" id="clear-check-{{notification.pk}}" alt="{{ notification.pk }}"></i></a>
                               {% endif %}
                             </li>
@@ -121,11 +121,11 @@
             <li class="dropdown {% block user_active %}{% endblock %}">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{request.user.profile.first_name}}<span class="caret"></span></a>
               <ul class="dropdown-menu">
-                        <li><a href="{% url 'profile_detail_view' request.user.profile.pk %}">Your profile</a></li>
-                        <li><a href="{% url 'friend_list' %}">Your friends</a></li>
-                        <li><a href="{% url 'group_list_view' %}">Your groups</a></li>
+                        <li><a href="{% url 'profile_detail_view' request.user.profile.pk %}">Your Profile</a></li>
+                        <li><a href="{% url 'friend_list' %}">Your Friends</a></li>
+                        <li><a href="{% url 'group_list_view' %}">Your Group Feeds</a></li>
                         <li role="separator" class="divider"></li>
-                        <li><a href="{% url 'logout_view' %}"><b>Log out</b> {{request.user.profile}}</a></li>
+                        <li><a href="{% url 'logout_view' %}"><b>Log Out</b> {{request.user.profile}}</a></li>
                     
               </ul>
             </li>

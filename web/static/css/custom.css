@@ -155,9 +155,6 @@ body {
 }
 
 .search-results {
-    max-height: 500px;
-    max-width: 100%;
-    overflow: auto;
     margin-bottom: 85px;
 }
 
@@ -174,6 +171,21 @@ div.event-detail:nth-child(even) {
 
 
 div.event-detail:nth-child(odd), a.btn-default.stan {
+    background: #FFF;
+    background-color: #FFF;
+    border-left: solid 10px #FFF;
+    border-right: solid 10px #FFF;
+}
+
+
+div.search-results>div.row:nth-child(even) {
+    background: #EEE;
+    border-left: solid 10px #EEE;
+    border-right: solid 10px #EEE;
+}
+
+
+div.search-results>div.row:nth-child(odd) {
     background: #FFF;
     background-color: #FFF;
     border-left: solid 10px #FFF;
