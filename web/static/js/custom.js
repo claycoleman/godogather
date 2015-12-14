@@ -519,7 +519,8 @@ $('.notification-menu').on('click', '.clear-button', function(e) {
     });
     var href = e.target.href
     if (href) {
-       window.location = e.target.href
+    //    window.location = e.target.href
+        window.alert("Yo you clicked a link")
     }
 });
 
