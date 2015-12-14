@@ -115,14 +115,17 @@
 
             var shouldSubmit = true
             if (end > start || (startComp > lateDate && endComp < earlyDate)) {
-                ;
+                $('#id_time_ending').css('border', '1px solid #cccccc');
+                $('#end-time-errors').text('');
             } else {
                 $('#id_time_ending').css('border', '1px solid red');
                 $('#end-time-errors').text('The end time cannot be before the start time.')
                 shouldSubmit = false;
             };
             if (startComp > timeComp ) { 
-                ;
+                $('#id_time_starting').css('border', '1px solid #cccccc');
+                $('#id_date_happening').css('border', '1px solid #cccccc');
+                $('#start-time-errors').html('')
             } else {
                 $('#id_time_starting').css('border', '1px solid red');
                 $('#id_date_happening').css('border', '1px solid red');
@@ -130,21 +133,24 @@
                 shouldSubmit = false;
             }
             if ($('#id_name').val()) { 
-                ;
+                $('#id_name').css('border', '1px solid #cccccc');
+                $('#name-errors').text('')
             } else {
                 $('#id_name').css('border', '1px solid red');
                 $('#name-errors').text('An event name is required!')
                 shouldSubmit = false;
             }
-            if ($('#id_location').val()) { 
-                ;
+            if ($('#id_location').val()) {
+                $('#id_location').css('border', '1px solid #cccccc');
+                $('#location-errors').text('')
             } else {
                 $('#id_location').css('border', '1px solid red');
                 $('#location-errors').text('An event location is required!')
                 shouldSubmit = false;
             }
             if ($('#id_description').val()) { 
-                ;
+                $('#id_description').css('border', '1px solid #cccccc');
+                $('#description-errors').text('')
             } else {
                 $('#id_description').css('border', '1px solid red');
                 $('#description-errors').text('An event description is required!')
