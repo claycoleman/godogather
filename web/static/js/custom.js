@@ -507,21 +507,20 @@ $('.notification-menu').on('click', '.clear-button', function(e) {
         success: function(data) {
             $("#notif-row-"+prk).removeClass('unread');
             $("#notif-"+prk).remove('');
-            if (data[0] == 0) {
-                $("#notification_request_bubble").html('');
-                $("#notifs").html('<li><a class="navbar-li">No notifications!</a></li>');
-                $("#notif-row-"+prk).removeClass('unread');
-                $("#notif-clear-button-"+prk).remove();
-            } else {
-                $("#notification_request_count").text(data[0]);
-            }
+                if (data[0] == 0) {
+                    $("#notification_request_bubble").html('');
+                    $("#notifs").html('<li><a class="navbar-li">No notifications!</a></li>');
+                    $("#notif-row-"+prk).removeClass('unread');
+                    $("#notif-clear-button-"+prk).remove();
+                } else {
+                    $("#notification_request_count").text(data[0]);
+                }
+                var href = e.target.href
+                if (href) {
+                    window.location = href
+                }
         }
     });
-    var href = e.target.href
-    if (href) {
-    //    window.location = e.target.href
-        window.alert("Yo you clicked a link")
-    }
 });
 
 
