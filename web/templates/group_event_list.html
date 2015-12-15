@@ -132,7 +132,9 @@
                 {% if events|length > 0 %}
                     <div class="main-event-feed">
                 {% for event in events %}
-                    <div class="event-detail" id="event-detail-{{ event.pk }}">
+                    <div class="event-detail" {% if event in happening_now %}style="background-color: rgba(255,230,0,0.3); border-color: rgba(255,230,0,0.1); padding-top: 10px"{% endif %} id="event-detail-{{ event.pk }}">
+                        {% if event in happening_now %}
+                        <p class="text-center georgia" style="font-size: 1.5em; margin-bottom: -40px">HAPPENING NOW UNTIL <span class="date-ending bold">{{ event.date_happening|date:"c" }}T{{ event.time_ending|time:"H:i" }}:00.000000+00:00</span></p>
                         {% if request.user.profile in event.host.all %}
                             <br>
                             <a href="{% url 'profile_detail_view' event.host.first.pk %}">
