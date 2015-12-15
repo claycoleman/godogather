@@ -106,15 +106,16 @@
             var end = new Date(dateString + $('#id_time_ending').val())
 
             var timeComp = new Date("1 Jan 2000 " + now.toTimeString())
-            var lateDate = new Date("1 Jan 2000 9:30 PM")
-            var earlyDate = new Date("2 Jan 2000 5:00 AM")
+            var lateDate = new Date("1 Jan 2000 7:00 PM")
+            var midnight = new Date("2 Jan 2000 12:00 AM")
+            var earlyDate = new Date("2 Jan 2000 6:59 AM")
             
 
             var startComp = new Date("1 Jan 2000 " + $('#id_time_starting').val())
             var endComp = new Date("2 Jan 2000 " + $('#id_time_ending').val())
 
             var shouldSubmit = true
-            if (end > start || (startComp > lateDate && endComp < earlyDate)) {
+            if (end > start || ((startComp > lateDate && startComp < midnight) && (endComp < earlyDate && endComp > midnight))) {
                 $('#id_time_ending').css('border', '1px solid #cccccc');
                 $('#end-time-errors').text('');
             } else {

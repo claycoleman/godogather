@@ -120,6 +120,11 @@ function standardizeDatesStarting() {
         var date = new Date(span[i].innerHTML);
         span[i].innerHTML = moment(date).calendar();
     } 
+    span = $(".date-ending")
+    for (i=0; i < span.length; i++) {
+        var date = new Date(span[i].innerHTML);
+        span[i].innerHTML = moment(date).format("h:mm A");
+    } 
     
 }
 

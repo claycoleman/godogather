@@ -10,7 +10,7 @@ h1, h2 {
     font-weight: bolder;
 }
 
-.georgia {
+.georgia, .georgia>* {
     font-family: 'Roboto Slab', serif;
 }
 
@@ -322,3 +322,4 @@ a.no-underline:hover {
     text-decoration: none;
 
 }
+

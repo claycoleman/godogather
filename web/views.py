@@ -1,7 +1,7 @@
 import pytz, requests, urllib
 from itertools import chain
 from operator import attrgetter
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.shortcuts import render, render_to_response, redirect, resolve_url
 from django.http import JsonResponse
@@ -157,16 +157,28 @@ def event_list_view(request):
         events = sorted(list(set(friend_events) | set(my_events)), key=attrgetter('date_posted'), reverse=True)
     else:
         events = sorted(list(set(friend_events) | set(my_events)), key=attrgetter('date_happening', 'time_starting')) #, reverse=True)
-
+    
+    happening_now = []
+    context['happening_now'] = happening_now
     for event in events:
         event_date = datetime.combine(date=event.date_happening, time=event.time_starting)
-        
+        end_date = datetime.combine(date=event.date_happening, time=event.time_ending)
+
+        if end_date < event_date:
+            end_date = end_date + 1000*60*60*24
+
+
         timezone_inst = ""
         if not timezone_inst:
             timezone_inst = 'UTC'
 
         event_date = event_date.replace(tzinfo=pytz.timezone(timezone_inst))
+        end_date = end_date.replace(tzinfo=pytz.timezone(timezone_inst))
+
+
         if event_date < timezone.now():
+            happening_now.append(event)
+        if end_date < timezone.now():
             for host in event.host.all():
                 host.events_hosted.remove(event)
                 host.past_events.add(event)
