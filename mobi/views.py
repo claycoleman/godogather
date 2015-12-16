@@ -97,11 +97,11 @@ def api_friends(request):
 
 @api_view(['GET', 'POST'])
 def api_event_feed(request):
-    if not request.auth:
+
+    if not request.user:
         return HttpResponse('Unauthorized', status=401)
 
-    user = Token.objects.get(key=request.auth).user
-    profile = Profile.objects.get(user=user)
+    profile = Profile.objects.get(user=request.user)
 
     # profile = Profile.objects.get(first_name="Ad")
     
