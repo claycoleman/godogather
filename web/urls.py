@@ -84,4 +84,5 @@ urlpatterns = [
     # comment urls
     url(r'^delete/comment/(?P<pk>\d+)/$', 'web.views.comment_delete_view', name='comment_delete_view')
 
+    
 ]

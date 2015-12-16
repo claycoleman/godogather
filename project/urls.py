@@ -23,7 +23,7 @@ from mobi import urls as mobi_urls
 
 urlpatterns = [
     url(r'^nimda/', include(admin.site.urls)),
+    url('', include('social.apps.django_app.urls', namespace='social')),
     url(r'^', include(web_urls)),
     url(r'^', include(mobi_urls)),
-    url('', include('social.apps.django_app.urls', namespace='social')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -145,7 +145,7 @@ def event_list_view(request):
     group_events = []
 
     for group in request.user.profile.groups_in.all():
-        group_events = list(chain(group_events, group.event_set.all()))
+        group_events = list(chain(group_events, group.event_set.exclude(host=None)))
 
     friend_events = list(set(friend_events) | set(group_events))
     my_events = request.user.profile.events_posted.all()
@@ -1394,6 +1394,7 @@ def ajax_facebook_friends(request):
 
     social = request.user.social_auth.get(provider='facebook')
     response = requests.get('https://graph.facebook.com/v2.5/{0}/friends'.format(social.uid),params={'access_token': social.extra_data['access_token']})
+    
     json = response.json()
     friends = json.get('data')
     friend_list = []

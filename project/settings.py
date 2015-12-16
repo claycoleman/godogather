@@ -17,6 +17,13 @@ TIME_INPUT_FORMATS = (
 
 LOGIN_URL = '/'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    )
+}
+
 
 # Application definition
 
@@ -34,6 +41,7 @@ INSTALLED_APPS = (
     'mobi',
     'social.apps.django_app.default',
     'location_picker',
+    'rest_framework.authtoken',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -71,6 +79,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'project.wsgi.application'
+
+SOCIAL_AUTH_ENABLED_BACKENDS = ('facebook', 'oauth2')
 
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/profile_create/' 
 
