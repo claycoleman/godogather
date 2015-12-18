@@ -1,24 +1,51 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load staticfiles %}
 {% load values_list %}
+{% load addcss %}
 {% load thumbnail %}
-    
-{% block refresh %}<meta http-equiv="refresh" content="120"><link rel="stylesheet" type="text/css" href="{% static 'css/popup.css' %}">{% endblock %}
 
-{% block title %}Home{% endblock title %}
+{% block refresh %}<meta http-equiv="refresh" content="120">{% endblock %}
+
+{% block title %}Today{% endblock title %}
 
 {% block body %}
-<div class="main">
     <div class="container">
+    <br>
         <div class="row">
-            <div class="col-md-9">
-                <h1 class="text-center bold">What Are You Doing?</h1>
-                <h5 style="float: left;" class="text-left"><strong>Current date: </strong><span id="current-date">{{ today |date:"c"}}</span></h5>
-                <a style="float: right;" href="{% url 'event_list_view' %}" class="btn btn-default {% if not order %}active{% endif %}">ORDER BY EVENT DATE</a><a style="float: right;" href="{% url 'event_list_view' %}?order=date_posted" class="btn btn-default {% if order %}active{% endif %}">ORDER BY DATE POSTED</a>&nbsp;&nbsp;<br>
-                    <br style="clear:both;"/>
-                    <hr style="margin-bottom: 0">
-                 
+            <div class="col-md-10 col-md-offset-1">
+                <h1 class="text-center bold">HAPPENING TODAY</h1>
 
+                <hr style="margin-bottom: 0">
+                <div class="text-center"><h3>Planning something?<a style="margin-left: 20px;" class="btn btn-success" href="#" id="plan-now">GET AN EVENT STARTED</a><a style="margin-left: 20px;" class="btn btn-warning hidden" href="#" id="hide-plan-now">CANCEL</a></h3></div>
+                <form id="create-event-basic" class="hidden" method="POST">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-xs-8 col-xs-offset-2">
+                                <strong>What are you going to do?</strong>
+                                {{ form.summary|addcss:"form-control" }}
+                                <span class='red' id='summary-errors'></span><br>
+                                <strong>When?</strong>
+                                <div class="row" style="margin-right: -8px; margin-left: -8px; ">
+                                    <div class="col-xs-1 text-center"><i class="fa fa-calendar-o" style='padding: 10px; border-radius: 8px; background: lightgray'></i></div>
+                                    <div class="col-xs-5">{{form.date_happening|addcss:"form-control datepicker"}}</div>
+                                    <div class="col-xs-1 text-center"><i class="fa fa-clock-o" style='padding: 10px; border-radius: 8px; background: lightgray'></i></div>
+                                    <div class="col-xs-5">{{form.time_starting|addcss:"form-control timepicker"}}</div>
+                                </div>
+                                <span class='red' id='start-time-errors'></span><br>
+                                <strong>Where?</strong>
+                                {{ form.location|addcss:"form-control" }}
+                                {{ form.test_location|addcss:"hidden" }}
+                                <span class='red' id='location-errors'></span>
+                                <input type="submit" style="margin-top: 5px;" class="form-control" value="Make it official!" id="create-button">
+                        </div>
+                    </div>
+                    <input id="current-timezone" name="timezone" class="hidden" value="UTC">
+                    {{form.errors}}
+                </form>
+                
+                <br>
+                <h5 class="text-left"><strong>Right now: </strong><span id="current-date">{{ today |date:"c"}}</span></h5>
+                    <hr style="margin-bottom: 0">
                 {% if events|length > 0 %}
                     <div class="main-event-feed">
                 {% for event in events %}
@@ -157,89 +184,130 @@
                     </div>
                     <hr style="margin-bottom: 0">
                     <h2 class="text-center" style="color: lightgray;"><i class='fa fa-arrow-down'></i></h2>
-                    </div>
                 {% else %}
-                    <h3>You have no events in your feed yet! Add some new friends or follow some groups to see some. If it's your first time here, be sure to check out the <a href="{% url 'about_view' %}">about page</a> for more about WAYD.</h3>
+                    <h3>Nothing's going on today!</h3>
                     <br>
-                    {% if request.user.social_auth.exists %}<h4 class="text-center"><a class="btn btn-primary form-control popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;YOUR FACEBOOK FRIENDS ON <strong>WAYD</strong></a></h4>
-                        
-                    {% endif %}
-                    
-                    <h4><a class="btn btn-primary form-control" href="{% url 'search_profiles' %}">SEARCH FOR FRIENDS</a></h4>
-                    </div>
                 {% endif %}
-            <div id="sidebar" class="col-md-3 affix-events">
-                <br>
-                <br>
-                <a class="btn btn-lg" href = "{% url 'event_create_view' %}" %}><i class='fa fa-plus-circle'></i> Create a new event</a>
-                <br>
-                {% if request.user.social_auth.exists %}<a class="btn btn-primary btn-sm popup" href="/ajax/facebook_friends/"><i class='fa fa-facebook'></i>&nbsp;&nbsp;YOUR FACEBOOK FRIENDS ON <strong>WAYD</strong></a>{% endif %}
-                <br>
-                <h3>Events you're going to!</h3>
-                <div class="main-events-going-to">
-                {% for event in request.user.profile.events_going_to.all %}
-                    <hr>
-                    <h5>{{ event }}</h5>
-                    <h6 style="color: darkgrey">Hosted by {% for host in event.host.all %}{% if host == request.user.profile %}<strong>You</strong>{% else %}{{host}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h6>
-                    <a class="btn btn-default" href="{% url 'event_detail_view' event.pk %}">MORE DETAILS</a></br>
-                {% endfor %}
-                </div>
-                <p class="text-center"><i class='fa fa-arrow-down'></i></p>
-
-                <br>
-                <h3>Your groups!</h3>
-                <div class="main-group-list">
-                {% for group in request.user.profile.groups_in.all|slice:"0:5" %}
-                    <hr>
-                    <h5>{{ group }}</h5>
-                    <h6 style="color: darkgrey">Group Admins: {% for admin in group.admin.all %}{% if admin == request.user.profile %}<strong>You</strong>{% else %}{{admin}}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</h6>
-                    <a class="btn btn-default" href="{% url 'group_event_list' group.pk %}">MORE DETAILS</a></br>
-                {% endfor %}
-                </div>                
-                <p class="text-center"><i class='fa fa-arrow-down'></i></p>
-
-
-                <h5 class="text-center" style="color: lightgray;"><a href="{% url 'group_list_view' %}">See all your groups</a></h5>
-                    
             </div>
+                
         </div>
     </div>
-</div>
+    
+{% endblock body %}
 
-{% endblock %}
+{% block links %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="{% static 'css/jquery.timeentry.css' %}">
+    <link rel="stylesheet" href="{% static 'location_picker/location_picker.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/popup.css' %}">
+    
+{% endblock links %}
 
 {% block scripts %}
-    <script type="text/javascript">
-        if (window.innerWidth>991) {
-        var distance = (window.innerWidth-1300)
-            if (distance > 270) {
-                distance = 270;
-            } else if (distance < 40) {
-                distance = 40;
-            }
-        $('#sidebar').css({'right': distance+'px'});
-        } 
-    </script>
     <script src="{% static 'js/jquery.popup.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/jstz-1.0.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jstz-1.0.4.min.js' %}"></script> 
+    <script src="{% static 'js/jquery.plugin.min.js' %}"></script>
+    <script src="{% static 'js/jquery.timeentry.min.js' %}"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
+    <script type="text/javascript">        
+        var input = document.getElementById('id_location');
+        var autocomplete = new google.maps.places.Autocomplete(input);
 
-    {% if request.user.profile.new_user %}
-    <script type="text/javascript">
-        if (window.confirm("Hey first timer! Welcome to WAYD. We're excited for you to be here and hope you enjoy! Hit okay below to head over to the about page and learn more about WAYD, or hit cancel to jump right into your home page. Get started by finding some friends Facebook and then begin posting what you're doing!")) {
-            window.location = '/about/'
-        } else {
-            $.ajax({
-                type: 'GET',
-                url: '/mark_non_new_user/'
-            });
-        }
+        autocomplete.addListener('place_changed', function() {
+            var place = autocomplete.getPlace();
+            if (!place.geometry) {
+              window.alert("Autocomplete's returned place contains no geometry");
+              return;
+            }
+            $('#id_test_location').val(place.geometry.location.lat() + ", " + place.geometry.location.lng())
+        });
+        $("#create-event-basic").hide();
+        
+      $('form input').on('keypress', function(e) {
+            return e.which !== 13;
+        });
+        $('#plan-now').on('click', function(e) {
+            $('#plan-now').addClass('hidden')
+            $('#hide-plan-now').removeClass('hidden')
+            $('#create-event-basic').removeClass('hidden')
+            $('#create-event-basic').show('150')
+        });
+        $('#hide-plan-now').on('click', function(e) {
+            $('#hide-plan-now').addClass('hidden')
+            $('#plan-now').removeClass('hidden')
+            $('#create-event-basic').hide('150')
+            // $('#create-event-basic').addClass('hidden')
+        });
+        $('#create-button').on('click', function(e) {
+            e.preventDefault();
+            var now = new Date()
+            console.log(now)
+
+            var from = $(".datepicker").val().split("-");
+
+            var date = new Date(from[0], from[1] - 1, from[2]);
+            var dateString = date.toDateString().split(" 00")[0] + " "
+            var start = new Date(dateString + $('#id_time_starting').val())
+            // var end = new Date(dateString + $('#id_time_ending').val())
+
+            var timeComp = new Date("1 Jan 2000 " + now.toTimeString())
+            var lateDate = new Date("1 Jan 2000 7:00 PM")
+            var midnight = new Date("2 Jan 2000 12:00 AM")
+            var earlyDate = new Date("2 Jan 2000 6:59 AM")
+            
+
+            var startComp = new Date("1 Jan 2000 " + $('#id_time_starting').val())
+            // var endComp = new Date("2 Jan 2000 " + $('#id_time_ending').val())
+
+            var shouldSubmit = true
+            // if (end > start || ((startComp > lateDate && startComp < midnight) && (endComp < earlyDate && endComp > midnight))) {
+            //     $('#id_time_ending').css('border', '1px solid #cccccc');
+            //     $('#end-time-errors').text('');
+            // } else {
+            //     $('#id_time_ending').css('border', '1px solid red');
+            //     $('#end-time-errors').text('The end time cannot be before the start time.')
+            //     shouldSubmit = false;
+            // };
+            if (startComp > timeComp ) { 
+                $('#id_time_starting').css('border', '1px solid #cccccc');
+                $('#id_date_happening').css('border', '1px solid #cccccc');
+                $('#start-time-errors').html('')
+            } else {
+                $('#id_time_starting').css('border', '1px solid red');
+                $('#id_date_happening').css('border', '1px solid red');
+                $('#start-time-errors').html('You can\'t plan something in the past!<br>')
+                shouldSubmit = false;
+            }
+            if ($('#id_summary').val()) { 
+                $('#id_summary').css('border', '1px solid #cccccc');
+                $('#summary-errors').text('')
+            } else {
+                $('#id_summary').css('border', '1px solid red');
+                $('#summary-errors').text('What are you gonna call your shindig?')
+                shouldSubmit = false;
+            }
+            if ($('#id_location').val()) {
+                $('#id_location').css('border', '1px solid #cccccc');
+                $('#location-errors').text('')
+                if ($('#id_test_location').val()) {
+                    $('#id_location').css('border', '1px solid #cccccc');
+                    $('#location-errors').text('')
+                } else {
+                    $('#id_location').css('border', '1px solid red');
+                    $('#location-errors').text('Please choose from the Google Map dropdown so WAYD can pinpoint the location.')
+                    shouldSubmit = false;
+                }
+            } else {
+                $('#id_location').css('border', '1px solid red');
+                $('#location-errors').text('Where is this going down?')
+                shouldSubmit = false;
+            }
+            
+
+            if (shouldSubmit) {
+                $('#create-event-basic').submit()
+            }
+        });
     </script>
-{% endif %}
-
-{% if fail %}
-    <script type="text/javascript">
-        window.alert("{{fail|safe}}");
-    </script>
-{% endif %}
-
 {% endblock scripts %}

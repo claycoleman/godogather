@@ -93,6 +93,14 @@
         });
   </script>
   <script type="text/javascript">
+      $('form input').on('keypress', function(e) {
+            return e.which !== 13;
+        });
+      $('#id_location').on('keypress', function(e) {
+            if (e.which == 13) {
+                e.preventDefault()
+            }
+        });
       $('#submit-button').on('click', function(e) {
             e.preventDefault();
             var now = new Date()

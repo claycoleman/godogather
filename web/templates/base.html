@@ -36,7 +36,8 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav navbar-right">
-            <li class="dropdown {% block home-active %}{% endblock %}"><a href="{% url 'event_list_view' %}">Home</a></li>
+            <li class="dropdown"><a href="{% url 'today_events_view' %}">Today</a></li>
+            <li class="dropdown"><a href="{% url 'event_list_view' %}">Home</a></li>
             {% if request.user.is_authenticated %}
             <li id="noti_Container" class="dropdown request_list">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span id='mobile-friend-text'></span><i id='friend-request-nav-icon' class="fa fa-user-plus fa-lg"></i><div id="friend_request_bubble">{% if request.user.profile.friend_requests.exists %} <div id='friend_request_noti' class="noti_bubble">{{ request.user.profile.friend_requests.all | length}}</div>{% endif %}</div></a>
@@ -73,7 +74,7 @@
                   {% for group in request.user.profile.group_requests.all|slice:"0:5" %}
                           <li class="hz" id='group-li-{{ group.pk }}'>
                             <a href='#' id="rejection-group-{{ group.pk }}" class="reject-button" alt="{{ group.pk }}"><i class="fa fa-times red" id="times-{{group.pk}}" alt="{{ group.pk }}"></i></a>
-                            <a href="{% url 'profile_detail_view' group.pk %}">{{ group }}</a>
+                            <a href="{% url 'group_member_view' group.pk %}">{{ group }}</a>
                             <a href='#' id="addition-group-{{ group.pk }}" class="add-button" alt="{{ group.pk }}"><i class="fa fa-check green" id="check-{{group.pk}}" alt="{{ group.pk }}"></i></a>
                           </li>
                       {% endfor %}

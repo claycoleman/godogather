@@ -150,7 +150,7 @@ $('#pick-friend-lists').on('click', '.invite_friend_list_to_event', function(e){
 
             $.ajax({
                 type: 'GET',
-                url: '/search_invite_json/{{event.pk}}/',
+                url: '/search_invite_event_json/{{event.pk}}/',
                 data: {
                   'search': $('#search').val(),
                 },

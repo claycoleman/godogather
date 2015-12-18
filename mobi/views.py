@@ -98,7 +98,7 @@ def api_friends(request):
 @api_view(['GET', 'POST'])
 def api_event_feed(request):
 
-    if not request.user:
+    if not request.user.is_authenticated():
         return HttpResponse('Unauthorized', status=401)
 
     profile = Profile.objects.get(user=request.user)

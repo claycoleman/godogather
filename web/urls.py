@@ -34,6 +34,7 @@ urlpatterns = [
     # event urls
     url(r'^events/(?P<pk>\d+)/$', 'web.views.event_detail_view', name='event_detail_view'),
     url(r'^home/$', 'web.views.event_list_view', name='event_list_view'),
+    url(r'^today/$', 'web.views.today_events_view', name='today_events_view'),
     url(r'^events/delete/(?P<pk>\d+)/$', 'web.views.event_delete_view', name='event_delete_view'),
     url(r'^events/update/(?P<pk>\d+)/$', 'web.views.event_update_view', name='event_update_view'),
     url(r'^events/create/$', 'web.views.event_create_view', name='event_create_view'),

@@ -25,7 +25,7 @@ $(document).ready(function(){
         autocomplete.addListener('place_changed', function() {
             var place = autocomplete.getPlace();
             if (!place.geometry) {
-              window.alert("Autocomplete's returned place contains no geometry");
+              window.alert("Try clicking on your option!");
               return;
             }
 

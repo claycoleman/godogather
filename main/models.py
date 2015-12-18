@@ -96,7 +96,7 @@ class Profile(models.Model):
         if self.notifications.exists():
             return self.notifications.filter(read=False)
         return []
-        
+
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):

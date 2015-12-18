@@ -12,6 +12,15 @@ from .models import Event, Group, Profile, FriendList
 valid_time_formats = ['%I:%M %p', '%P', '%H:%M%A', '%H:%M %A', '%H:%M%a', '%H:%M %a']
 
 
+class BasicEventCreate(forms.Form):
+    summary = forms.CharField()
+    date_happening = forms.DateField(initial=datetime.datetime.now())
+    time_starting = forms.TimeField(input_formats=valid_time_formats)
+    location = forms.CharField()
+    test_location = forms.CharField()
+
+
+
 class EventModelCreateForm(forms.ModelForm):
     date_happening = forms.DateField(initial=datetime.datetime.now())
     time_starting = forms.TimeField(input_formats=valid_time_formats)

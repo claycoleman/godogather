@@ -21,7 +21,7 @@ from django.core.files.temp import NamedTemporaryFile
 from project.local import FB_APP_ID
 from sorl.thumbnail import get_thumbnail
 from main.models import Event, Group, Profile, Comment, Notification, FriendList
-from main.forms import SearchProfile, EventModelCreateForm, EventModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, UserLogin, ProfileModelCreateForm, ProfileModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, ContactForm, CommentForm, FriendListCreate
+from main.forms import SearchProfile, EventModelCreateForm, EventModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, UserLogin, ProfileModelCreateForm, ProfileModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, ContactForm, CommentForm, FriendListCreate, BasicEventCreate
 
 
 
@@ -197,6 +197,127 @@ def event_list_view(request):
     context['my_events'] = my_events
 
     return render_to_response('event_list.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def today_events_view(request):
+    
+    context = {}
+    context['friends_pk'] = request.user.profile.friends.values_list('pk', flat=True)
+    context['groups_in'] = request.user.profile.groups_in.values_list('pk', flat=True)
+
+    form = BasicEventCreate(request.POST or None)
+    context['form'] = form
+    if request.method == "POST":
+        if form.is_valid():
+            new_event = Event.objects.create(name=form.cleaned_data["summary"], date_happening=form.cleaned_data["date_happening"], time_starting=form.cleaned_data["time_starting"], location=form.cleaned_data["location"], test_location=form.cleaned_data["test_location"])
+
+            if form.cleaned_data.get('time_ending'):
+                new_event.time_ending = form.cleaned_data.get("time_ending")
+            else:
+                new_event.time_ending = (datetime.combine(form.cleaned_data["date_happening"],form.cleaned_data["time_starting"]) + timedelta(hours=3)).time()
+
+            event = datetime.combine(new_event.date_happening, new_event.time_starting)
+            event_ending = datetime.combine(new_event.date_happening, new_event.time_ending)
+
+            timezone_inst = request.POST.get('timezone')
+            if not timezone_inst:
+                timezone_inst = 'UTC'
+                print "UTC"
+            else:
+                print timezone_inst
+
+            event = event.replace(tzinfo=pytz.timezone(timezone_inst))
+            event = event.astimezone(pytz.utc)
+
+            event_ending = event_ending.replace(tzinfo=pytz.timezone(timezone_inst))
+            event_ending = event_ending.astimezone(pytz.utc)
+
+            new_event.date_happening = event.date()
+            new_event.time_starting = event.time()
+            new_event.time_ending = event_ending.time()
+            new_event.save()
+
+            new_event.host.add(request.user.profile)
+
+            for host in new_event.host.all():
+                new_event.people_coming.add(host)
+                host.events_posted.add(new_event)
+                for follower in host.followers.all():
+                    new_notif = Notification.objects.create(user=follower)
+                    new_notif.notification_type = "Following posted event"
+                    new_notif.message = "%s posted a new event, \"%s\"." % (host.first_name, new_event.name)
+                    new_notif.sender_pk = new_event.pk
+                    new_notif.save()
+            
+            new_event.create_apple_ics()
+            return redirect('event_detail_view', new_event.pk)
+
+    friend_events = []
+    for friend in request.user.profile.friends.all():
+        friend_events = list(chain(friend_events, friend.events_posted.filter(public=True)))
+
+    group_events = []
+
+    for group in request.user.profile.groups_in.all():
+        group_events = list(chain(group_events, group.event_set.exclude(host=None)))
+
+    friend_events = list(set(friend_events) | set(group_events))
+
+    my_events = request.user.profile.events_posted.all()
+
+    invited_events = request.user.profile.events_invited_to.all()
+    my_events = list(set(my_events) | set(invited_events))
+
+    events = sorted(list(set(friend_events) | set(my_events)),key=attrgetter('date_happening', 'time_starting')) 
+
+    final_events = []
+    tomorrow = timezone.now() + timedelta(days=1)
+    today = timezone.now()
+
+    
+    happening_now = []
+    context['happening_now'] = happening_now
+
+    for event in events:
+        event_date = datetime.combine(date=event.date_happening, time=event.time_starting)
+        end_date = datetime.combine(date=event.date_happening, time=event.time_ending)
+
+
+        if end_date < event_date:
+            end_date = end_date + timedelta(days=1)
+
+
+        timezone_inst = ""
+        if not timezone_inst:
+            timezone_inst = 'UTC'
+
+        event_date = event_date.replace(tzinfo=pytz.timezone(timezone_inst))
+        end_date = end_date.replace(tzinfo=pytz.timezone(timezone_inst))
+
+        if event_date < tomorrow:
+            final_events.append(event)
+
+        if event_date < today:
+            happening_now.append(event)
+        if end_date < today:
+            for host in event.host.all():
+                host.events_hosted.remove(event)
+                host.past_events.add(event)
+            event.people_coming.clear()
+            event.people_not_coming.clear()
+            event.people_who_posted_it.clear()
+            event.people_who_shared_it.clear()
+            try:
+                os.remove(event.ics.file.name)
+            except:
+                pass
+            final_events.remove(event)
+
+    context['today'] = datetime.now()
+    context['events'] = final_events
+
+    return render_to_response('today_events.html', context, context_instance=RequestContext(request))
     
 
 @login_required
@@ -221,7 +342,7 @@ def event_create_view(request):
             event = datetime.combine(new_event.date_happening, new_event.time_starting)
             event_ending = datetime.combine(new_event.date_happening, new_event.time_ending)
 
-            timezone_inst = form.data['timezone']
+            timezone_inst = form.data.get('timezone')
             if not timezone_inst:
                 timezone_inst = 'UTC'
                 print "UTC'd"
@@ -407,6 +528,13 @@ def event_update_view(request, pk):
                         new_notif.sender_pk = updated_event.pk
                         new_notif.save()
 
+                    for person in updated_event.people_not_coming.exclude():
+                        new_notif = Notification.objects.create(user=person)
+                        new_notif.notification_type = "Event Updated"
+                        new_notif.message = "%s changed the %s of the event you couldn't go to." % (request.user.profile.first_name, changed, updated_event.name)
+                        new_notif.sender_pk = updated_event.pk
+                        new_notif.save()
+
 
                 if request.POST.get('_finish'):
                     return redirect('event_detail_view', pk)
@@ -540,6 +668,7 @@ def group_event_list(request, pk):
 
     context['today'] = datetime.now()
     context['events'] = events
+    print events
     context['my_events'] = my_events
 
     return render_to_response('group_event_list.html', context, context_instance=RequestContext(request))
@@ -1310,7 +1439,9 @@ def can_come(request):
     event_date = datetime.combine(event.date_happening, event.time_starting)
     date = "%s" % event_date.isoformat('T')
     posted = "%s" % event.date_posted.isoformat(' ')
-    return JsonResponse([event.name, hosts, date, "People coming: %d" % event.people_coming.count(), host_list[0].picture.url, posted, event.description, "People not coming: %d" % event.people_not_coming.count()], safe=False)
+    return JsonResponse([event.name, hosts, date, "People coming: %d" % event.people_coming.count(), get_thumbnail(host_list[0].picture, '200x200', crop='center', quality=99).url, posted, event.description], safe=False)
+
+
 
 
 @login_required
@@ -1329,7 +1460,7 @@ def cannot_come(request):
             hosts += "%s, " % e.first_name
     event_date = datetime.combine(event.date_happening, event.time_starting)
     date = "%s" % event_date.isoformat('T')    
-    return JsonResponse([event.name, hosts, date, event.people_coming.count(), host_list[0].picture.url], safe=False)
+    return JsonResponse([event.name, hosts, date, event.people_coming.count(), get_thumbnail(host_list[0].picture, '200x200', crop='center', quality=99).url], safe=False)
 
 
 @login_required
@@ -1360,7 +1491,7 @@ def cancel_decision(request):
     event_date = datetime.combine(event.date_happening, event.time_starting)
     date = "%s" % event_date.isoformat('T')
     posted = "%s" % event.date_posted.isoformat(' ')
-    return JsonResponse([event.name, hosts, date, event.people_coming.count(), host_list[0].picture.url, posted, event.description], safe=False)
+    return JsonResponse([event.name, hosts, date, event.people_coming.count(), get_thumbnail(host_list[0].picture, '200x200', crop='center', quality=99).url, posted, event.description], safe=False)
 
 
 @login_required
