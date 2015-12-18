@@ -14,7 +14,7 @@
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
                 <h1 class="text-center bold">HAPPENING TODAY</h1>
-
+                <h5 class="text-center">Things happening over the next 24 hours!</h5>
                 <hr style="margin-bottom: 0">
                 <div class="text-center"><h3>Planning something?<a style="margin-left: 20px;" class="btn btn-success" href="#" id="plan-now">GET AN EVENT STARTED</a><a style="margin-left: 20px;" class="btn btn-warning hidden" href="#" id="hide-plan-now">CANCEL</a></h3></div>
                 <form id="create-event-basic" class="hidden" method="POST">
@@ -71,7 +71,9 @@
                                     <h5>People not coming: {{ event.people_not_coming.count}}</h5>
                                 </div>
                                 <div class="col-md-8 text-right">
-                                    <h3>{{ event.description }}</h3>
+                                    {% if event.description %}
+                                        <h5>{{ event.description }}</h5>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div style="float: right;" class="text-center green">
@@ -108,7 +110,9 @@
                                     <h5>People coming: {{ event.people_coming.count}}</h5>
                                 </div>
                                 <div class="col-md-8 text-right">
-                                    <h3>{{ event.description }}</h3>
+                                    {% if event.description %}
+                                        <h5>{{ event.description }}</h5>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="text-right" style="float:right;">
@@ -166,7 +170,9 @@
                                         <h4 class="date-starting">{{ event.date_happening|date:"c" }}T{{ event.time_starting|time:"H:i" }}:00.000000+00:00</h4>
                                     </div>
                                     <div class="col-md-5 text-right">
-                                    <h5>{{ event.description }}</h5>
+                                    {% if event.description %}
+                                        <h5>{{ event.description }}</h5>
+                                    {% endif %}
                                 </div>
                                 </div>
                                 
@@ -183,7 +189,22 @@
                 {% endfor %}
                     </div>
                     <hr style="margin-bottom: 0">
-                    <h2 class="text-center" style="color: lightgray;"><i class='fa fa-arrow-down'></i></h2>
+                    <div id="see-more" style="min-height: 100px;">
+                        <h3 class="text-center" style="margin-bottom: 10px;"><a class="no-underline">Want to see more things coming up?</a></h3>
+                        <div class="row hidden" id="more-time-buttons">
+                            <div class="col-xs-3" id='place-holder'></div>
+                            <div class="col-xs-2 text-right">
+                                <a href="#" class="btn btn-default" id='tomorrow-events'>TOMORROW</a>
+                            </div>
+                            <div class="col-xs-2 text-center">
+                                <a href="#" class="btn btn-default" id='full-week-events'>THIS WEEK</a>
+                            </div>
+                            <div class="col-xs-2 text-left">
+                                <a href="{% url 'event_list_view' %}" class="btn btn-default" id='all-events'>ALL EVENTS</a>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
                 {% else %}
                     <h3>Nothing's going on today!</h3>
                     <br>
@@ -308,6 +329,13 @@
             if (shouldSubmit) {
                 $('#create-event-basic').submit()
             }
+        });
+     $("#more-time-buttons").hide();
+     $("#more-time-buttons").removeClass('hidden');
+     $("#see-more").mouseenter(function() {
+            $("#more-time-buttons").show(50);
+        }).mouseleave(function() {
+            $("#more-time-buttons").hide(70);
         });
     </script>
 {% endblock scripts %}

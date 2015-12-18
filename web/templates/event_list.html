@@ -41,10 +41,11 @@
                                 <div class="col-md-4">
                                     <h4 class="date-starting">{{ event.date_happening|date:"c" }}T{{ event.time_starting|time:"H:i" }}:00.000000+00:00</h4>
                                     <h5>People coming: {{ event.people_coming.count}}</h5>
-                                    <h5>People not coming: {{ event.people_not_coming.count}}</h5>
                                 </div>
                                 <div class="col-md-8 text-right">
-                                    <h3>{{ event.description }}</h3>
+                                    {% if event.description %}
+                                        <h5>{{ event.description }}</h5>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div style="float: right;" class="text-center green">
@@ -81,7 +82,9 @@
                                     <h5>People coming: {{ event.people_coming.count}}</h5>
                                 </div>
                                 <div class="col-md-8 text-right">
-                                    <h3>{{ event.description }}</h3>
+                                    {% if event.description %}
+                                        <h5>{{ event.description }}</h5><br>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="text-right" style="float:right;">
@@ -113,6 +116,7 @@
                                     {% endfor %}</p>
                                 {% endif %}
                             {% endif %}
+                            
                             {% else %}
                                 <br>
                                 <a href="{% url 'profile_detail_view' event.host.first.pk %}">
@@ -147,6 +151,7 @@
                                     <a class="btn btn-success confirm-can-come" alt="{{event.pk}}" id="confirm-button-{{event.pk}}" href="#"><i class="fa fa-check-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;Count me in!</a>&nbsp;
                                     <a class="btn btn-danger confirm-cannot-come" alt="{{event.pk}}" id="reject-button-{{event.pk}}" href="#"><i class="fa fa-times-circle" id='icon-{{event.pk}}' alt="{{event.pk}}"></i>&nbsp;&nbsp;Can't make it!</a>
                                 </div>
+                            <br>
                             <br>
 
                             {% endif %}

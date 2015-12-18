@@ -168,6 +168,7 @@ class FriendList(models.Model):
     name = models.CharField(null=True, blank=True, max_length=255)
     owner = models.ForeignKey('Profile', null=True, blank=True, related_name='lists')
     people = models.ManyToManyField('Profile', blank=True, related_name='+')
+    contacts = models.ManyToManyField('Contact', blank=True, related_name='+')
 
     class Meta:
         verbose_name = "List"
@@ -179,3 +180,11 @@ class FriendList(models.Model):
             return 'Uh oh'
         return self.name
 
+
+class Contact(models.Model):
+    name = models.CharField(null=True, blank=True, max_length=255)
+    contact_method = models.CharField(null=True, blank=True, max_length=255)
+    creator = models.ForeignKey('Profile', null=True, blank=True, related_name='user_contacts')
+
+    def __unicode__(self):
+        return self.name or "Uh oh"

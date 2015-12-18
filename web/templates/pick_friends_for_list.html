@@ -1,9 +1,20 @@
 
 <div class="container">
     <div class="row">
-                <h2>Choose friends for your Friend List</h2>
-                <h2><i>{{friend_list}}</i></h2>
         <div class="col-md-7" id="pick-friend-list" alt="{{ friend_list.pk }}">
+        <a id="show-form" class="btn btn-primary">ADD A NEW CONTACT</a>
+        <a id="hide-form" style="min-width: 176px;" class="btn btn-warning hidden">CANCEL</a>
+        <form method="POST" style="margin-top: 10px;" class="hidden" id="create-contact">
+            {% csrf_token %}
+            Name:<br>
+            {{ form.name }}
+            Email or phone:
+            {{ form.contact_method }}
+            <span class='red' id='contact-errors'></span>
+            <input type="submit" class="form-control" style="width: 80%; margin-top: 10px;" id="create-button">
+        </form>
+        <hr>
+        <h3>Choose friends</h3>
         {% if friends.exists %}
             {% for friend in friends %}
                 <div class="row">
@@ -19,12 +30,31 @@
         {% else %}
             <h4>You have no more friends to add to this Friend List!</h4>
         {% endif %}
+        <hr>
+        <h3>Choose contacts</h3>
+        {% if contacts.exists %}
+            {% for contact in contacts %}
+                <div class="row">
+                    <div class="col-md-9">
+                        <h4>{{ contact.name }}&nbsp;&nbsp;</h4>
+                    </div>
+                    <div class="col-md-3" >
+                        <a style="margin-top: -3px;" class="btn btn-success add-contact-to-list" href="#" id="contact-{{ contact.pk }}">ADD</a>
+                    </div>
+                </div>
+                
+            {% endfor %}
+        {% else %}
+            <h4>You have no more friends to add to this Friend List!</h4>
+        {% endif %}
         </div>
     </div>
 </div>
 
 
 <script type="text/javascript">
+$('#create-contact').hide()
+$('#create-contact').removeClass('hidden')
 $('#pick-friend-list').on('click', '.add-friend-to-list', function(e){
     e.preventDefault();
     console.log('Share!');
@@ -47,4 +77,91 @@ $('#pick-friend-list').on('click', '.add-friend-to-list', function(e){
         }
     });
 });
+
+$('#pick-friend-list').on('click', '.add-contact-to-list', function(e){
+    e.preventDefault();
+    console.log('Share!');
+    var contact_pk = e.target.id.replace('contact-', '');
+    $.ajax({
+        type: 'GET',
+        url: '/add_contact_to_friend_list/',
+        data: {
+            contact_pk: contact_pk,
+            list_pk: $('#pick-friend-list').attr('alt'),
+
+        },
+        success: function(data) {
+            $('#contact-'+contact_pk).removeClass('add-contact-to-list');
+            $('#contact-'+contact_pk).removeClass('btn-success');
+            $('#contact-'+contact_pk).addClass('btn-default');
+            $('#contact-'+contact_pk).addClass('green');
+            $('#contact-'+contact_pk).text('ADDED!');
+
+        }
+    });
+});
+
+$('#show-form').on('click', function(e) {
+    $('#create-contact').show(150)
+    $('#show-form').addClass('hidden')
+    $('#hide-form').removeClass('hidden')
+});
+
+
+$('#hide-form').on('click', function(e) {
+    $('#create-contact').hide(150)
+    $('#hide-form').addClass('hidden')
+    $('#show-form').removeClass('hidden')
+});
+
+$('#create-button').on('click', function(e) {
+    e.preventDefault();
+    var shouldSubmit = true;
+    var name = $('#name-input').val()
+    if (name) {
+        $('#name-input').css('border', '1px solid #cccccc')
+    } else {
+        $('#name-input').css('border', '1px solid red')
+        shouldSubmit = false;
+    }
+    var contact = $('#method-input').val();
+    if (contact) {
+        var numbers = contact.replace(/[^0-9]/g, '');
+        var isPhoneNumber = numbers.length >= 10
+    } else {
+        shouldSubmit = false;
+    }
+
+
+    var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    var isValidEmail = re.test(contact);
+
+    if (contact && isPhoneNumber || isValidEmail) {
+        $('#method-input').css('border', '1px solid #cccccc')
+        $('#contact-errors').text('')
+    } else {
+        $('#method-input').css('border', '1px solid red')
+        $('#contact-errors').text('Please enter a valid email or 10 digit phone number!')
+        shouldSubmit = false;
+    }
+    if (shouldSubmit) {
+        $.ajax({
+            type: 'GET',
+            url: '/create_contact_and_add_to_list/{{ friend_list.pk }}/',
+            data: {
+                name: name, 
+                contact_method: contact 
+            },
+            success: function(data) {
+                $('#create-contact').hide(150)
+                $('#hide-form').addClass('hidden')
+                $('#name-input').val(' ')
+                $('#method-input').val(' ');
+                $('#show-form').removeClass('hidden')
+            }
+        });
+    }
+});
+
+
 </script>

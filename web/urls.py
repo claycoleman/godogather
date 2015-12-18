@@ -25,11 +25,13 @@ urlpatterns = [
     url(r'^subscribe/(?P<pk>\d+)/$', 'web.views.subscribe', name='subscribe'),
     url(r'^subscribe_group/(?P<pk>\d+)/$', 'web.views.subscribe_group', name='subscribe_group'),
     url(r'^add_friend_to_friend_list/$', 'web.views.add_friend_to_friend_list'),
+    url(r'^add_contact_to_friend_list/$', 'web.views.add_contact_to_friend_list'),
     url(r'^invite_friend_to_event/$', 'web.views.invite_friend_to_event'),
     url(r'^invite_friend_list_to_event/$', 'web.views.invite_friend_list_to_event'),
     url(r'^mark_non_new_user/$', 'web.views.mark_non_new_user'),
     url(r'^search_invite_event_json/(?P<pk>\d+)/$', 'web.views.search_invite_event_json'),
     url(r'^search_invite_group_json/(?P<pk>\d+)/$', 'web.views.search_invite_group_json'),
+    url(r'^create_contact_and_add_to_list/(?P<pk>\d+)/$', 'web.views.create_contact_and_add_to_list'),
 
     # event urls
     url(r'^events/(?P<pk>\d+)/$', 'web.views.event_detail_view', name='event_detail_view'),

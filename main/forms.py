@@ -162,3 +162,8 @@ class CommentForm(forms.Form):
 
 class FriendListCreate(forms.Form):
     name = forms.CharField(required=False, label="Enter the name of your new Friend List here!", widget=forms.TextInput(attrs={'id': 'comment_body', 'class': "form-control", 'placeholder':"Type the name here"}))
+
+
+class ContactCreate(forms.Form):
+    name = forms.CharField(widget=forms.TextInput(attrs={'id': 'name-input', 'class': "form-control", 'placeholder':"Who is it?", 'style': 'width: 80%'}))
+    contact_method = forms.CharField(widget=forms.TextInput(attrs={'id': 'method-input', 'class': "form-control", 'placeholder':"Email or phone #", 'style': 'width: 80%'}))

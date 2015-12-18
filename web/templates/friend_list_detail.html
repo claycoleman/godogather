@@ -32,21 +32,33 @@
                 </div>
             </div>
         <h2>{{friend_list}}</h2>
-                {% if friends %}
+                {% if members %}
                     <div class="row">
-                    {% for profile in friends %}
-                         <div class="col-xs-2 text-center" style="margin-right: -15px; margin-top: 2px; margin-bottom: 2px;">
-                            <a class="no-underline" href="{% url 'profile_detail_view' profile.pk %}">
-                            {% thumbnail  profile.picture "200x200" crop="center" as im %}
-                                <img src="{{ im.url }}" class="port-item" width="80" height="80" style="border-radius: 40px" alt="{{ person }}">
-                            {% endthumbnail %}
-                        </br>
-                            {{ profile.first_name }}<br>{{ profile.last_name }}</a>
-                        </div>
+                    {% for profile in members %}
+                        {% if profile.contact_method %}
+                            <div class="col-xs-2 text-center" style="margin-right: -15px; margin-top: 2px; margin-bottom: 2px;">
+                                <a class="no-underline tooltipped" data-placement="top" data-toggle="tooltip" title="{{ profile.contact_method }}">
+                                    <img src="{% static 'img/add-icon.svg' %}" class="port-item" width="80" height="80" style="border-radius: 40px" alt="{{ profile.name }}">
+
+                            </br>
+                                {{ profile.name }}<br></a>
+                            </div>
+                        {% else %}
+                            <div class="col-xs-2 text-center" style="margin-right: -15px; margin-top: 2px; margin-bottom: 2px;">
+                                <a class="no-underline" href="{% url 'profile_detail_view' profile.pk %}">
+                                {% thumbnail  profile.picture "200x200" crop="center" as im %}
+                                    <img src="{{ im.url }}" class="port-item" width="80" height="80" style="border-radius: 40px" alt="{{ person }}">
+                                {% endthumbnail %}
+                            </br>
+                                {{ profile.first_name }}<br>{{ profile.last_name }}</a>
+                            </div>
+                        {% endif %}
+                         
                         {% if forloop.counter|divisibleby:6 %}
                             </div> <div class="row">
                         {% endif %}
                     {% endfor %}
+                    
                          <div class="col-xs-2 text-center" style="margin-right: -15px; margin-top: 2px; margin-bottom: 2px;">
                             <a class="no-underline popup" href="{% url 'pick_friends_for_list' friend_list.pk %}">
                             <img width="80" height="80" style="border-radius: 40px; margin-left: 5px" src="{% static 'img/add-icon.svg' %}">
@@ -64,8 +76,9 @@
                             </br>
                             Add more<br>friends</a>
                         </span>
-                        <br><br><br>
-                        <br><br><br>
+                        <br><br>
+                        <br><br>
+                        <br><br>
                 {% endif %}
                 <br>
                 <a class="btn btn-danger delete-button" href="{% url 'friend_list_delete_view' friend_list.pk %}" id="{{ friend_list }}">DELETE THIS LIST</a><br>

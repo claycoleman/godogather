@@ -20,8 +20,8 @@ from django.core.files.temp import NamedTemporaryFile
 
 from project.local import FB_APP_ID
 from sorl.thumbnail import get_thumbnail
-from main.models import Event, Group, Profile, Comment, Notification, FriendList
-from main.forms import SearchProfile, EventModelCreateForm, EventModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, UserLogin, ProfileModelCreateForm, ProfileModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, ContactForm, CommentForm, FriendListCreate, BasicEventCreate
+from main.models import Event, Group, Profile, Comment, Notification, FriendList, Contact
+from main.forms import SearchProfile, EventModelCreateForm, EventModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, UserLogin, ProfileModelCreateForm, ProfileModelUpdateForm, GroupModelCreateForm, GroupModelUpdateForm, ContactForm, CommentForm, FriendListCreate, BasicEventCreate, ContactCreate
 
 
 
@@ -165,7 +165,7 @@ def event_list_view(request):
         end_date = datetime.combine(date=event.date_happening, time=event.time_ending)
 
         if end_date < event_date:
-            end_date = end_date + 1000*60*60*24
+            end_date = end_date + timedelta(days=1)
 
 
         timezone_inst = ""
@@ -1089,12 +1089,20 @@ def friend_list(request):
 def friend_list_detail_view(request, pk):
     friend_list = FriendList.objects.get(pk=pk)
     if request.user.profile != friend_list.owner:
-        return redirect('friend_list_list_view')
+        return redirect('friend_list')
 
     context = {}
 
-    friends = [friend for friend in friend_list.people.all()]
-    context['friends'] = friends
+    members = [friend for friend in friend_list.people.all()]
+    for contact in friend_list.contacts.all():
+        print contact.contact_method
+        members.append(contact)
+
+    for profile in members:
+        print profile.contact_method
+
+    context['members'] = members
+
     friend_lists = [e for e in request.user.profile.lists.all().order_by('name')]
 
     context['friend_lists'] = friend_lists
@@ -1106,7 +1114,7 @@ def friend_list_detail_view(request, pk):
 
     if request.method == "POST":
         if form.is_valid():
-            name = form.cleaned_data['name'].strip()
+            name = form.cleaned_data.get('name').strip()
             if name != "" and name is not None:
                 new_friend_list, created = FriendList.objects.get_or_create(owner=request.user.profile, name=name)
                 if created:
@@ -1123,12 +1131,33 @@ def pick_friends_for_list(request, pk):
     context = {}
 
     friend_list = FriendList.objects.get(pk=pk)
+    form = ContactCreate(request.POST or None)
+    context['form'] = form
 
+    if request.method == "POST":
+        if form.is_valid():
+            new_contact, created = Contact.objects.get_or_create(name=form.cleaned_data.get('name'), contact_method=form.cleaned_data('contact_method'), creator=request.user.profile)
+            friend_list.contacts.add(new_contact)
+
+
+    context['contacts'] = request.user.profile.user_contacts.exclude(pk__in=friend_list.contacts.values_list('pk', flat=True))
     context['friend_list'] = friend_list
     context['friends'] = request.user.profile.friends.exclude(pk__in=friend_list.people.values_list('pk', flat=True))
 
 
     return render_to_response('pick_friends_for_list.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def create_contact_and_add_to_list(request, pk):
+    friend_list = FriendList.objects.get(pk=pk)
+
+    name = request.GET.get('name')
+    contact_method = request.GET.get('contact_method')
+    new_contact, created = Contact.objects.get_or_create(name=name, contact_method=contact_method, creator=request.user.profile)
+    friend_list.contacts.add(new_contact)
+
+    return JsonResponse({'result':True})
 
 
 @login_required
@@ -1493,6 +1522,7 @@ def cancel_decision(request):
     posted = "%s" % event.date_posted.isoformat(' ')
     return JsonResponse([event.name, hosts, date, event.people_coming.count(), get_thumbnail(host_list[0].picture, '200x200', crop='center', quality=99).url, posted, event.description], safe=False)
 
+# twilio +15707981320
 
 @login_required
 def clear_notification(request):
@@ -1604,6 +1634,19 @@ def add_friend_to_friend_list(request):
     friend_list = FriendList.objects.get(pk=list_pk)
 
     friend_list.people.add(friend)
+
+    return JsonResponse({'success': True})
+
+
+@login_required
+def add_contact_to_friend_list(request):
+    contact_pk = request.GET.get('contact_pk')
+    list_pk = request.GET.get('list_pk')
+
+    contact = Contact.objects.get(pk=contact_pk)
+    friend_list = FriendList.objects.get(pk=list_pk)
+
+    friend_list.contacts.add(contact)
 
     return JsonResponse({'success': True})
 
