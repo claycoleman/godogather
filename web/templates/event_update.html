@@ -163,14 +163,6 @@
                 $('#location-errors').text('An event location is required!')
                 shouldSubmit = false;
             }
-            if ($('#id_description').val()) { 
-                $('#id_description').css('border', '1px solid #cccccc');
-                $('#description-errors').text('')
-            } else {
-                $('#id_description').css('border', '1px solid red');
-                $('#description-errors').text('An event description is required!')
-                shouldSubmit = false;
-            }
 
 
             return shouldSubmit;

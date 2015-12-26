@@ -43,7 +43,7 @@ class EventModelCreateForm(forms.ModelForm):
         self.fields["date_happening"].required = True
         self.fields["time_starting"].required = True
         self.fields["time_ending"].required = True
-        self.fields["description"].required = True
+        self.fields["description"].required = False
         self.fields["description"].widget = forms.Textarea(attrs={'rows': '4'})
 
 
@@ -67,6 +67,7 @@ class EventModelUpdateForm(forms.ModelForm):
         self.fields["date_happening"].required = True
         self.fields["time_starting"].required = True
         self.fields["time_ending"].required = True
+        self.fields["description"].required = False
         self.fields["description"].widget = forms.Textarea(attrs={'rows': '4'})
 
 
