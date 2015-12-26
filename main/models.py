@@ -27,7 +27,7 @@ class Event(models.Model):
     people_not_coming = models.ManyToManyField('Profile', blank=True, related_name="events_not_going_to")
     host = models.ManyToManyField('Profile', blank=True, related_name="events_hosted")
     groups = models.ManyToManyField('Group', blank=True)
-    public = models.BooleanField(default=False)
+    public = models.BooleanField(default=True)
     shareable = models.BooleanField(default=True)
     ics = models.FileField(upload_to="event_ics", null=True, blank=True)
     invitees = models.ManyToManyField('Profile', blank=True, related_name='events_invited_to')

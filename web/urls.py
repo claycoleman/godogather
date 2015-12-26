@@ -32,6 +32,7 @@ urlpatterns = [
     url(r'^search_invite_event_json/(?P<pk>\d+)/$', 'web.views.search_invite_event_json'),
     url(r'^search_invite_group_json/(?P<pk>\d+)/$', 'web.views.search_invite_group_json'),
     url(r'^create_contact_and_add_to_list/(?P<pk>\d+)/$', 'web.views.create_contact_and_add_to_list'),
+    url(r'^more_events/$', 'web.views.more_events'),
 
     # event urls
     url(r'^events/(?P<pk>\d+)/$', 'web.views.event_detail_view', name='event_detail_view'),

@@ -96,11 +96,15 @@
                 {% if forloop.counter|divisibleby:6 %}
                     </div><div class="row" style="margin-left: 5px">
                 {% endif %}
-                {% if forloop.counter == 18 %}
-                    </div><a href="{% url 'friend_list' %}">See all friends</a><div>
-                {% endif %}
             {% endfor %}
                 </div>
+            <br>
+            <br>
+            <a style="min-width: 144px;" class="btn btn-default" href="{% url 'other_friend_list' profile.pk %}">ALL FRIENDS</a>
+            <a style="min-width: 144px;" href="{% url 'other_mutual_list' profile.pk %}" class="btn btn-default">MUTUAL FRIENDS</a>
+            <br>
+            <br>
+    
             <h3>{{ profile.first_name }}'s Group Feeds</h3>
             {% if profile.groups_in.exists %}
             {% for group in profile.groups_in.all %}
@@ -109,11 +113,6 @@
             {% else %}
                 <h3>{{ profile.first_name }} isn't in any Group Feeds yet!</h3>
             {% endif %}
-            <br>
-            <br>
-            <a style="min-width: 144px;" class="btn btn-default" href="{% url 'other_friend_list' profile.pk %}">ALL FRIENDS</a>
-            <a style="min-width: 144px;" href="{% url 'other_mutual_list' profile.pk %}" class="btn btn-default">MUTUAL FRIENDS</a>
-    
         </div>
     </div>
 </div>

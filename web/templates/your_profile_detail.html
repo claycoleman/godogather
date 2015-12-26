@@ -81,14 +81,17 @@
                     {% if forloop.counter|divisibleby:6 %}
                         </div><div class="row" style="margin-left: 5px">
                     {% endif %}
-                    {% if forloop.counter == 18 %}
-                        </div><a href="#friend-lists">See all friends</a><div>
-                    {% endif %}
                 {% endfor %}
             {% else %}
                 <h4>You don't have any friends yet.</h4>
             {% endif %}
                 </div>
+
+            <br>
+            <br>
+            <a style="min-width: 144px;" class="btn btn-default" href="{% url 'friend_list' %}">ALL FRIENDS</a>
+            <br>
+            <br>
             <h3>Your Group Feeds</h3>
             {% if profile.groups_in.exists %}
                 {% for group in profile.groups_in.all %}
@@ -98,9 +101,6 @@
                 <h4>You're not in any Group Feeds yet!</h4>
             {% endif %}
 
-            <br>
-            <br>
-            <a style="min-width: 144px;" class="btn btn-default" href="{% url 'friend_list' %}">ALL FRIENDS</a>
     
         </div>
     </div>

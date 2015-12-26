@@ -131,6 +131,7 @@ def event_list_view(request):
 
     order = request.GET.get('order', '')
     fail = request.GET.get('fail', '')
+
     if 'eventremoved' in fail:
         context['fail'] = "Sorry, the event you're looking for has been deleted, or doesn't exist!"
     elif 'groupremoved' in fail:
@@ -160,6 +161,7 @@ def event_list_view(request):
     
     happening_now = []
     context['happening_now'] = happening_now
+
     for event in events:
         event_date = datetime.combine(date=event.date_happening, time=event.time_starting)
         end_date = datetime.combine(date=event.date_happening, time=event.time_ending)
@@ -252,6 +254,7 @@ def today_events_view(request):
             
             new_event.create_apple_ics()
             return redirect('event_detail_view', new_event.pk)
+
 
     friend_events = []
     for friend in request.user.profile.friends.all():
@@ -1806,6 +1809,91 @@ def search_invite_group_json(request, pk):
         _dict['no_friend_lists'] = True
 
     return JsonResponse(_dict)
+
+def more_events(request):
+    days = int(request.GET.get('days', 2))
+    friend_events = []
+    for friend in request.user.profile.friends.all():
+        friend_events = list(chain(friend_events, friend.events_posted.filter(public=True)))
+
+    group_events = []
+
+    for group in request.user.profile.groups_in.all():
+        group_events = list(chain(group_events, group.event_set.exclude(host=None)))
+
+    friend_events = list(set(friend_events) | set(group_events))
+
+    my_events = request.user.profile.events_posted.all()
+
+    invited_events = request.user.profile.events_invited_to.all()
+    my_events = list(set(my_events) | set(invited_events))
+
+    events = sorted(list(set(friend_events) | set(my_events)),key=attrgetter('date_happening', 'time_starting')) 
+
+    final_events = []
+    tomorrow = timezone.now() + timedelta(days=days)
+    today = timezone.now()
+
+    
+    happening_now = []
+
+    for event in events:
+        event_date = datetime.combine(date=event.date_happening, time=event.time_starting)
+        end_date = datetime.combine(date=event.date_happening, time=event.time_ending)
+
+
+        if end_date < event_date:
+            end_date = end_date + timedelta(days=1)
+
+
+        timezone_inst = ""
+        if not timezone_inst:
+            timezone_inst = 'UTC'
+
+        event_date = event_date.replace(tzinfo=pytz.timezone(timezone_inst))
+        end_date = end_date.replace(tzinfo=pytz.timezone(timezone_inst))
+
+        if event_date < tomorrow:
+            final_events.append(event)
+
+        if event_date < today:
+            happening_now.append(event)
+    
+    event_list = []
+
+    for event in final_events:
+        event_dict = {}
+        event_dict['name'] = event.name
+        event_dict['id'] = event.pk
+        event_dict['description'] = event.description
+        event_dict['date_posted'] = event.date_posted
+        event_dict['date_happening'] = "%sT%s.000Z" % (event.date_happening, event.time_starting)
+        event_dict['date_ending'] = "%sT%s.000Z" % (event.date_happening, event.time_ending)
+        host_list = []
+        for host in event.host.all():
+            host_list.append({'host_pk': host.pk, 'img_url': host.picture.url, 'name': str(host)})
+        event_dict['host'] = host_list
+        group_list = []
+        for group in event.groups.all():
+            group_list.append({'group_pk': group.pk, 'name': group.name})
+        event_dict['groups'] = group_list
+
+        event_dict['people_coming'] = event.people_coming.count()
+        event_dict['people_not_coming'] = event.people_not_coming.count()
+        event_dict['happening_now'] = event in happening_now
+
+        if request.user.profile.pk in event.host.values_list('pk', flat=True):
+            event_dict['status'] = 'yourEvent'
+
+        elif request.user.profile.pk in event.people_coming.values_list('pk', flat=True):
+            event_dict['status'] = 'going'
+        elif request.user.profile.pk in event.people_not_coming.values_list('pk', flat=True):
+            event_dict['status'] = 'notGoing'
+        else:
+            event_dict['status'] = 'noDecision'
+        event_list.append(event_dict)
+
+    return JsonResponse(event_list, safe=False)
 
 def slugify(string):
     return string.lower().replace(' ', '-')
